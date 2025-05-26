@@ -1,6 +1,7 @@
+import { Application } from 'express';
+
 import { app as myApp } from '../app';
 
-import { Application } from 'express';
 
 const healthcheck = require('@hmcts/nodejs-healthcheck');
 
