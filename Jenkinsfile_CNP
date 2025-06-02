@@ -1,6 +1,19 @@
 #!groovy
 
+properties([
+[
+$class       : 'GithubProjectProperty',
+displayName  : 'Admin UI Webapp',
+projectUrlStr: 'https://github.com/hmcts/hmc-admin-ui/'
+],
+pipelineTriggers([
+[$class: 'GitHubPushTrigger']
+])
+])
+
 @Library("Infrastructure")
+
+import uk.gov.hmcts.contino.AppPipelineDsl
 
 def type = "nodejs"
 def product = "hmc"
