@@ -1,5 +1,17 @@
-{"value":"@types/helmet","children":{"ID":"@types/helmet (deprecation)","Issue":"This is a stub types definition. helmet provides its own type definitions, so you do not need this installed.","Severity":"moderate","Vulnerable Versions":"4.0.0","Tree Versions":["4.0.0"],"Dependents":["hmc-admin-ui@workspace:."]}}
-{"value":"axios","children":{"ID":1103618,"Issue":"axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL","URL":"https://github.com/advisories/GHSA-jr5f-v2jv-69x6","Severity":"high","Vulnerable Versions":">=1.0.0 <1.8.2","Tree Versions":["1.7.4"],"Dependents":["hmc-admin-ui@workspace:."]}}
-{"value":"cookie","children":{"ID":1103907,"Issue":"cookie accepts cookie name, path, and domain with out of bounds characters","URL":"https://github.com/advisories/GHSA-pxg6-pf52-xh8x","Severity":"low","Vulnerable Versions":"<0.7.0","Tree Versions":["0.4.0"],"Dependents":["csurf@npm:1.11.0"]}}
-{"value":"csurf","children":{"ID":"csurf (deprecation)","Issue":"This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions","Severity":"moderate","Vulnerable Versions":"1.11.0","Tree Versions":["1.11.0"],"Dependents":["hmc-admin-ui@workspace:."]}}
-{"value":"formidable","children":{"ID":1104171,"Issue":"Formidable relies on hexoid to prevent guessing of filenames for untrusted executable content","URL":"https://github.com/advisories/GHSA-75v8-2h7p-7m2m","Severity":"low","Vulnerable Versions":">=3.1.1-canary.20211030 <3.5.3","Tree Versions":["3.5.2"],"Dependents":["superagent@npm:10.2.0"]}}
+➤ YN0001: RequestError: unable to get local issuer certificate
+    at ClientRequest.<anonymous> (/Users/anthonydummer/IdeaProjects/hmc/hmc-admin-ui/.yarn/releases/yarn-4.8.1.cjs:147:14258)
+    at Object.onceWrapper (node:events:632:26)
+    at ClientRequest.emit (node:events:529:35)
+    at u.emit (/Users/anthonydummer/IdeaProjects/hmc/hmc-admin-ui/.yarn/releases/yarn-4.8.1.cjs:142:14855)
+    at TLSSocket.socketErrorListener (node:_http_client:501:9)
+    at TLSSocket.emit (node:events:517:28)
+    at emitErrorNT (node:internal/streams/destroy:151:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at TLSSocket.onConnectSecure (node:_tls_wrap:1659:34)
+    at TLSSocket.emit (node:events:517:28)
+    at TLSSocket._finishInit (node:_tls_wrap:1070:8)
+    at ssl.onhandshakedone (node:_tls_wrap:856:12)
+
+➤ Errors happened when preparing the environment required to run this command.
+➤ This might be caused by packages being missing from the lockfile, in which case running "yarn install" might help.
