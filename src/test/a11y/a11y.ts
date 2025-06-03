@@ -5,7 +5,6 @@ import supertest from 'supertest';
 
 import { app } from '../../main/app';
 
-
 const pa11y = require('pa11y');
 
 let server: Server;
