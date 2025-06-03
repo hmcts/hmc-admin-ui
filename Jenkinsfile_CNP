@@ -1,10 +1,23 @@
 #!groovy
 
+properties([
+[
+$class       : 'GithubProjectProperty',
+displayName  : 'Admin UI Webapp',
+projectUrlStr: 'https://github.com/hmcts/hmc-admin-ui/'
+],
+pipelineTriggers([
+[$class: 'GitHubPushTrigger']
+])
+])
+
 @Library("Infrastructure")
 
+import uk.gov.hmcts.contino.AppPipelineDsl
+
 def type = "nodejs"
-def product = "rpe"
-def component = "expressjs-template"
+def product = "hmc"
+def component = "admin-ui"
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 
