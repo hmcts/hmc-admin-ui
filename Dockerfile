@@ -7,6 +7,8 @@ USER hmcts
 
 COPY --chown=hmcts:hmcts . .
 
+RUN yarn
+
 # ---- Build image ----
 FROM base as build
 

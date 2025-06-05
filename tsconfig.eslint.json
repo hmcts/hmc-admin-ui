@@ -1,4 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": []
+  "exclude": [],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "codecept.conf.ts"]
 }

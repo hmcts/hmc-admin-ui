@@ -1,6 +1,5 @@
 import * as path from 'path';
 
-import { Logger } from '@hmcts/nodejs-logging';
 import * as bodyParser from 'body-parser';
 import config = require('config');
 import cookieParser from 'cookie-parser';
@@ -13,6 +12,8 @@ import { AppInsights } from './modules/appinsights';
 import { Helmet } from './modules/helmet';
 import { Nunjucks } from './modules/nunjucks';
 import { PropertiesVolume } from './modules/properties-volume';
+
+const { Logger } = require('@hmcts/nodejs-logging');
 
 const { setupDev } = require('./development');
 
@@ -28,7 +29,6 @@ export const app = express();
 app.locals.ENV = env;
 
 const logger = Logger.getLogger('app');
-
 new PropertiesVolume().enableFor(app);
 new AppInsights().enable();
 new Nunjucks(developmentMode).enableFor(app);
