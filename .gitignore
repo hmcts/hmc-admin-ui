@@ -10,9 +10,9 @@ node_modules/
 *log
 .DS_Store
 
-src/main/public/img/lib/*
+client/public/img/lib/*
 src/main/public/js/lib/**/*.js
-src/main/public/stylesheets/lib/*
+client/public/stylesheets/lib/*
 src/main/resources/localhost-ssl
 
 node-rpm-packaging/
@@ -23,7 +23,7 @@ npm-debug.log.*
 .settings/
 dist/
 public/
-src/main/views/govuk
+client/views/govuk
 coverage/
 smoke-output/
 functional-output/

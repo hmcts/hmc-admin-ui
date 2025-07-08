@@ -12,12 +12,20 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier',
+    // 'prettier',
   ],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: 'module',
     project: './tsconfig.eslint.json',
+    tsconfigRootDir: __dirname,
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {
+        project: './tsconfig.eslint.json',
+      },
+    },
   },
   globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
   rules: {

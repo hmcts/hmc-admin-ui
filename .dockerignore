@@ -15,4 +15,4 @@
 !webpack/**
 !src/main/**
 !config/**
-!webpack.config.js
+!client/webpack.config.js
