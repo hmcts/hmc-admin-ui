@@ -1,5 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "exclude": [],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "codecept.conf.ts"]
+  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "test/**/*.ts", "codecept.conf.ts"],
+  "compilerOptions": {
+    "module": "ES2020",
+    "types": ["node", "jasmine"],
+    "moduleResolution": "node"
+  }
 }
