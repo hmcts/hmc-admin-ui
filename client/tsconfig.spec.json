@@ -2,13 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["jest"],
+    "types": ["jasmine", "node"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "target": "es2017",
     "importHelpers": true
   },
-  "files": ["setup-jest.ts"],
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": ["app/**/*.spec.ts", "app/**/*.ts"]
 }

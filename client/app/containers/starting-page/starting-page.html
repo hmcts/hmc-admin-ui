@@ -1,1 +1,37 @@
-<p>starting-page works!</p>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-form-group">
+      <h1 class="govuk-label-wrapper">
+        <label class="govuk-label govuk-label--l">{{ 'Please select one of the following options' }}</label>
+      </h1>
+      <form class="form" [formGroup]="supportOptionsForm">
+        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios" id="singleRequest">
+          <div class="govuk-radios__item">
+            <input
+              class="govuk-radios__input"
+              id="support_option_choice_yes"
+              name="supportOption"
+              formControlName="supportOption"
+              type="radio"
+              [value]="true"
+            />
+            <label class="govuk-label govuk-radios__label" for="support_option_choice_yes">
+              {{ 'Singular Request' }}
+            </label>
+          </div>
+          <div class="govuk-radios__item">
+            <input
+              class="govuk-radios__input"
+              id="support_option_choice_no"
+              name="supportOption"
+              formControlName="supportOption"
+              type="radio"
+              [value]="false"
+            />
+            <label class="govuk-label govuk-radios__label" for="support_option_choice_no"> {{ 'Bulk Request' }} </label>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

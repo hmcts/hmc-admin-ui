@@ -31,8 +31,8 @@ version
 
 .eslintcache
 
-.yarn/*
-!.yarn/cache/*
+.pnp.*
+.yarn/*y
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases

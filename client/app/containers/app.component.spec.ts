@@ -15,11 +15,11 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it("should have the 'hmc-admin-angular-ui' title", () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('hmc-admin-angular-ui');
-  });
+  // it("should have the 'hmc-admin-angular-ui' title", () => {
+  //   const fixture = TestBed.createComponent(AppComponent);
+  //   const app = fixture.componentInstance;
+  //   expect(app.title).toEqual('hmc-admin-angular-ui');
+  // });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);

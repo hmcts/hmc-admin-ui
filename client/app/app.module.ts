@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-import { AppComponent } from './containers/app.component';
-import { AppRoutingModule } from './routes/app-routing.module';
-
-@NgModule({
-  declarations: [AppComponent],
-  bootstrap: [AppComponent],
-  imports: [AppRoutingModule],
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  templateUrl: './containers/app.component.html',
 })
-export class AppModule {}
+export class AppComponent {}
