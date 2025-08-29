@@ -32,9 +32,12 @@ version
 .eslintcache
 
 .pnp.*
-.yarn/*y
+.yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+/infrastructure/.terraform/
+.angular/cache/*
