@@ -1,3 +1,5 @@
+import { Given, Then } from '@cucumber/cucumber';
+
 import { config as testConfig } from '../config';
 
 const { I } = inject();

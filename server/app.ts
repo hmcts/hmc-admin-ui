@@ -57,6 +57,8 @@ app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate, no-store');
   next();
 });
+app.get('/', (_req, res) => res.sendFile(path.join(angularDistPath, 'index.html')));
+app.get('*', (_req, res) => res.sendFile(path.join(angularDistPath, 'index.html')));
 
 glob
   .sync(__dirname + '/routes/**/*.+(ts|js)')

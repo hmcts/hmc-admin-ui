@@ -17,7 +17,8 @@
     "paths": {
       "router/*": ["router/*"],
       "routes/*": ["routes/*"]
-    }
+    },
+    "types": ["jasmine"]
   },
-  "exclude": ["**/*.test.ts", "**/codecept.conf.ts", "**/__mocks__/*"]
+  "exclude": ["**/*.test.ts", "**/codecept.conf.ts", "**/__mocks__/*", "test/steps/*", "**/*.spec.ts"]
 }

@@ -9,5 +9,6 @@
     "target": "es2017",
     "importHelpers": true
   },
-  "include": ["app/**/*.spec.ts", "app/**/*.ts"]
+  "include": ["app/**/*.spec.ts", "app/**/*.ts"],
+  "exclude": ["test/steps/*"]
 }

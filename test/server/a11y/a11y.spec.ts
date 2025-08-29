@@ -3,7 +3,7 @@ import { AddressInfo } from 'net';
 
 import supertest from 'supertest';
 
-import { app } from '../../server/app';
+import { app } from '../../../server/app';
 
 const pa11y = require('pa11y');
 
@@ -81,10 +81,10 @@ function expectNoErrors(messages: PallyIssue[]): void {
 
 function testAccessibility(url: string): void {
   describe(`Page ${url}`, () => {
-    test('should have no accessibility errors', async () => {
+    it('should have no accessibility errors', async () => {
       await ensurePageCallWillSucceed(url);
       const result = await runPally(url);
-      expect(result.issues).toEqual(expect.any(Array));
+      expect(result.issues instanceof Array).toBe(true);
       expectNoErrors(result.issues);
     }, 150000);
   });
