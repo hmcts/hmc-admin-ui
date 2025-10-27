@@ -1,1 +1,24 @@
-<router-outlet></router-outlet>
+<div class="govuk-width-container govuk-!-padding-top-4 govuk-!-padding-bottom-4">
+  <div class="govuk-grid-column-two-thirds">
+    <!-- Page title that your smoke test expects -->
+    <h1 class="govuk-heading-xl">Admin UI - Support Tools</h1>
+    <router-outlet (activate)="onChildActivate($event)"></router-outlet>
+
+    <div class="govuk-button-group govuk-!-margin-top-6">
+      <button type="button" class="govuk-button govuk-button--secondary" (click)="onBack()" [disabled]="isFirstStep">
+        Back
+      </button>
+
+      <!-- 👇 submit the child form even though this button is outside it -->
+      <button
+        class="govuk-button"
+        type="submit"
+        [attr.form]="activeFormId || null"
+        (click)="onContinue()"
+        [disabled]="continueDisabled || isLastStep"
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+</div>

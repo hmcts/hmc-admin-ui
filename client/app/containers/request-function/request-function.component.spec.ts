@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StartingPage } from './starting-page';
+import { RequestFunctionComponent } from './request-function.component';
 
 describe('StartingPage', () => {
-  let component: StartingPage;
-  let fixture: ComponentFixture<StartingPage>;
+  let component: RequestFunctionComponent;
+  let fixture: ComponentFixture<RequestFunctionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StartingPage],
+      imports: [RequestFunctionComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(StartingPage);
+    fixture = TestBed.createComponent(RequestFunctionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

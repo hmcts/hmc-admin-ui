@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Page2 } from './page2';
+import { RequestTypeComponent } from './request-type.component';
 
 describe('StartingPage', () => {
-  let component: Page2;
-  let fixture: ComponentFixture<Page2>;
+  let component: RequestTypeComponent;
+  let fixture: ComponentFixture<RequestTypeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Page2],
+      imports: [RequestTypeComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Page2);
+    fixture = TestBed.createComponent(RequestTypeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

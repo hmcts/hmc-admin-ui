@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { StartingPage } from '../containers/starting-page/starting-page';
+import { RequestTypeComponent } from '../containers/request-type/request-type.component';
 const routes: Routes = [
   {
     path: 'EntryPoint',
-    component: StartingPage,
+    component: RequestTypeComponent,
   },
 ];
 

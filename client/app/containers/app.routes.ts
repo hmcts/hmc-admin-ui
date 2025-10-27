@@ -1,20 +1,12 @@
+// client/app/app.routes.ts
 import { Routes } from '@angular/router';
 
-import { Page2 } from './page2/page2';
-import { StartingPage } from './starting-page/starting-page';
+import { RequestFunctionComponent } from './request-function/request-function.component';
+import { RequestTypeComponent } from './request-type/request-type.component';
 
 export const routes: Routes = [
-  {
-    path: '',
-    title: 'Starting Page',
-    component: StartingPage,
-    children: [
-      {
-        path: 'Page Two', // child route path
-        title: 'Second page',
-        component: Page2, // child route component that the router renders
-      },
-    ],
-  },
-  { path: '**', redirectTo: '' }, // optional, but nice to have
+  { path: '', redirectTo: 'request-type', pathMatch: 'full' },
+  { path: 'request-type', component: RequestTypeComponent },
+  { path: 'request-function', component: RequestFunctionComponent },
+  { path: '**', redirectTo: 'request-type' },
 ];

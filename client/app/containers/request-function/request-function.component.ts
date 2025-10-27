@@ -5,14 +5,14 @@ import { Store, select } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-starting-page',
+  selector: 'request-function',
   standalone: true,
   imports: [ReactiveFormsModule],
-  templateUrl: './starting-page.html',
-  styleUrls: ['./starting-page.css'],
+  templateUrl: './request-function.component.html',
+  styleUrls: ['./request-function.component.css'],
 })
-export class StartingPage implements OnInit {
-  public supportOptionsForm!: FormGroup;
+export class RequestFunctionComponent implements OnInit {
+  public requestFunctionForm!: FormGroup;
   public hearingPanelRequired = false;
   public validationErrors: { id: string; message: string }[] = [];
   public navigator$: Observable<string>;
@@ -30,15 +30,15 @@ export class StartingPage implements OnInit {
   }
 
   private initForm(): void {
-    this.supportOptionsForm = this.formBuilder.group({
+    this.requestFunctionForm = this.formBuilder.group({
       supportOption: [null, Validators.required] as const,
     });
   }
 
   onSubmit(): void {
-    const value = this.supportOptionsForm.value.supportOption as boolean | null;
+    const value = this.requestFunctionForm.value.supportOption as boolean | null;
     if (value === null) {
-      this.validationErrors = [{ id: 'supportOption', message: 'Select an option' }];
+      this.validationErrors = [{ id: 'requestFunction', message: 'Select an option' }];
       return;
     }
   }

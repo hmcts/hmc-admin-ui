@@ -1,0 +1,47 @@
+<div class="govuk-grid-row">
+  <!--  <div class="govuk-grid-column-two-thirds">-->
+  <form
+    class="form"
+    id="wizard-step-form"
+    [formGroup]="requestFunctionForm"
+    (ngSubmit)="$event.preventDefault()"
+    novalidate
+  >
+    <div class="govuk-form-group">
+      <fieldset class="govuk-fieldset" aria-describedby="request-function-hint">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+          <h2 class="govuk-fieldset__heading">Please select one of the following options</h2>
+        </legend>
+
+        <div id="request-type-hint" class="govuk-hint">Choose the type of request you want to make.</div>
+
+        <div class="govuk-radios" data-module="govuk-radios" id="requestFunction">
+          <div class="govuk-radios__item">
+            <input
+              class="govuk-radios__input"
+              id="request_function_rollback"
+              name="requestFunction"
+              formControlName="requestFunction"
+              type="radio"
+              [value]="true"
+            />
+            <label class="govuk-radios__label" for="request_function_rollback"> Rollback </label>
+          </div>
+          <div class="govuk-radios__item">
+            <input
+              class="govuk-radios__input"
+              id="request_function_final_state_transition"
+              name="requestFunction"
+              formControlName="requestFunction"
+              type="radio"
+              [value]="false"
+            />
+            <label class="govuk-radios__label" for="request_function_final_state_transition">
+              Final State Transition
+            </label>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </form>
+</div>
