@@ -16,29 +16,36 @@ module.exports = {
     {
       test: /\.scss$/,
       use: [
-        'style-loader',
-        {
-          loader: MiniCssExtractPlugin.loader,
-          options: {
-            esModule: false,
-          },
-        },
+        // 'style-loader',
+        // {
+        //   loader: MiniCssExtractPlugin.loader,
+        //   options: {
+        //     esModule: false,
+        //   },
+        // },
+        // Use style-loader in dev; extract only in prod
+        //    devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+        MiniCssExtractPlugin.loader,
         {
           loader: 'css-loader',
           options: {
             url: false,
+            sourceMap: devMode,
           },
         },
         {
           loader: 'sass-loader',
           options: {
-            sassOptions: {
-              quietDeps: true,
-            },
+            // sassOptions: {
+            //   quietDeps: true,
+            // },
+            sourceMap: devMode,
+            sassOptions: { quietDeps: true },
           },
         },
       ],
     },
   ],
   plugins: [miniCss],
+  // plugins: devMode ? [] : [miniCss],
 };

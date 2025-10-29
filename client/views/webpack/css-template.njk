@@ -1,1 +1,5 @@
-<link href="/<%= htmlWebpackPlugin.files.css[0].substr(htmlWebpackPlugin.files.publicPath.length) %>" rel="stylesheet">
+<% if (htmlWebpackPlugin && htmlWebpackPlugin.files && htmlWebpackPlugin.files.css && htmlWebpackPlugin.files.css.length) { %>
+  <% for (var i = 0; i < htmlWebpackPlugin.files.css.length; i++) { %>
+    <link nonce="{{ cspNonce }}" href="<%= htmlWebpackPlugin.files.css[i] %>" rel="stylesheet">
+  <% } %>
+<% } %>

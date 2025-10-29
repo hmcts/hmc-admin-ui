@@ -13,6 +13,7 @@ module.exports = {
   plugins: [...govukFrontend.plugins, ...scss.plugins, ...HtmlWebpack.plugins],
   entry: path.resolve(sourcePath, 'index.ts'),
   mode: devMode ? 'development' : 'production',
+  devtool: devMode ? 'source-map' : false,
   module: {
     rules: [
       ...scss.rules,
@@ -28,7 +29,9 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, '../dist'),
-    publicPath: '',
+    publicPath: '/',
     filename,
+    devtoolModuleFilenameTemplate: info =>
+      'webpack:///' + path.posix.relative(process.cwd(), info.absoluteResourcePath).replace(/\\\\/g, '/'),
   },
 };

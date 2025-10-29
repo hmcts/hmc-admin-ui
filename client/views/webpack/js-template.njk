@@ -1,1 +1,7 @@
- <script src="/<%= htmlWebpackPlugin.files.js[0].substr(htmlWebpackPlugin.files.publicPath.length) %>"></script>
+<script nonce="{{ cspNonce }}">window.__webpack_nonce__ = "{{ cspNonce }}";</script>
+
+<% if (htmlWebpackPlugin && htmlWebpackPlugin.files && htmlWebpackPlugin.files.js && htmlWebpackPlugin.files.js.length) { %>
+  <% for (var i = 0; i < htmlWebpackPlugin.files.js.length; i++) { %>
+    <script nonce="{{ cspNonce }}" src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+  <% } %>
+<% } %>
