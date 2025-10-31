@@ -6,8 +6,6 @@ import { json, urlencoded } from 'body-parser';
 import config from 'config';
 import cookieParser from 'cookie-parser';
 import express from 'express';
-// import expressNunjucks from 'express-nunjucks';
-import expressNunjucks from 'express-nunjucks';
 import RateLimit from 'express-rate-limit';
 import { glob } from 'glob';
 
@@ -17,6 +15,7 @@ import { Helmet } from './modules/helmet';
 import { PropertiesVolume } from './modules/properties-volume';
 
 const { Logger } = require('@hmcts/nodejs-logging');
+const expressNunjucks = require('express-nunjucks');
 
 const { setupDev } = require('./development');
 

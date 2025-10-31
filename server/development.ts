@@ -27,7 +27,8 @@ const setupDev = (app: express.Express, developmentMode: boolean): void => {
     if (!config.devtool) {
       config.devtool = 'source-map';
     }
-    const publicPath = (config.output && config.output.publicPath) || '/';
+    // const publicPath = (config.output && config.output.publicPath) || '/';
+    const publicPath = config.output && config.output.publicPath ? config.output.publicPath : '/';
     const compiler = webpack(config);
     app.use(
       webpackDev(compiler, {
