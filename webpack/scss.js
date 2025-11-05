@@ -36,11 +36,13 @@ module.exports = {
         {
           loader: 'sass-loader',
           options: {
-            // sassOptions: {
-            //   quietDeps: true,
-            // },
             sourceMap: devMode,
-            sassOptions: { quietDeps: true },
+            implementation: require('sass'),
+            sassOptions: {
+              quietDeps: true,
+              // If your Dart Sass >= 1.63:
+              // silenceDeprecations: ['slash-div', 'mixed-decls']
+            },
           },
         },
       ],

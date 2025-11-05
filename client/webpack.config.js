@@ -31,6 +31,13 @@ module.exports = {
   },
   mode: devMode ? 'development' : 'production',
   devtool: devMode ? 'source-map' : false,
+  // Silence Sass deprecation warnings originating from dependencies (e.g., govuk-frontend)
+  ignoreWarnings: [
+    // Generic Sass division deprecation from sass-loader
+    { module: /sass-loader/, message: /Using \/ for division|slash-div/ },
+    // Upcoming mixed declarations behavior change
+    { module: /sass-loader/, message: /mixed-decls/ },
+  ],
   module: {
     rules: [
       {
@@ -53,7 +60,15 @@ module.exports = {
               { loader: 'raw-loader' },
               {
                 loader: 'sass-loader',
-                options: { sourceMap: devMode, sassOptions: { quietDeps: true } },
+                options: {
+                  sourceMap: devMode,
+                  implementation: require('sass'),
+                  sassOptions: {
+                    quietDeps: true, // hide deprecations from node_modules
+                    // If your Dart Sass supports it (≥1.63):
+                    silenceDeprecations: ['slash-div'], // or ['division'] depending on your Sass version
+                  },
+                },
               },
             ],
           },
@@ -62,7 +77,7 @@ module.exports = {
           {
             test: /\.css$/i,
             resourceQuery: /ngResource/,
-            use: ['raw-loader'],
+            use: [{ loader: 'raw-loader' }],
           },
 
           // 4) Angular component HTML -> string (only if needed)
