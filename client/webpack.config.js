@@ -4,7 +4,6 @@ const sourcePath = path.resolve(__dirname, 'assets/js');
 const govukFrontend = require(path.resolve(__dirname, '../webpack/govukFrontend'));
 const scss = require(path.resolve(__dirname, '../webpack/scss'));
 const HtmlWebpack = require(path.resolve(__dirname, '../webpack/htmlWebpack'));
-const linkerPlugin = require('@angular/compiler-cli/linker/babel');
 const { AngularWebpackPlugin } = require('@ngtools/webpack');
 
 const devMode = process.env.NODE_ENV !== 'production';
@@ -42,17 +41,7 @@ module.exports = {
     rules: [
       {
         oneOf: [
-          // 1) Linker for partial-ivy node_modules
-          {
-            test: /\.[cm]?js$/,
-            include: /node_modules/,
-            use: {
-              loader: 'babel-loader',
-              options: { compact: false, plugins: [linkerPlugin] },
-            },
-          },
-
-          // 2) Angular component SCSS -> string (for ?ngResource)
+          // 1) Angular component SCSS -> string (for ?ngResource)
           {
             test: /\.scss$/i,
             resourceQuery: /ngResource/,
@@ -73,24 +62,24 @@ module.exports = {
             ],
           },
 
-          // 3) Angular component CSS -> string (for ?ngResource)
+          // 2) Angular component CSS -> string (for ?ngResource)
           {
             test: /\.css$/i,
             resourceQuery: /ngResource/,
             use: [{ loader: 'raw-loader' }],
           },
 
-          // 4) Angular component HTML -> string (only if needed)
+          // 3) Angular component HTML -> string (only if needed)
           {
             test: /\.html$/i,
             resourceQuery: /ngResource/,
             use: ['raw-loader'],
           },
 
-          // 5) Your existing global SCSS/CSS pipeline (Extracts to files)
+          // 4) Your existing global SCSS/CSS pipeline (Extracts to files)
           ...scss.rules,
 
-          // 6) Angular AOT for your app code
+          // 5) Angular AOT for your app code
           {
             test: /\.ts$/,
             exclude: /node_modules/,
