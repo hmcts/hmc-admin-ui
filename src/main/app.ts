@@ -1,6 +1,11 @@
 import * as path from 'path';
 
-import { Logger } from '@hmcts/nodejs-logging';
+import { HTTPError } from './HttpError';
+import { AppInsights } from './modules/appinsights';
+import { Helmet } from './modules/helmet';
+import { Nunjucks } from './modules/nunjucks';
+import { PropertiesVolume } from './modules/properties-volume';
+
 import * as bodyParser from 'body-parser';
 import config = require('config');
 import cookieParser from 'cookie-parser';
@@ -8,13 +13,9 @@ import express from 'express';
 import RateLimit from 'express-rate-limit';
 import { glob } from 'glob';
 
-import { HTTPError } from './HttpError';
-import { AppInsights } from './modules/appinsights';
-import { Helmet } from './modules/helmet';
-import { Nunjucks } from './modules/nunjucks';
-import { PropertiesVolume } from './modules/properties-volume';
-
 const { setupDev } = require('./development');
+
+const { Logger } = require('@hmcts/nodejs-logging');
 
 const env = process.env.NODE_ENV || 'development';
 const developmentMode = env === 'development';
@@ -61,7 +62,7 @@ app.use((req, res) => {
 });
 
 // error handler
-app.use((err: HTTPError, req: express.Request, res: express.Response) => {
+app.use((err: HTTPError, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(`${err.stack || err}`);
 
   // set locals, only providing error in development
