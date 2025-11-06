@@ -5,6 +5,7 @@ node_modules/
 
 .idea/
 *.iml
+.DS_Store
 
 *swp
 *log
@@ -32,9 +33,10 @@ version
 .eslintcache
 
 .yarn/*
-!.yarn/cache/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+config/local-development.json
