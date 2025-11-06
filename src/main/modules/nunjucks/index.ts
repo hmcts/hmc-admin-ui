@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import * as express from 'express';
 import * as nunjucks from 'nunjucks';
