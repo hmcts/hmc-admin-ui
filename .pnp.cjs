@@ -40,7 +40,7 @@ const RAW_RUNTIME_STATE =
           ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
           ["@types/config", "npm:3.3.5"],\
-          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9"],\
+          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.10"],\
           ["@types/csurf", "npm:1.11.5"],\
           ["@types/es6-promisify", "npm:6.0.4"],\
           ["@types/express", "npm:4.17.23"],\
@@ -5932,17 +5932,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@types/cookie-parser", [\
-      ["npm:1.4.9", {\
-        "packageLocation": "./.yarn/cache/@types-cookie-parser-npm-1.4.9-628dc5b6f4-6192a4899b.zip/node_modules/@types/cookie-parser/",\
+      ["npm:1.4.10", {\
+        "packageLocation": "./.yarn/cache/@types-cookie-parser-npm-1.4.10-b93a455d7e-1f37b5a411.zip/node_modules/@types/cookie-parser/",\
         "packageDependencies": [\
-          ["@types/cookie-parser", "npm:1.4.9"]\
+          ["@types/cookie-parser", "npm:1.4.10"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9", {\
-        "packageLocation": "./.yarn/__virtual__/@types-cookie-parser-virtual-bc26b9c6b5/0/cache/@types-cookie-parser-npm-1.4.9-628dc5b6f4-6192a4899b.zip/node_modules/@types/cookie-parser/",\
+      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.10", {\
+        "packageLocation": "./.yarn/__virtual__/@types-cookie-parser-virtual-d02a0ee0c6/0/cache/@types-cookie-parser-npm-1.4.10-b93a455d7e-1f37b5a411.zip/node_modules/@types/cookie-parser/",\
         "packageDependencies": [\
-          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9"],\
+          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.10"],\
           ["@types/express", "npm:4.17.23"]\
         ],\
         "packagePeers": [\
@@ -12495,7 +12495,7 @@ const RAW_RUNTIME_STATE =
           ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
           ["@types/config", "npm:3.3.5"],\
-          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9"],\
+          ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.10"],\
           ["@types/csurf", "npm:1.11.5"],\
           ["@types/es6-promisify", "npm:6.0.4"],\
           ["@types/express", "npm:4.17.23"],\
