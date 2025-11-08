@@ -37,7 +37,7 @@ const RAW_RUNTIME_STATE =
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
           ["@hmcts/properties-volume", "npm:0.0.14"],\
           ["@types/body-parser", "npm:1.19.6"],\
-          ["@types/chai", "npm:5.2.2"],\
+          ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
           ["@types/config", "npm:3.3.5"],\
           ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9"],\
@@ -5892,11 +5892,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@types/chai", [\
-      ["npm:5.2.2", {\
-        "packageLocation": "./.yarn/cache/@types-chai-npm-5.2.2-175f762512-de425e7b02.zip/node_modules/@types/chai/",\
+      ["npm:5.2.3", {\
+        "packageLocation": "./.yarn/cache/@types-chai-npm-5.2.3-5f61dbddda-e79947307d.zip/node_modules/@types/chai/",\
         "packageDependencies": [\
-          ["@types/chai", "npm:5.2.2"],\
-          ["@types/deep-eql", "npm:4.0.2"]\
+          ["@types/chai", "npm:5.2.3"],\
+          ["@types/deep-eql", "npm:4.0.2"],\
+          ["assertion-error", "npm:2.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5905,7 +5906,7 @@ const RAW_RUNTIME_STATE =
       ["npm:7.1.8", {\
         "packageLocation": "./.yarn/cache/@types-chai-as-promised-npm-7.1.8-7c01d80dfb-88e2d42f14.zip/node_modules/@types/chai-as-promised/",\
         "packageDependencies": [\
-          ["@types/chai", "npm:5.2.2"],\
+          ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"]\
         ],\
         "linkType": "HARD"\
@@ -7522,6 +7523,13 @@ const RAW_RUNTIME_STATE =
           ["assertion-error", "npm:1.1.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:2.0.1", {\
+        "packageLocation": "./.yarn/cache/assertion-error-npm-2.0.1-8169d136f2-a0789dd882.zip/node_modules/assertion-error/",\
+        "packageDependencies": [\
+          ["assertion-error", "npm:2.0.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["ast-types", [\
@@ -8731,7 +8739,7 @@ const RAW_RUNTIME_STATE =
       ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.1.2", {\
         "packageLocation": "./.yarn/__virtual__/chai-as-promised-virtual-48ed11f941/0/cache/chai-as-promised-npm-7.1.2-ee0dcf9f07-be372540da.zip/node_modules/chai-as-promised/",\
         "packageDependencies": [\
-          ["@types/chai", "npm:5.2.2"],\
+          ["@types/chai", "npm:5.2.3"],\
           ["chai", "npm:4.5.0"],\
           ["chai-as-promised", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.1.2"],\
           ["check-error", "npm:1.0.3"]\
@@ -12491,7 +12499,7 @@ const RAW_RUNTIME_STATE =
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
           ["@hmcts/properties-volume", "npm:0.0.14"],\
           ["@types/body-parser", "npm:1.19.6"],\
-          ["@types/chai", "npm:5.2.2"],\
+          ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
           ["@types/config", "npm:3.3.5"],\
           ["@types/cookie-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.9"],\
@@ -18517,7 +18525,7 @@ const RAW_RUNTIME_STATE =
       ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.7.0", {\
         "packageLocation": "./.yarn/__virtual__/sinon-chai-virtual-8f4009bfb0/0/cache/sinon-chai-npm-3.7.0-8e6588805e-028853eb8a.zip/node_modules/sinon-chai/",\
         "packageDependencies": [\
-          ["@types/chai", "npm:5.2.2"],\
+          ["@types/chai", "npm:5.2.3"],\
           ["@types/sinon", null],\
           ["chai", "npm:4.5.0"],\
           ["sinon", "npm:15.1.0"],\
