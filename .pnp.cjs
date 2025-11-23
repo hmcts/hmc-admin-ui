@@ -78,7 +78,7 @@ const RAW_RUNTIME_STATE =
           ["express", "npm:5.1.0"],\
           ["express-nunjucks", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.1.2"],\
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
-          ["glob", "npm:10.4.5"],\
+          ["glob", "npm:10.5.0"],\
           ["govuk-frontend", "npm:5.9.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
@@ -12169,6 +12169,19 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
+      ["npm:10.5.0", {\
+        "packageLocation": "./.yarn/cache/glob-npm-10.5.0-b569657078-ab3bccfefc.zip/node_modules/glob/",\
+        "packageDependencies": [\
+          ["foreground-child", "npm:3.3.1"],\
+          ["glob", "npm:10.5.0"],\
+          ["jackspeak", "npm:3.4.3"],\
+          ["minimatch", "npm:9.0.5"],\
+          ["minipass", "npm:7.1.2"],\
+          ["package-json-from-dist", "npm:1.0.1"],\
+          ["path-scurry", "npm:1.11.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
       ["npm:11.0.1", {\
         "packageLocation": "./.yarn/cache/glob-npm-11.0.1-2249503635-57b12a05cc.zip/node_modules/glob/",\
         "packageDependencies": [\
@@ -12552,7 +12565,7 @@ const RAW_RUNTIME_STATE =
           ["express", "npm:5.1.0"],\
           ["express-nunjucks", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.1.2"],\
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
-          ["glob", "npm:10.4.5"],\
+          ["glob", "npm:10.5.0"],\
           ["govuk-frontend", "npm:5.9.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
