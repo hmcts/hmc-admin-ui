@@ -89,7 +89,7 @@ const RAW_RUNTIME_STATE =
           ["jest-junit", "npm:16.0.0"],\
           ["jquery", "npm:3.7.1"],\
           ["lint-staged", "npm:13.2.2"],\
-          ["lodash", "npm:4.17.21"],\
+          ["lodash", "npm:4.17.23"],\
           ["mini-css-extract-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:2.7.6"],\
           ["nock", "npm:13.3.1"],\
           ["nodemon", "npm:2.0.22"],\
@@ -12804,7 +12804,7 @@ const RAW_RUNTIME_STATE =
           ["jest-junit", "npm:16.0.0"],\
           ["jquery", "npm:3.7.1"],\
           ["lint-staged", "npm:13.2.2"],\
-          ["lodash", "npm:4.17.21"],\
+          ["lodash", "npm:4.17.23"],\
           ["mini-css-extract-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:2.7.6"],\
           ["nock", "npm:13.3.1"],\
           ["nodemon", "npm:2.0.22"],\
@@ -15098,6 +15098,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/lodash-npm-4.17.21-6382451519-c08619c038.zip/node_modules/lodash/",\
         "packageDependencies": [\
           ["lodash", "npm:4.17.21"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:4.17.23", {\
+        "packageLocation": "./.yarn/cache/lodash-npm-4.17.23-50bdb1c01a-82504c8825.zip/node_modules/lodash/",\
+        "packageDependencies": [\
+          ["lodash", "npm:4.17.23"]\
         ],\
         "linkType": "HARD"\
       }]\
