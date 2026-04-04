@@ -79,7 +79,7 @@ const RAW_RUNTIME_STATE =
           ["express-nunjucks", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.1.2"],\
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
           ["glob", "npm:11.1.0"],\
-          ["govuk-frontend", "npm:5.9.0"],\
+          ["govuk-frontend", "npm:5.14.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
           ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.5.1"],\
@@ -12852,10 +12852,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["govuk-frontend", [\
-      ["npm:5.9.0", {\
-        "packageLocation": "./.yarn/cache/govuk-frontend-npm-5.9.0-c2de295b9d-bc75221e77.zip/node_modules/govuk-frontend/",\
+      ["npm:5.14.0", {\
+        "packageLocation": "./.yarn/cache/govuk-frontend-npm-5.14.0-921256176a-be321340f4.zip/node_modules/govuk-frontend/",\
         "packageDependencies": [\
-          ["govuk-frontend", "npm:5.9.0"]\
+          ["govuk-frontend", "npm:5.14.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13065,7 +13065,7 @@ const RAW_RUNTIME_STATE =
           ["express-nunjucks", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.1.2"],\
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
           ["glob", "npm:11.1.0"],\
-          ["govuk-frontend", "npm:5.9.0"],\
+          ["govuk-frontend", "npm:5.14.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
           ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.5.1"],\
