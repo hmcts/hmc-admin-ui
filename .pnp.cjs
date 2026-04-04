@@ -32,7 +32,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/preset-env", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.2"],\
           ["@codeceptjs/allure-legacy", "npm:1.0.2"],\
           ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0"],\
-          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.3.0"],\
+          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
           ["@hmcts/properties-volume", "npm:0.0.14"],\
@@ -4906,20 +4906,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@hmcts/info-provider", [\
-      ["npm:1.3.0", {\
-        "packageLocation": "./.yarn/cache/@hmcts-info-provider-npm-1.3.0-912f8923f0-4e143f1c0a.zip/node_modules/@hmcts/info-provider/",\
+      ["npm:1.4.0", {\
+        "packageLocation": "./.yarn/cache/@hmcts-info-provider-npm-1.4.0-3e4acc49b8-c73658a9b3.zip/node_modules/@hmcts/info-provider/",\
         "packageDependencies": [\
-          ["@hmcts/info-provider", "npm:1.3.0"]\
+          ["@hmcts/info-provider", "npm:1.4.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.3.0", {\
-        "packageLocation": "./.yarn/__virtual__/@hmcts-info-provider-virtual-e3aee08cc3/0/cache/@hmcts-info-provider-npm-1.3.0-912f8923f0-4e143f1c0a.zip/node_modules/@hmcts/info-provider/",\
+      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0", {\
+        "packageLocation": "./.yarn/__virtual__/@hmcts-info-provider-virtual-43396453d5/0/cache/@hmcts-info-provider-npm-1.4.0-3e4acc49b8-c73658a9b3.zip/node_modules/@hmcts/info-provider/",\
         "packageDependencies": [\
-          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.3.0"],\
+          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@types/express", "npm:4.17.25"],\
           ["express", "npm:5.1.0"],\
-          ["js-yaml", "npm:4.1.0"]\
+          ["js-yaml", "npm:4.1.1"]\
         ],\
         "packagePeers": [\
           "@types/express",\
@@ -12935,7 +12935,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/preset-env", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.2"],\
           ["@codeceptjs/allure-legacy", "npm:1.0.2"],\
           ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0"],\
-          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.3.0"],\
+          ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
           ["@hmcts/properties-volume", "npm:0.0.14"],\
@@ -14831,6 +14831,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["argparse", "npm:2.0.1"],\
           ["js-yaml", "npm:4.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:4.1.1", {\
+        "packageLocation": "./.yarn/cache/js-yaml-npm-4.1.1-86ec786790-a52d0519f0.zip/node_modules/js-yaml/",\
+        "packageDependencies": [\
+          ["argparse", "npm:2.0.1"],\
+          ["js-yaml", "npm:4.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
