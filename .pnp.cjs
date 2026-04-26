@@ -103,7 +103,7 @@ const RAW_RUNTIME_STATE =
           ["sass", "npm:1.99.0"],\
           ["sass-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:13.3.3"],\
           ["serve-favicon", "npm:2.5.1"],\
-          ["sinon", "npm:15.1.0"],\
+          ["sinon", "npm:15.2.0"],\
           ["sinon-chai", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.7.0"],\
           ["style-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.3.4"],\
           ["stylelint", "npm:16.18.0"],\
@@ -13266,7 +13266,7 @@ const RAW_RUNTIME_STATE =
           ["sass", "npm:1.99.0"],\
           ["sass-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:13.3.3"],\
           ["serve-favicon", "npm:2.5.1"],\
-          ["sinon", "npm:15.1.0"],\
+          ["sinon", "npm:15.2.0"],\
           ["sinon-chai", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.7.0"],\
           ["style-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.3.4"],\
           ["stylelint", "npm:16.18.0"],\
@@ -19368,15 +19368,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sinon", [\
-      ["npm:15.1.0", {\
-        "packageLocation": "./.yarn/cache/sinon-npm-15.1.0-de4ccc6954-5933c0edf6.zip/node_modules/sinon/",\
+      ["npm:15.2.0", {\
+        "packageLocation": "./.yarn/cache/sinon-npm-15.2.0-ba6c0831db-faa2d12aaa.zip/node_modules/sinon/",\
         "packageDependencies": [\
           ["@sinonjs/commons", "npm:3.0.1"],\
           ["@sinonjs/fake-timers", "npm:10.3.0"],\
           ["@sinonjs/samsam", "npm:8.0.2"],\
           ["diff", "npm:5.2.0"],\
           ["nise", "npm:5.1.9"],\
-          ["sinon", "npm:15.1.0"],\
+          ["sinon", "npm:15.2.0"],\
           ["supports-color", "npm:7.2.0"]\
         ],\
         "linkType": "HARD"\
@@ -19396,7 +19396,7 @@ const RAW_RUNTIME_STATE =
           ["@types/chai", "npm:5.2.3"],\
           ["@types/sinon", null],\
           ["chai", "npm:4.5.0"],\
-          ["sinon", "npm:15.1.0"],\
+          ["sinon", "npm:15.2.0"],\
           ["sinon-chai", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.7.0"]\
         ],\
         "packagePeers": [\
