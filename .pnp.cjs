@@ -109,7 +109,7 @@ const RAW_RUNTIME_STATE =
           ["stylelint", "npm:16.26.1"],\
           ["stylelint-config-standard", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:36.0.1"],\
           ["stylelint-config-standard-scss", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:13.1.0"],\
-          ["superagent", "npm:10.2.3"],\
+          ["superagent", "npm:10.3.0"],\
           ["supertest", "npm:7.2.2"],\
           ["ts-jest", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:29.1.0"],\
           ["ts-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:9.4.3"],\
@@ -4981,7 +4981,7 @@ const RAW_RUNTIME_STATE =
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
           ["js-yaml", "npm:4.1.0"],\
-          ["superagent", "npm:10.2.3"]\
+          ["superagent", "npm:10.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12612,18 +12612,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:4.0.4", {\
-        "packageLocation": "./.yarn/cache/form-data-npm-4.0.4-10eb4ef9c3-a4b62e2193.zip/node_modules/form-data/",\
-        "packageDependencies": [\
-          ["asynckit", "npm:0.4.0"],\
-          ["combined-stream", "npm:1.0.8"],\
-          ["es-set-tostringtag", "npm:2.1.0"],\
-          ["form-data", "npm:4.0.4"],\
-          ["hasown", "npm:2.0.2"],\
-          ["mime-types", "npm:2.1.35"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:4.0.5", {\
         "packageLocation": "./.yarn/cache/form-data-npm-4.0.5-c35fce815a-52ecd6e927.zip/node_modules/form-data/",\
         "packageDependencies": [\
@@ -13352,7 +13340,7 @@ const RAW_RUNTIME_STATE =
           ["stylelint", "npm:16.26.1"],\
           ["stylelint-config-standard", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:36.0.1"],\
           ["stylelint-config-standard-scss", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:13.1.0"],\
-          ["superagent", "npm:10.2.3"],\
+          ["superagent", "npm:10.3.0"],\
           ["supertest", "npm:7.2.2"],\
           ["ts-jest", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:29.1.0"],\
           ["ts-loader", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:9.4.3"],\
@@ -20157,22 +20145,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["superagent", [\
-      ["npm:10.2.3", {\
-        "packageLocation": "./.yarn/cache/superagent-npm-10.2.3-792c09e71d-377bf938e6.zip/node_modules/superagent/",\
-        "packageDependencies": [\
-          ["component-emitter", "npm:1.3.1"],\
-          ["cookiejar", "npm:2.1.4"],\
-          ["debug", "virtual:85d5d916b6a745b2f8de0d4b1704b7084bdd4f7573c1ef5d1c877f2c866045a9b29fe2bc752d1b73e531c378a0518dd3f9fa187b31427fb9bacbe34b14715dde#npm:4.4.0"],\
-          ["fast-safe-stringify", "npm:2.1.1"],\
-          ["form-data", "npm:4.0.4"],\
-          ["formidable", "npm:3.5.4"],\
-          ["methods", "npm:1.1.2"],\
-          ["mime", "npm:2.6.0"],\
-          ["qs", "npm:6.14.0"],\
-          ["superagent", "npm:10.2.3"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:10.3.0", {\
         "packageLocation": "./.yarn/cache/superagent-npm-10.3.0-8dedd29079-e62b132814.zip/node_modules/superagent/",\
         "packageDependencies": [\
