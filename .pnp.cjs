@@ -82,7 +82,7 @@ const RAW_RUNTIME_STATE =
           ["govuk-frontend", "npm:5.14.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
-          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.6"],\
+          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.7"],\
           ["husky", "npm:8.0.3"],\
           ["jest", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:29.7.0"],\
           ["jest-html-reporter", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.10.2"],\
@@ -13313,7 +13313,7 @@ const RAW_RUNTIME_STATE =
           ["govuk-frontend", "npm:5.14.0"],\
           ["helmet", "npm:8.1.0"],\
           ["hmc-admin-ui", "workspace:."],\
-          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.6"],\
+          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.7"],\
           ["husky", "npm:8.0.3"],\
           ["jest", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:29.7.0"],\
           ["jest-html-reporter", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:3.10.2"],\
@@ -13429,22 +13429,22 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["html-webpack-plugin", [\
-      ["npm:5.6.6", {\
-        "packageLocation": "./.yarn/cache/html-webpack-plugin-npm-5.6.6-6bfcaf725b-819ebee079.zip/node_modules/html-webpack-plugin/",\
+      ["npm:5.6.7", {\
+        "packageLocation": "./.yarn/cache/html-webpack-plugin-npm-5.6.7-b84bbcfd90-fc81e1c2d3.zip/node_modules/html-webpack-plugin/",\
         "packageDependencies": [\
-          ["html-webpack-plugin", "npm:5.6.6"]\
+          ["html-webpack-plugin", "npm:5.6.7"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.6", {\
-        "packageLocation": "./.yarn/__virtual__/html-webpack-plugin-virtual-625e4294d6/0/cache/html-webpack-plugin-npm-5.6.6-6bfcaf725b-819ebee079.zip/node_modules/html-webpack-plugin/",\
+      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.7", {\
+        "packageLocation": "./.yarn/__virtual__/html-webpack-plugin-virtual-5646d346b5/0/cache/html-webpack-plugin-npm-5.6.7-b84bbcfd90-fc81e1c2d3.zip/node_modules/html-webpack-plugin/",\
         "packageDependencies": [\
           ["@rspack/core", null],\
           ["@types/html-minifier-terser", "npm:6.1.0"],\
           ["@types/rspack__core", null],\
           ["@types/webpack", null],\
           ["html-minifier-terser", "npm:6.1.0"],\
-          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.6"],\
+          ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.7"],\
           ["lodash", "npm:4.17.21"],\
           ["pretty-error", "npm:4.0.0"],\
           ["tapable", "npm:2.2.1"],\
