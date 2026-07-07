@@ -18202,7 +18202,7 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["puppeteer", [\
       ["npm:22.15.0", {\
-        "packageLocation": "./.yarn/cache/puppeteer-npm-22.15.0-fa225bdb63-500ea99250.zip/node_modules/puppeteer/",\
+        "packageLocation": "./.yarn/unplugged/puppeteer-npm-22.15.0-fa225bdb63/node_modules/puppeteer/",\
         "packageDependencies": [\
           ["@puppeteer/browsers", "npm:2.3.0"],\
           ["cosmiconfig", "virtual:fa225bdb634e1cbc539c15f52d21e8c24930965df910bda33d9b1290d228e0a64585d7b53da6663575dc8acfbfbe07bcf6d81ab99b1b2b3701c454c9cc8cf6e7#npm:9.0.0"],\
