@@ -1,1 +1,18 @@
-{}
+{
+  "auth": {
+    "enabled": false
+  },
+  "session": {
+    "cookie": {
+      "name": "hmc-admin-ui-test-session"
+    },
+    "appCookie": {
+      "name": "hmc-admin-ui-test-app"
+    }
+  },
+  "secrets": {
+    "hmc": {
+      "hmc-admin-ui-session-secret": "test-session-secret"
+    }
+  }
+}

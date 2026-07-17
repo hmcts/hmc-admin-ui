@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "enabled": {
+      "__name": "AUTH_ENABLED",
+      "__format": "boolean"
+    }
+  },
+  "requestBody": {
+    "urlencodedLimit": "REQUEST_BODY_URLENCODED_LIMIT",
+    "urlencodedParameterLimit": {
+      "__name": "REQUEST_BODY_URLENCODED_PARAMETER_LIMIT",
+      "__format": "number"
+    }
+  },
+  "services": {
+    "idam": {
+      "clientID": "IDAM_CLIENT_ID",
+      "scope": "IDAM_CLIENT_SCOPE",
+      "url": {
+        "hmc": "HMC_ADMIN_UI_BASE_URL",
+        "public": "IDAM_PUBLIC_URL"
+      }
+    }
+  },
+  "session": {
+    "cookie": {
+      "name": "SESSION_COOKIE_NAME"
+    },
+    "appCookie": {
+      "name": "SESSION_APP_COOKIE_NAME"
+    }
+  },
+  "RBAC": {
+    "access": "RBAC_ACCESS"
+  },
+  "secrets": {
+    "hmc": {
+      "AppInsightsInstrumentationKey": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "hmc-admin-ui-client-secret": "HMC_ADMIN_UI_CLIENT_SECRET",
+      "hmc-admin-ui-session-secret": "SESSION_SECRET"
+    }
+  }
+}
