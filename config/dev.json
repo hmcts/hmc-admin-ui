@@ -10,6 +10,13 @@
       "name": "hmc-admin-ui-app"
     }
   },
+  "services": {
+    "idam": {
+      "url": {
+        "hmc": "http://localhost:3000"
+      }
+    }
+  },
   "secrets": {
     "hmc": {
       "hmc-admin-ui-session-secret": "local-development-session-secret"

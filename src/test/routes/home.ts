@@ -21,7 +21,8 @@ describe('Home page', () => {
         .expect(res => expect(res.text).to.contain('value="singular"'))
         .expect(res => expect(res.text).to.contain('Singular'))
         .expect(res => expect(res.text).to.contain('type="submit"'))
-        .expect(res => expect(res.text).to.contain('Continue'));
+        .expect(res => expect(res.text).to.contain('Continue'))
+        .expect(res => expect(res.text).not.to.contain('Sign out'));
     });
   });
 

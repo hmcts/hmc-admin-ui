@@ -36,7 +36,7 @@
       "url": {
         "public": "https://hmcts-access.aat.platform.hmcts.net",
         "api": "https://idam-api.aat.platform.hmcts.net",
-        "hmc": "https://localhost:3000"
+        "hmc": "http://localhost:3000"
       }
     }
   },

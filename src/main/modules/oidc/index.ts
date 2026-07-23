@@ -40,6 +40,7 @@ export class OidcMiddleware {
         },
         routes: {
           callback: '/oauth2/callback',
+          logout: '/logout',
           postLogoutRedirect: this.baseUrl,
         },
         session: {
@@ -77,6 +78,7 @@ export class OidcMiddleware {
       }
 
       this.assertAccess(this.normaliseRoles(req.oidc.user?.roles));
+      _res.locals.isAuthenticated = true;
       next();
     });
   }
