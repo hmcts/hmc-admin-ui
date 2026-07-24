@@ -9531,6 +9531,7 @@ __metadata:
     playwright: "npm:1.59.1"
     postcss: "npm:^8.4.27"
     prettier: "npm:2.8.8"
+    puppeteer: "npm:22.15.0"
     request: "npm:2.88.2"
     require-directory: "npm:2.1.1"
     sass: "npm:1.99.0"
@@ -13951,7 +13952,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^22.3.0":
+"puppeteer@npm:22.15.0, puppeteer@npm:^22.3.0":
   version: 22.15.0
   resolution: "puppeteer@npm:22.15.0"
   dependencies:
