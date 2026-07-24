@@ -22,6 +22,7 @@ skills/<category>/<skill-name>/SKILL.md
 ```
 
 Current categories:
+
 - `frontend`
 - `api`
 - `testing`

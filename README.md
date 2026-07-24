@@ -6,31 +6,56 @@
 
 Running the application requires the following tools to be installed in your environment:
 
-- [Node.js](https://nodejs.org/) v12.0.0 or later
-- [yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/) v20.20.2, as specified in [.nvmrc](.nvmrc)
+- [Yarn](https://yarnpkg.com/) v4.15.0, managed by Corepack
 - [Docker](https://www.docker.com)
 
-### Running the application
+Enable Corepack before installing dependencies:
 
-Install dependencies by executing the following command:
+```bash
+corepack enable
+```
+
+Install dependencies:
 
 ```bash
 yarn install
 ```
 
-Bundle:
+### Building the application
+
+Create a development build of the frontend assets:
 
 ```bash
-yarn webpack
+yarn build
 ```
 
-Run:
+This runs Webpack using [webpack.config.js](webpack.config.js). The generated JavaScript and CSS assets are written to
+`src/main/public`.
+
+Create a production build:
+
+```bash
+yarn build:prod
+```
+
+The production build sets `NODE_ENV=production`, runs Webpack in production mode, and emits hashed asset filenames.
+
+### Running the application locally
+
+Start the application in development mode with Nodemon:
+
+```bash
+yarn start:dev
+```
+
+Start the application in production mode:
 
 ```bash
 yarn start
 ```
 
-The applications's home page will be available at http://localhost:3000
+The application's home page will be available at http://localhost:3000.
 
 ### Running with Docker
 
@@ -46,35 +71,40 @@ Run the application by executing the following command:
 docker-compose up
 ```
 
-This will start the frontend container exposing the application's port
-(set to `3000` in this template app).
+This will start the frontend container exposing the application's port, `3000`.
 
 In order to test if the application is up, you can visit http://localhost:3000 in your browser.
-You should get a very basic home page (no styles, etc.).
 
 ## Developing
 
 ### Code style
 
 We use [ESLint](https://github.com/typescript-eslint/typescript-eslint)
-alongside [sass-lint](https://github.com/sasstools/sass-lint)
+alongside [Stylelint](https://stylelint.io/) and [Prettier](https://prettier.io/).
+
+Run all lint checks:
+
+```bash
+yarn lint
+```
 
 Running the linting with auto fix:
 
 ```bash
-yarn lint --fix
+yarn lint:fix
 ```
+
+`yarn lint:fix` runs Prettier across the project and then applies ESLint auto-fixes. It does not run Stylelint fixes.
 
 ### Running the tests
 
-This template app uses [Jest](https://jestjs.io//) as the test engine. You can run unit tests by executing
-the following command:
+This application uses [Jest](https://jestjs.io/) as the test engine. Run unit tests:
 
 ```bash
-yarn test
+yarn test:unit
 ```
 
-Here's how to run functional tests (the template contains just one sample test):
+Run route tests:
 
 ```bash
 yarn test:routes
@@ -87,6 +117,24 @@ yarn test:a11y
 ```
 
 Make sure all the paths in your application are covered by accessibility tests (see [a11y.ts](src/test/a11y/a11y.ts)).
+
+Run smoke tests against a deployed or locally running application:
+
+```bash
+TEST_URL=http://localhost:3000 yarn test:smoke
+```
+
+Run functional tests with CodeceptJS and Playwright:
+
+```bash
+yarn test:functional
+```
+
+Run the main local CI checks:
+
+```bash
+yarn cichecks
+```
 
 ### Security
 

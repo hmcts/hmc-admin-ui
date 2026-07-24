@@ -1,5 +1,7 @@
 Feature: Initial Functional test
 
-    Scenario: The home page loads
+    Scenario: Logged in users can view the home page
         When I go to '/'
-        Then the page should include 'Default page template' 
+        And I log in as the functional test user
+        Then the page should include 'Support tools'
+        And the page should include 'What type of request would you like to make?'
