@@ -36,7 +36,7 @@ When('I log in as the functional test user', () => {
 
   I.waitForElement('input[type="password"], input[name="password"], #password', testConfig.WaitForTimeout);
   I.fillField('input[type="password"], input[name="password"], #password', password);
-  I.click('Sign in');
+  I.click('Continue');
 });
 
 Then('the page URL should be {string}', (url: string) => {
