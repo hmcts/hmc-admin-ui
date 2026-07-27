@@ -7,9 +7,12 @@
 
 {% block header %}
   {{ govukHeader({
+    classes: 'hmc-header',
     rebrand: _rebrand,
     serviceName: 'HMC Admin UI',
     serviceUrl: '/',
+    navigationClasses: 'hmc-header__navigation',
+    navigationLabel: 'Account',
     navigation: [
       {
         href: '/logout',
