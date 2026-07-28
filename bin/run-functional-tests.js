@@ -3,9 +3,6 @@ const path = require('path');
 
 const projectRoot = path.resolve(__dirname, '..');
 const isWindows = process.platform === 'win32';
-const packageManager = process.env.npm_execpath
-  ? { command: process.execPath, args: [process.env.npm_execpath] }
-  : { command: 'yarn', args: [] };
 
 function run(command, args) {
   const result = spawnSync(command, args, {
@@ -23,10 +20,10 @@ function run(command, args) {
   return result.status ?? 1;
 }
 
-let testResult = run(packageManager.command, [...packageManager.args, 'playwright', 'install']);
+let testResult = run('yarn', ['playwright', 'install']);
 
 if (testResult === 0) {
-  testResult = run(packageManager.command, [...packageManager.args, 'exec', 'codeceptjs', 'run', '--steps']);
+  testResult = run('codeceptjs', ['run', '--steps']);
 }
 
 const reportResult = run('node', ['bin/generate-functional-test-report.js']);
