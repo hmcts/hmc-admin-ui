@@ -23,10 +23,10 @@ function run(command, args) {
   return result.status ?? 1;
 }
 
-let testResult = run(packageManager.command, packageManager.args.concat(['playwright', 'install']));
+let testResult = run(packageManager.command, [...packageManager.args, 'playwright', 'install']);
 
 if (testResult === 0) {
-  testResult = run(packageManager.command, packageManager.args.concat(['exec', 'codeceptjs', 'run', '--steps']));
+  testResult = run(packageManager.command, [...packageManager.args, 'exec', 'codeceptjs', 'run', '--steps']);
 }
 
 const reportResult = run('node', ['bin/generate-functional-test-report.js']);
