@@ -30,6 +30,9 @@
     }
   },
   "services": {
+    "hmc": {
+      "url": "http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal"
+    },
     "idam": {
       "clientID": "hmc_admin_ui",
       "scope": "openid profile roles",
@@ -38,12 +41,15 @@
         "api": "https://idam-api.aat.platform.hmcts.net",
         "hmc": "http://localhost:3000"
       }
-    }
+    },
+    "s2s": "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
   },
+  "microservice": "hmc_admin_ui",
   "secrets": {
     "hmc": {
       "AppInsightsInstrumentationKey": false,
       "hmc-admin-ui-client-secret": "hmc_admin_ui_secret",
+      "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
       "hmc-admin-ui-session-secret": "hmc-admin-ui-session-secret"
     }
   }
