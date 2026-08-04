@@ -74,9 +74,10 @@ describe('Bulk upload page', () => {
         .expect(res => expect(res.text).to.contain('Bulk request'))
         .expect(res => expect(res.text).to.contain('enctype="multipart/form-data"'))
         .expect(res => expect(res.text).to.contain('type="file"'))
+        .expect(res => expect(res.text).to.contain('class="govuk-file-upload"'))
         .expect(res => expect(res.text).to.contain('accept=".csv,text/csv"'))
         .expect(res => expect(res.text).to.contain('name="bulkUploadFile"'))
-        .expect(res => expect(res.text).to.contain('Choose file'))
+        .expect(res => expect(res.text).to.contain('aria-describedby="bulk-upload-file-hint'))
         .expect(res => expect(res.text).to.contain('hearingId, caseRef, action, notes and state'))
         .expect(res => expect(res.text).to.contain('Submit'))
         .expect(res => expect(res.text).to.contain('Cancel'))
@@ -101,7 +102,7 @@ describe('Bulk upload page', () => {
         .attach(
           'bulkUploadFile',
           Buffer.from(
-            'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,CANCELLED,Incident,final_state_transition'
+            'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,Incident,CANCELLED'
           ),
           'bulk-upload.csv'
         )
@@ -162,7 +163,7 @@ describe('Bulk upload response page', () => {
       .query({ _csrf: csrfToken })
       .attach(
         'bulkUploadFile',
-        Buffer.from('hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,CANCELLED,,rollback'),
+        Buffer.from('hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,rollback,,'),
         'bulk-upload.csv'
       )
       .expect(303);
@@ -172,7 +173,7 @@ describe('Bulk upload response page', () => {
       .expect(res => expect(res.status).to.equal(200))
       .expect(res =>
         expect(res.text).to.contain(
-          '12345678901234567890,1234567890123456,CANCELLED,rollback,success,Request accepted for processing'
+          '12345678901234567890,1234567890123456,rollback,,success,Mock manageExceptions response processed'
         )
       );
   });

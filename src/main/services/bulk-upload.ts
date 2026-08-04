@@ -1,37 +1,84 @@
-export type SupportRequest = {
-  hearingId: string;
-  caseRef: string;
-  action: string;
-  notes: string;
-  state: string;
-};
-
-export type BulkUploadPayload = {
-  supportRequests: SupportRequest[];
-};
-
-export type BulkUploadValidationError = {
-  row?: number;
-  message: string;
-};
-
-export type BulkUploadParseResult =
-  | {
-      isValid: true;
-      payload: BulkUploadPayload;
-      responseCsv: string;
-    }
-  | {
-      isValid: false;
-      errors: BulkUploadValidationError[];
-    };
-
-type CsvRow = Record<string, string>;
+import type { BulkUploadParseResult, BulkUploadValidationError, CsvRow } from '../types/bulk-upload';
+import { ManageExceptionsResponse, SupportRequest } from '../types/manage-exceptions';
 
 const expectedHeaders = ['hearingId', 'caseRef', 'action', 'notes', 'state'];
-const validStates = ['final_state_transition', 'rollback'];
-const validActions = ['CANCELLED', 'COMPLETED', 'ADJOURNED'];
+const validActions = ['final_state_transition', 'rollback'];
+const validStates = ['CANCELLED', 'COMPLETED', 'ADJOURNED'];
 
+// parse the uploaded csv into JSON
+export function parseBulkUploadCsv(csvContent: string): BulkUploadParseResult {
+  const lines = csvContent.split(/\r?\n/).map(l => l.trim());
+  const headerRowIndex = findHeaderRowIndex(lines);
+  const { headers, rows } = parseCsv(csvContent, headerRowIndex);
+  const headerErrors = validateHeaders(headers);
+
+  if (headerErrors.length > 0) {
+    // if no headers or invalid headers, return an error to the user
+    return { isValid: false, errors: headerErrors };
+  }
+
+  const rowErrors = rows.flatMap((row, index) => validateRow(row, index + 2));
+
+  if (rowErrors.length > 0) {
+    return { isValid: false, errors: rowErrors };
+  }
+
+  //convert rows into support request objects
+  const supportRequests = rows.map(row => ({
+    hearingId: row.hearingId,
+    caseRef: row.caseRef,
+    action: row.action,
+    notes: row.notes,
+    state: row.state,
+  }));
+
+  return {
+    isValid: true,
+    payload: { supportRequests },
+    responseCsv: buildBulkUploadResponseCsv(supportRequests),
+  };
+}
+
+// convert the manageExceptions response into a downloadable CSV
+export function buildBulkUploadResponseCsv(
+  supportRequests: SupportRequest[],
+  manageExceptionsResponse?: ManageExceptionsResponse
+): string {
+  const rows = ['hearingId,caseRef,action,state,status,message'];
+  const responseByHearingId = new Map(
+    (manageExceptionsResponse?.supportRequestResponse || []).map(response => [response.hearingId, response])
+  );
+
+  if (supportRequests.length === 0) {
+    // default row if no valid hearing rows were found in the CSV
+    rows.push('unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"');
+  } else {
+    supportRequests.forEach(request => {
+      const response = responseByHearingId.get(request.hearingId);
+      rows.push(
+        [
+          // Currently all hearing details returned back, may only need hearingId, status and message for users though
+          request.hearingId,
+          request.caseRef,
+          request.action,
+          request.state,
+          // added default messages in unlikely event that manageExceptions does not return the relevant fields
+          response?.status || 'UNKNOWN',
+          response?.message || 'No response message returned',
+        ]
+          .map(csvEscape)
+          // convert object into row
+          .join(',')
+      );
+    });
+  }
+
+  rows.push('');
+  // convert rows into full csv file
+  return rows.join('\n');
+}
+
+// cleanly escape a value for CSV output, adding quotes if necessary
 function csvEscape(value: string): string {
   if (/[",\n\r]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -67,6 +114,7 @@ function parseCsvLine(line: string): string[] {
   return cells;
 }
 
+// Will parse the CSV content into headers and rows
 function parseCsv(csvContent: string, headerStartLine = 0): { headers: string[]; rows: CsvRow[] } {
   const lines = csvContent
     .split(/\r?\n/)
@@ -91,8 +139,8 @@ function parseCsv(csvContent: string, headerStartLine = 0): { headers: string[];
   return { headers, rows };
 }
 
+// validate the headers of the CSV file against the expected headers
 function validateHeaders(headers: string[]): BulkUploadValidationError[] {
-  console.log('Validating headers:', headers);
   const missingHeaders = expectedHeaders.filter(header => !headers.includes(header));
   const unexpectedHeaders = headers.filter(header => !expectedHeaders.includes(header));
 
@@ -107,8 +155,8 @@ function validateHeaders(headers: string[]): BulkUploadValidationError[] {
   ];
 }
 
+// validate a single row of the CSV file against expectations
 function validateRow(row: CsvRow, rowNumber: number): BulkUploadValidationError[] {
-  console.log(`Validating row ${rowNumber}:`, row)
   const errors: BulkUploadValidationError[] = [];
   const hearingId = row.hearingId || '';
   const caseRef = row.caseRef || '';
@@ -124,81 +172,25 @@ function validateRow(row: CsvRow, rowNumber: number): BulkUploadValidationError[
     errors.push({ row: rowNumber, message: 'Notes/Incident Number exceeds 5000 character limit.' });
   }
 
+  // Regex to check if caseRef is a 16-digit numeric value
   if (!/^\d{16}$/.test(caseRef)) {
     errors.push({ row: rowNumber, message: 'Case Reference Number must be a 16-digit numeric value.' });
   }
 
-  if (!validStates.includes(state)) {
-    console.log(validStates, state)
-    errors.push({ row: rowNumber, message: "State must be either 'final_state_transition' or 'rollback'." });
+  if (!validActions.includes(action)) {
+    errors.push({ row: rowNumber, message: "Action must be either 'final_state_transition' or 'rollback'." });
   }
 
-  if (state === 'final_state_transition' && !action) {
-    errors.push({ row: rowNumber, message: 'Status is mandatory for final_state_transition requests.' });
-  } else if (action && !validActions.includes(action)) {
-    errors.push({ row: rowNumber, message: 'Action must be one of CANCELLED, COMPLETED, or ADJOURNED.' });
+  if (action === 'final_state_transition' && !state) {
+    errors.push({ row: rowNumber, message: 'State is mandatory for final_state_transition requests.' });
+  } else if (state && !validStates.includes(state)) {
+    errors.push({ row: rowNumber, message: 'State must be one of CANCELLED, COMPLETED, or ADJOURNED.' });
   }
 
   return errors;
 }
 
-export function parseBulkUploadCsv(csvContent: string): BulkUploadParseResult {
-  const lines = csvContent.split(/\r?\n/).map(l => l.trim());
-  const headerRowIndex = findHeaderRowIndex(lines);
-  const { headers, rows } = parseCsv(csvContent, headerRowIndex);
-  const headerErrors = validateHeaders(headers);
-
-  if (headerErrors.length > 0) {
-    return { isValid: false, errors: headerErrors };
-  }
-
-  const rowErrors = rows.flatMap((row, index) => validateRow(row, index + 2));
-
-  if (rowErrors.length > 0) {
-    return { isValid: false, errors: rowErrors };
-  }
-
-  const supportRequests = rows.map(row => ({
-    hearingId: row.hearingId,
-    caseRef: row.caseRef,
-    action: row.action,
-    notes: row.notes,
-    state: row.state,
-  }));
-
-  return {
-    isValid: true,
-    payload: { supportRequests },
-    responseCsv: buildBulkUploadResponseCsv(supportRequests),
-  };
-}
-
-export function buildBulkUploadResponseCsv(supportRequests: SupportRequest[]): string {
-  const rows = ['hearingId,caseRef,action,state,status,message'];
-
-  if (supportRequests.length === 0) {
-    rows.push('unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"');
-  } else {
-    supportRequests.forEach(request => {
-      rows.push(
-        [
-          request.hearingId,
-          request.caseRef,
-          request.action,
-          request.state,
-          'success',
-          'Request accepted for processing',
-        ]
-          .map(csvEscape)
-          .join(',')
-      );
-    });
-  }
-
-  rows.push('');
-  return rows.join('\n');
-}
-
+// find which row the headers are on
 function findHeaderRowIndex(lines: string[]): number {
   const headerSet = new Set(expectedHeaders);
   for (let i = 0; i < Math.min(lines.length, 5); i++) {

@@ -7,6 +7,7 @@ document.querySelectorAll<HTMLFormElement>('[data-bulk-upload-form]').forEach(fo
   const fileInput = form.querySelector<HTMLInputElement>('[data-bulk-upload-file]');
   const fileName = form.querySelector<HTMLElement>('[data-bulk-upload-file-name]');
 
+  // simple listener to update file display name when file is selected
   fileInput?.addEventListener('change', () => {
     const file = fileInput.files?.[0];
 

@@ -2,7 +2,7 @@ import { Application, Request, Response } from 'express';
 
 import homeRoute from '../../../main/routes/home';
 
-type RouteHandler = (req: Request, res: Response) => void;
+type RouteHandler = (req: Request, res: Response) => void | Promise<void>;
 type RegisteredRoute = [string, ...unknown[]];
 
 describe('Home route', () => {
@@ -74,20 +74,20 @@ describe('Home route', () => {
     expect(post).toHaveBeenCalledWith('/bulk-upload', expect.any(Function), expect.any(Function));
   });
 
-  test('redirects to the bulk upload response page on bulk upload POST', () => {
+  test('redirects to the bulk upload response page on bulk upload POST', async () => {
     const handler = post.mock.calls[1][2] as RouteHandler;
     const redirect = jest.fn();
     const res = { redirect } as unknown as Response;
     const req = {
       file: {
         buffer: Buffer.from(
-          'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,CANCELLED,Incident,final_state_transition'
+          'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,Incident,CANCELLED'
         ),
       },
       session: {},
     } as unknown as Request;
 
-    handler(req, res);
+    await handler(req, res);
 
     expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload/response');
     expect(req.session).toMatchObject({
@@ -96,14 +96,14 @@ describe('Home route', () => {
           {
             hearingId: '12345678901234567890',
             caseRef: '1234567890123456',
-            action: 'CANCELLED',
+            action: 'final_state_transition',
             notes: 'Incident',
-            state: 'final_state_transition',
+            state: 'CANCELLED',
           },
         ],
       }),
       bulkUploadResponseCsv: expect.stringContaining(
-        '12345678901234567890,1234567890123456,CANCELLED,final_state_transition,success,Request accepted for processing'
+        '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,success,Mock manageExceptions response processed'
       ),
     });
   });
@@ -163,5 +163,85 @@ describe('Home route', () => {
     expect(send).toHaveBeenCalledWith(
       expect.stringContaining('12345678901234567890,1234567890123456,CANCELLED,rollback,success,Done')
     );
+  });
+});
+
+describe('Home route with auth enabled', () => {
+  afterEach(() => {
+    jest.resetModules();
+    jest.dontMock('config');
+    jest.dontMock('../../../main/services/hearing-service');
+    jest.dontMock('../../../main/services/user-auth');
+  });
+
+  test('posts bulk upload payload to manageExceptions and writes its response into the CSV', async () => {
+    jest.resetModules();
+
+    const manageExceptions = jest.fn().mockResolvedValue({
+      supportRequestResponse: [
+        {
+          hearingId: '12345678901234567890',
+          status: 'error',
+          message: 'Service rejected this request',
+        },
+      ],
+    });
+
+    jest.doMock('config', () => ({
+      get: jest.fn((key: string) => {
+        if (key === 'auth.enabled') {
+          return true;
+        }
+
+        return undefined;
+      }),
+    }));
+    jest.doMock('../../../main/services/hearing-service', () => ({
+      HearingService: jest.fn(() => ({ manageExceptions })),
+    }));
+    jest.doMock('../../../main/services/user-auth', () => ({
+      getUserAccessToken: jest.fn(() => 'user-token'),
+    }));
+
+    const { default: authEnabledHomeRoute } = require('../../../main/routes/home');
+    const get = jest.fn<void, RegisteredRoute>();
+    const post = jest.fn<void, RegisteredRoute>();
+    const app = { get, post } as unknown as Application;
+    authEnabledHomeRoute(app);
+
+    const handler = post.mock.calls[1][2] as RouteHandler;
+    const redirect = jest.fn();
+    const res = { redirect } as unknown as Response;
+    const req = {
+      file: {
+        buffer: Buffer.from(
+          'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,Incident,CANCELLED'
+        ),
+      },
+      session: {},
+    } as unknown as Request;
+
+    await handler(req, res);
+
+    expect(manageExceptions).toHaveBeenCalledWith(
+      {
+        supportRequests: [
+          {
+            hearingId: '12345678901234567890',
+            caseRef: '1234567890123456',
+            action: 'final_state_transition',
+            notes: 'Incident',
+            state: 'CANCELLED',
+          },
+        ],
+      },
+      'user-token'
+    );
+    expect(req.session).toMatchObject({
+      bulkUploadResponseCsv: expect.stringContaining(
+        '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,error,Service rejected this request'
+      ),
+    });
+    expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload/response');
   });
 });

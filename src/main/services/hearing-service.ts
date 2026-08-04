@@ -2,13 +2,11 @@ import { AxiosInstance, create } from 'axios';
 import config from 'config';
 
 import { ServiceAuthTokenProvider } from '../modules/service-auth';
-
-export type ManageEndpointsPayload = Record<string, unknown>;
-export type ManageEndpointsResponse = unknown;
+import type { ManageExceptionsPayload, ManageExceptionsResponse } from '../types/manage-exceptions';
 
 export class HearingService {
   private readonly client: AxiosInstance;
-  private readonly manageEndpointsPath: string = '/manageEndpoints';
+  private readonly manageExceptionsPath: string = '/manageExceptions';
   private readonly serviceAuthTokenProvider: ServiceAuthTokenProvider;
 
   public constructor(client?: AxiosInstance, serviceAuthTokenProvider = new ServiceAuthTokenProvider()) {
@@ -20,12 +18,12 @@ export class HearingService {
     this.serviceAuthTokenProvider = serviceAuthTokenProvider;
   }
 
-  public async manageEndpoints(
-    payload: ManageEndpointsPayload,
+  public async manageExceptions(
+    payload: ManageExceptionsPayload,
     userAccessToken: string
-  ): Promise<ManageEndpointsResponse> {
+  ): Promise<ManageExceptionsResponse> {
     const serviceAuthToken = await this.serviceAuthTokenProvider.getToken();
-    const response = await this.client.post<ManageEndpointsResponse>(this.manageEndpointsPath, payload, {
+    const response = await this.client.post<ManageExceptionsResponse>(this.manageExceptionsPath, payload, {
       headers: {
         Authorization: `Bearer ${userAccessToken}`,
         ServiceAuthorization: `Bearer ${serviceAuthToken}`,
