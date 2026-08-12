@@ -36,12 +36,12 @@ describe('Home route', () => {
     expect(post).toHaveBeenCalledWith('/', expect.any(Function));
   });
 
-  test('redirects back to the home page on POST', () => {
+  test('redirects back to the home page when no request type is selected on POST', () => {
     const handler = post.mock.calls[0][1] as RouteHandler;
     const redirect = jest.fn();
     const res = { redirect } as unknown as Response;
 
-    handler({ body: { requestType: 'singular' } } as Request, res);
+    handler({ body: {} } as Request, res);
 
     expect(redirect).toHaveBeenCalledWith(303, '/');
   });
@@ -56,192 +56,13 @@ describe('Home route', () => {
     expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload');
   });
 
-  test('registers the bulk upload page route', () => {
-    expect(get).toHaveBeenCalledWith('/bulk-upload', expect.any(Function));
-  });
-
-  test('renders the bulk upload page on GET', () => {
-    const handler = get.mock.calls[1][1] as RouteHandler;
-    const render = jest.fn();
-    const res = { render } as unknown as Response;
-
-    handler({} as Request, res);
-
-    expect(render).toHaveBeenCalledWith('bulk-upload');
-  });
-
-  test('registers the bulk upload action route', () => {
-    expect(post).toHaveBeenCalledWith('/bulk-upload', expect.any(Function), expect.any(Function));
-  });
-
-  test('redirects to the bulk upload response page on bulk upload POST', async () => {
-    const handler = post.mock.calls[1][2] as RouteHandler;
+  test('redirects singular requests to the singular request type page on POST', () => {
+    const handler = post.mock.calls[0][1] as RouteHandler;
     const redirect = jest.fn();
     const res = { redirect } as unknown as Response;
-    const req = {
-      file: {
-        buffer: Buffer.from(
-          'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,Incident,CANCELLED'
-        ),
-      },
-      session: {},
-    } as unknown as Request;
 
-    await handler(req, res);
+    handler({ body: { requestType: 'singular' } } as Request, res);
 
-    expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload/response');
-    expect(req.session).toMatchObject({
-      bulkUploadRequestJson: JSON.stringify({
-        supportRequests: [
-          {
-            hearingId: '12345678901234567890',
-            caseRef: '1234567890123456',
-            action: 'final_state_transition',
-            notes: 'Incident',
-            state: 'CANCELLED',
-          },
-        ],
-      }),
-      bulkUploadResponseCsv: expect.stringContaining(
-        '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,success,Mock manageExceptions response processed'
-      ),
-    });
-  });
-
-  test('renders an error when no file is uploaded', () => {
-    const handler = post.mock.calls[1][2] as RouteHandler;
-    const render = jest.fn();
-    const status = jest.fn(() => ({ render }));
-    const res = { status } as unknown as Response;
-
-    handler({ session: {} } as Request, res);
-
-    expect(status).toHaveBeenCalledWith(400);
-    expect(render).toHaveBeenCalledWith('bulk-upload', {
-      errors: [{ message: 'A file must be uploaded.' }],
-    });
-  });
-
-  test('registers the bulk upload response route', () => {
-    expect(get).toHaveBeenCalledWith('/bulk-upload/response', expect.any(Function));
-  });
-
-  test('renders the bulk upload response page on GET', () => {
-    const handler = get.mock.calls[2][1] as RouteHandler;
-    const render = jest.fn();
-    const res = { render } as unknown as Response;
-
-    handler({} as Request, res);
-
-    expect(render).toHaveBeenCalledWith('bulk-upload-response');
-  });
-
-  test('registers the bulk upload response download route', () => {
-    expect(get).toHaveBeenCalledWith('/bulk-upload/response/download', expect.any(Function));
-  });
-
-  test('returns the bulk upload response CSV on GET', () => {
-    const handler = get.mock.calls[3][1] as RouteHandler;
-    const send = jest.fn();
-    const set = jest.fn(() => ({ send }));
-    const status = jest.fn(() => ({ set }));
-    const res = { status } as unknown as Response;
-    const req = {
-      session: {
-        bulkUploadResponseCsv:
-          'hearingId,caseRef,action,state,status,message\n12345678901234567890,1234567890123456,CANCELLED,rollback,success,Done\n',
-      },
-    } as unknown as Request;
-
-    handler(req, res);
-
-    expect(status).toHaveBeenCalledWith(200);
-    expect(set).toHaveBeenCalledWith({
-      'Content-Disposition': 'attachment; filename="bulk-upload-response.csv"',
-      'Content-Type': 'text/csv; charset=utf-8',
-    });
-    expect(send).toHaveBeenCalledWith(
-      expect.stringContaining('12345678901234567890,1234567890123456,CANCELLED,rollback,success,Done')
-    );
-  });
-});
-
-describe('Home route with auth enabled', () => {
-  afterEach(() => {
-    jest.resetModules();
-    jest.dontMock('config');
-    jest.dontMock('../../../main/services/hearing-service');
-    jest.dontMock('../../../main/services/user-auth');
-  });
-
-  test('posts bulk upload payload to manageExceptions and writes its response into the CSV', async () => {
-    jest.resetModules();
-
-    const manageExceptions = jest.fn().mockResolvedValue({
-      supportRequestResponse: [
-        {
-          hearingId: '12345678901234567890',
-          status: 'error',
-          message: 'Service rejected this request',
-        },
-      ],
-    });
-
-    jest.doMock('config', () => ({
-      get: jest.fn((key: string) => {
-        if (key === 'auth.enabled') {
-          return true;
-        }
-
-        return undefined;
-      }),
-    }));
-    jest.doMock('../../../main/services/hearing-service', () => ({
-      HearingService: jest.fn(() => ({ manageExceptions })),
-    }));
-    jest.doMock('../../../main/services/user-auth', () => ({
-      getUserAccessToken: jest.fn(() => 'user-token'),
-    }));
-
-    const { default: authEnabledHomeRoute } = require('../../../main/routes/home');
-    const get = jest.fn<void, RegisteredRoute>();
-    const post = jest.fn<void, RegisteredRoute>();
-    const app = { get, post } as unknown as Application;
-    authEnabledHomeRoute(app);
-
-    const handler = post.mock.calls[1][2] as RouteHandler;
-    const redirect = jest.fn();
-    const res = { redirect } as unknown as Response;
-    const req = {
-      file: {
-        buffer: Buffer.from(
-          'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,Incident,CANCELLED'
-        ),
-      },
-      session: {},
-    } as unknown as Request;
-
-    await handler(req, res);
-
-    expect(manageExceptions).toHaveBeenCalledWith(
-      {
-        supportRequests: [
-          {
-            hearingId: '12345678901234567890',
-            caseRef: '1234567890123456',
-            action: 'final_state_transition',
-            notes: 'Incident',
-            state: 'CANCELLED',
-          },
-        ],
-      },
-      'user-token'
-    );
-    expect(req.session).toMatchObject({
-      bulkUploadResponseCsv: expect.stringContaining(
-        '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,error,Service rejected this request'
-      ),
-    });
-    expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload/response');
+    expect(redirect).toHaveBeenCalledWith(303, '/singular');
   });
 });
