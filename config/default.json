@@ -34,7 +34,7 @@
       "url": "http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal"
     },
     "idam": {
-      "clientID": "hmc_admin_ui",
+      "clientID": "hmc-admin-ui",
       "scope": "openid profile roles",
       "url": {
         "public": "https://hmcts-access.aat.platform.hmcts.net",
@@ -44,7 +44,7 @@
     },
     "s2s": "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
   },
-  "microservice": "hmc_admin_ui",
+  "microservice": "hmc-admin-ui",
   "secrets": {
     "hmc": {
       "AppInsightsInstrumentationKey": false,

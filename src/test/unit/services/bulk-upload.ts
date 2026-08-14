@@ -27,7 +27,7 @@ describe('parseBulkUploadCsv', () => {
             caseRef: '2234567890123456',
             action: 'rollback',
             notes: '',
-            state: '',
+            state: undefined,
           },
         ],
       },

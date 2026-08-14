@@ -3,7 +3,7 @@ export type SupportRequest = {
   caseRef: string;
   action: string;
   notes: string;
-  state: string;
+  state: string | undefined;
 };
 
 export type ManageExceptionsPayload = {

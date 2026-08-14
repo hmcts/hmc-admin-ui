@@ -23,6 +23,7 @@ export class HearingService {
     userAccessToken: string
   ): Promise<ManageExceptionsResponse> {
     const serviceAuthToken = await this.serviceAuthTokenProvider.getToken();
+
     const response = await this.client.post<ManageExceptionsResponse>(this.manageExceptionsPath, payload, {
       headers: {
         Authorization: `Bearer ${userAccessToken}`,
@@ -30,7 +31,6 @@ export class HearingService {
         'Content-Type': 'application/json',
       },
     });
-
     return response.data;
   }
 }
