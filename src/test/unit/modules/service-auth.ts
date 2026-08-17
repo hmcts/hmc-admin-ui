@@ -13,7 +13,7 @@ jest.mock('config', () => ({
   get: jest.fn((key: string) => {
     const values: Record<string, string> = {
       'services.s2s': 'http://service-auth-provider',
-      microservice: 'hmc_admin_ui',
+      microservice: 'hmc-admin-ui',
       'secrets.hmc.hmc-admin-ui-s2s-secret': 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',
     };
 
@@ -33,7 +33,7 @@ describe('ServiceAuthTokenProvider', () => {
       expect(post).toHaveBeenCalledWith(
         '/lease',
         {
-          microservice: 'hmc_admin_ui',
+          microservice: 'hmc-admin-ui',
           oneTimePassword: '023871',
         },
         { headers: { 'Content-Type': 'application/json' } }

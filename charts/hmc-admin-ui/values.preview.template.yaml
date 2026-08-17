@@ -7,5 +7,5 @@ nodejs:
 idam-pr:
   enabled: true
   redirect_uris:
-    hmc_admin_ui:
+    hmc-admin-ui:
       - https://${SERVICE_FQDN}/oauth2/callback

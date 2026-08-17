@@ -29,7 +29,7 @@ export function parseBulkUploadCsv(csvContent: string): BulkUploadParseResult {
     caseRef: row.caseRef,
     action: row.action,
     notes: row.notes,
-    state: row.state,
+    state: row.state === '' ? undefined : row.state,
   }));
 
   return {
@@ -79,12 +79,15 @@ export function buildBulkUploadResponseCsv(
 }
 
 // cleanly escape a value for CSV output, adding quotes if necessary
-function csvEscape(value: string): string {
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
+function csvEscape(value: string | undefined): string {
+  // Set empty string for undefined values
+  const cellValue = value ?? '';
+
+  if (/[",\n\r]/.test(cellValue)) {
+    return `"${cellValue.replace(/"/g, '""')}"`;
   }
 
-  return value;
+  return cellValue;
 }
 
 // Transforms a single CSV line into an array of cell values
