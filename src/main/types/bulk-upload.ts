@@ -17,3 +17,8 @@ export type BulkUploadParseResult =
     };
 
 export type CsvRow = Record<string, string>;
+
+export type BulkUploadSession = {
+  bulkUploadRequestJson?: string;
+  bulkUploadResponseCsv?: string;
+};

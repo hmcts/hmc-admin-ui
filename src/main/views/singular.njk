@@ -6,11 +6,30 @@
     <div class="govuk-grid-column-two-thirds">
       <a href="/" class="govuk-back-link">Back</a>
 
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">
+              There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li>
+                    <a href="#singular-request-type-final-state-transition">{{ error.message }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
       <form method="post" action="/singular" autocomplete="off" novalidate>
         {{ csrfProtection(csrfToken) }}
 
-        <div class="govuk-form-group">
-          <fieldset class="govuk-fieldset" aria-describedby="singular-request-type-hint">
+        <div class="govuk-form-group{% if errorMap['singular-request-type'] %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" aria-describedby="singular-request-type-hint{% if errorMap['singular-request-type'] %} singular-request-type-error{% endif %}">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
               <span class="govuk-caption-xl">Support tools</span>
               <h1 class="govuk-fieldset__heading">
@@ -20,15 +39,20 @@
             <div id="singular-request-type-hint" class="govuk-hint">
               Select one option.
             </div>
+            {% if errorMap['singular-request-type'] %}
+              <p id="singular-request-type-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> {{ errorMap['singular-request-type'] }}
+              </p>
+            {% endif %}
             <div class="govuk-radios" data-module="govuk-radios">
               <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="singular-request-type-final-state-transition" name="singularRequestType" type="radio" value="final-state-transition">
+                <input class="govuk-radios__input" id="singular-request-type-final-state-transition" name="singularRequestType" type="radio" value="final-state-transition"{% if form.singularRequestType == "final-state-transition" %} checked{% endif %}>
                 <label class="govuk-label govuk-radios__label" for="singular-request-type-final-state-transition">
                   Final state transition
                 </label>
               </div>
               <div class="govuk-radios__item">
-                <input class="govuk-radios__input" id="singular-request-type-rollback" name="singularRequestType" type="radio" value="rollback">
+                <input class="govuk-radios__input" id="singular-request-type-rollback" name="singularRequestType" type="radio" value="rollback"{% if form.singularRequestType == "rollback" %} checked{% endif %}>
                 <label class="govuk-label govuk-radios__label" for="singular-request-type-rollback">
                   Rollback
                 </label>

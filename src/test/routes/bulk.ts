@@ -82,7 +82,7 @@ describe('Bulk upload response page', () => {
     await request(app)
       .get('/bulk-upload/response')
       .expect(res => expect(res.status).to.equal(200))
-      .expect(res => expect(res.text).to.contain('Bulk upload response'))
+      .expect(res => expect(res.text).to.contain('Bulk request response'))
       .expect(res => expect(res.text).to.contain('Download response CSV'))
       .expect(res => expect(res.text).to.contain('href="/bulk-upload/response/download"'));
   });

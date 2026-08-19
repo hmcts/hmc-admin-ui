@@ -1,38 +1,34 @@
 import config from 'config';
 import { Application, Request, Response } from 'express';
 
-import { mockManageExceptionsResponse } from '../services/manage-exceptions';
 import {
   buildErrorMap,
   buildSingularRequestForm,
   buildSingularRequestPayload,
   finalStateTransitionStatuses,
-  FormError,
-  SingularRequestForm,
-  SingularRequestType,
   validateSingularRequestForm,
 } from '../services/singular-request';
+import { ManageExceptionsResponse } from '../types/manage-exceptions';
+import {
+  FormError,
+  SingularPageOptions,
+  SingularRequestForm,
+  SingularRequestType,
+  SingularRequestTypeSelectionForm,
+  SingularSession,
+} from '../types/singular-request';
 
 const authEnabled: boolean = config.get('auth.enabled');
 
-type SingularPageOptions = {
-  heading: string;
-  requestType: SingularRequestType;
-  successMessage: string;
-  view: string;
-};
-
 const finalStateTransitionPage: SingularPageOptions = {
   heading: 'final state transition',
-  requestType: 'final-state-transition',
-  successMessage: 'Final state transition was successful.',
+  requestType: SingularRequestType.FINAL_STATE_TRANSITION,
   view: 'singular-final-state-transition',
 };
 
 const rollbackPage: SingularPageOptions = {
   heading: 'rollback',
-  requestType: 'rollback',
-  successMessage: 'Rollback was successful.',
+  requestType: SingularRequestType.ROLLBACK,
   view: 'singular-rollback',
 };
 
@@ -43,6 +39,30 @@ function emptyForm(): SingularRequestForm {
     status: '',
     notes: '',
   };
+}
+
+function emptyRequestTypeSelectionForm(): SingularRequestTypeSelectionForm {
+  return {
+    singularRequestType: '',
+  };
+}
+
+function renderRequestTypeSelection(
+  res: Response,
+  options: {
+    errors?: FormError[];
+    form?: SingularRequestTypeSelectionForm;
+    statusCode?: number;
+  } = {}
+): void {
+  const response = options.statusCode ? res.status(options.statusCode) : res;
+  const errors = options.errors || [];
+
+  response.render('singular', {
+    errorMap: buildErrorMap(errors),
+    errors,
+    form: options.form || emptyRequestTypeSelectionForm(),
+  });
 }
 
 function renderPage(res: Response, page: SingularPageOptions, options = {}): void {
@@ -69,10 +89,15 @@ function renderErrors(
   });
 }
 
+// Response status can be 'success' or 'successful'
+function isSuccessfulResponseStatus(status: string | undefined): boolean {
+  return ['success', 'successful'].includes(String(status || '').toLowerCase());
+}
+
 async function handleSingularRequest(req: Request, res: Response, page: SingularPageOptions): Promise<void> {
   const form = buildSingularRequestForm(req.body);
   const errors = validateSingularRequestForm(form, {
-    requireStatus: page.requestType === 'final-state-transition',
+    requireStatus: page.requestType === SingularRequestType.FINAL_STATE_TRANSITION,
   });
 
   if (errors.length > 0) {
@@ -81,7 +106,7 @@ async function handleSingularRequest(req: Request, res: Response, page: Singular
   }
 
   const payload = buildSingularRequestPayload(form, page.requestType);
-  let manageExceptionsResponse = mockManageExceptionsResponse(payload);
+  let manageExceptionsResponse: ManageExceptionsResponse = { supportRequestResponse: [] };
 
   if (authEnabled) {
     const { HearingService } = require('../services/hearing-service');
@@ -89,51 +114,52 @@ async function handleSingularRequest(req: Request, res: Response, page: Singular
 
     try {
       manageExceptionsResponse = await new HearingService().manageExceptions(payload, getUserAccessToken(req));
-    } catch {
-      renderErrors(res, page, 502, form, [
-        {
-          field: 'service',
-          message: `The ${page.heading} could not be submitted. Try again later.`,
-        },
-      ]);
+    } catch (error) {
+      res.redirect(303, '/singular/problem');
       return;
     }
   }
 
   const response = manageExceptionsResponse.supportRequestResponse?.[0];
+  const session = req.session as typeof req.session & SingularSession;
+  // session stores data needed for the singular response page
+  session.singularResponse = {
+    hearingId: response?.hearingId || form.hearingId,
+    requestType: page.requestType,
+    status: isSuccessfulResponseStatus(response?.status) ? 'success' : 'failure',
+    message: response?.message || 'No response message returned',
+  };
 
-  if (response?.status && response.status !== 'success') {
-    renderErrors(res, page, 400, form, [
-      {
-        field: 'service',
-        message: response.message || `The ${page.heading} could not be submitted.`,
-      },
-    ]);
-    return;
-  }
-
-  renderPage(res, page, {
-    successMessage: page.successMessage,
-  });
+  res.redirect(303, '/singular/response');
 }
 
 export default function (app: Application): void {
   app.get('/singular', (req, res) => {
-    res.render('singular');
+    renderRequestTypeSelection(res);
   });
 
   app.post('/singular', (req, res) => {
-    if (req.body.singularRequestType === 'final-state-transition') {
+    const form = {
+      singularRequestType: String(req.body.singularRequestType || ''),
+    };
+
+    // Note - the below two pages could be combined in future
+    // For simplicity they are being kept separate for now
+    if (form.singularRequestType === SingularRequestType.FINAL_STATE_TRANSITION) {
       res.redirect(303, '/singular/final-state-transition');
       return;
     }
 
-    if (req.body.singularRequestType === 'rollback') {
+    if (form.singularRequestType === SingularRequestType.ROLLBACK) {
       res.redirect(303, '/singular/rollback');
       return;
     }
 
-    res.redirect(303, '/singular');
+    renderRequestTypeSelection(res, {
+      errors: [{ field: 'singular-request-type', message: 'Select a singular request type' }],
+      form,
+      statusCode: 400,
+    });
   });
 
   app.get('/singular/final-state-transition', (req, res) => {
@@ -150,5 +176,22 @@ export default function (app: Application): void {
 
   app.post('/singular/rollback', async (req, res) => {
     await handleSingularRequest(req, res, rollbackPage);
+  });
+
+  app.get('/singular/problem', (req, res) => {
+    res.status(502).render('singular-problem');
+  });
+
+  app.get('/singular/response', (req, res) => {
+    const session = req.session as typeof req.session & SingularSession;
+
+    if (!session.singularResponse) {
+      res.redirect(303, '/');
+      return;
+    }
+
+    res.render('singular-response', {
+      result: session.singularResponse,
+    });
   });
 }

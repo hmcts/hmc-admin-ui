@@ -5,12 +5,8 @@ import { Application, NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 
 import { buildBulkUploadResponseCsv, parseBulkUploadCsv } from '../services/bulk-upload';
+import { BulkUploadSession } from '../types/bulk-upload';
 import { ManageExceptionsResponse } from '../types/manage-exceptions';
-
-type BulkUploadSession = {
-  bulkUploadRequestJson?: string;
-  bulkUploadResponseCsv?: string;
-};
 
 const defaultBulkUploadResponseCsv = [
   'hearingId,caseRef,action,state,status,message',

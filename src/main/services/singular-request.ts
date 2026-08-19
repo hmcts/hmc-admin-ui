@@ -1,18 +1,5 @@
 import { ManageExceptionsPayload } from '../types/manage-exceptions';
-
-export type SingularRequestType = 'final-state-transition' | 'rollback';
-
-export type SingularRequestForm = {
-  hearingId: string;
-  caseRef: string;
-  status: string;
-  notes: string;
-};
-
-export type FormError = {
-  field: string;
-  message: string;
-};
+import { FormError, SingularRequestForm, SingularRequestType } from '../types/singular-request';
 
 export const finalStateTransitionStatuses = ['CANCELLED', 'ADJOURNED', 'COMPLETED'];
 
@@ -25,6 +12,7 @@ export function buildSingularRequestForm(body: Record<string, unknown>): Singula
   };
 }
 
+// Note - Due to field limitations based on validation, these are mainly safeguards
 export function validateSingularRequestForm(
   form: SingularRequestForm,
   options: { requireStatus: boolean }
@@ -74,9 +62,10 @@ export function buildSingularRequestPayload(
       {
         hearingId: form.hearingId,
         caseRef: form.caseRef,
-        action: requestType === 'rollback' ? 'rollback' : form.status,
+        // Note - not using the enum value here for fst as expects underscores
+        action: requestType === SingularRequestType.ROLLBACK ? SingularRequestType.ROLLBACK : 'final_state_transition',
         notes: form.notes,
-        state: requestType === 'rollback' ? '' : 'final_state_transition',
+        state: requestType === SingularRequestType.ROLLBACK ? undefined : form.status,
       },
     ],
   };

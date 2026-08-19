@@ -78,7 +78,8 @@ describe('Singular request type page', () => {
         .expect(res => expect(res.text).to.contain('value="rollback"'))
         .expect(res => expect(res.text).to.contain('Rollback'))
         .expect(res => expect(res.text).to.contain('Continue'))
-        .expect(res => expect(res.text).to.contain('href="/"'));
+        .expect(res => expect(res.text).to.contain('href="/"'))
+        .expect(res => expect(res.text).not.to.contain('There is a problem'));
     });
   });
 
@@ -117,6 +118,27 @@ describe('Singular request type page', () => {
         })
         .expect(res => expect(res.status).to.equal(303))
         .expect(res => expect(res.headers.location).to.equal('/singular/rollback'));
+    });
+
+    test('should display a validation error when no singular request type is selected', async () => {
+      const agent = request.agent(app);
+      const getResponse = await agent.get('/singular').expect(200);
+      const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
+
+      expect(csrfToken).to.not.be.undefined;
+
+      await agent
+        .post('/singular')
+        .type('form')
+        .send({
+          _csrf: csrfToken,
+        })
+        .expect(res => expect(res.status).to.equal(400))
+        .expect(res => expect(res.text).to.contain('There is a problem'))
+        .expect(res => expect(res.text).to.contain('Select a singular request type'))
+        .expect(res =>
+          expect(res.text).to.contain('aria-describedby="singular-request-type-hint singular-request-type-error"')
+        );
     });
   });
 });
@@ -187,7 +209,7 @@ describe('Singular final state transition page', () => {
       .expect(res => expect(res.text).to.contain('Incident Number / Notes must be 5000 characters or fewer'));
   });
 
-  test('should display a success message when the final state transition is submitted', async () => {
+  test('should redirect to the singular response page when the final state transition is submitted', async () => {
     const agent = request.agent(app);
     const getResponse = await agent.get('/singular/final-state-transition').expect(200);
     const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
@@ -204,9 +226,22 @@ describe('Singular final state transition page', () => {
         status: 'CANCELLED',
         notes: 'Incident',
       })
+      .expect(res => expect(res.status).to.equal(303))
+      .expect(res => expect(res.headers.location).to.equal('/singular/response'));
+
+    await agent
+      .get('/singular/response')
       .expect(res => expect(res.status).to.equal(200))
-      .expect(res => expect(res.text).to.contain('Success'))
-      .expect(res => expect(res.text).to.contain('Final state transition was successful.'));
+      .expect(res => expect(res.text).to.contain('Final state transition'))
+      .expect(res => expect(res.text).to.contain('request unsuccessful'))
+      .expect(res => expect(res.text).to.contain('Hearing ID'))
+      .expect(res => expect(res.text).to.contain('12345678901234567890'))
+      .expect(res => expect(res.text).to.contain('govuk-error-message'))
+      .expect(res => expect(res.text).to.contain('No response message returned'))
+      .expect(res => expect(res.text).not.to.contain('Singular request response'))
+      .expect(res => expect(res.text).to.contain('Return to Support tools'))
+      .expect(res => expect(res.text).to.contain('Make another singular request'))
+      .expect(res => expect(res.text).to.contain('href="/"'));
   });
 });
 
@@ -271,7 +306,7 @@ describe('Singular rollback page', () => {
       .expect(res => expect(res.text).to.contain('Incident Number / Notes must be 5000 characters or fewer'));
   });
 
-  test('should display a success message when rollback is submitted', async () => {
+  test('should redirect to the singular response page when rollback is submitted', async () => {
     const agent = request.agent(app);
     const getResponse = await agent.get('/singular/rollback').expect(200);
     const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
@@ -287,8 +322,21 @@ describe('Singular rollback page', () => {
         caseRef: '1234567890123456',
         notes: 'Incident',
       })
+      .expect(res => expect(res.status).to.equal(303))
+      .expect(res => expect(res.headers.location).to.equal('/singular/response'));
+
+    await agent
+      .get('/singular/response')
       .expect(res => expect(res.status).to.equal(200))
-      .expect(res => expect(res.text).to.contain('Success'))
-      .expect(res => expect(res.text).to.contain('Rollback was successful.'));
+      .expect(res => expect(res.text).to.contain('Rollback'))
+      .expect(res => expect(res.text).to.contain('request unsuccessful'))
+      .expect(res => expect(res.text).to.contain('Hearing ID'))
+      .expect(res => expect(res.text).to.contain('12345678901234567890'))
+      .expect(res => expect(res.text).to.contain('govuk-error-message'))
+      .expect(res => expect(res.text).to.contain('No response message returned'))
+      .expect(res => expect(res.text).not.to.contain('Singular request response'))
+      .expect(res => expect(res.text).to.contain('Return to Support tools'))
+      .expect(res => expect(res.text).to.contain('Make another singular request'))
+      .expect(res => expect(res.text).to.contain('href="/"'));
   });
 });
