@@ -138,11 +138,9 @@ export default function (app: Application): void {
 
     if (!result.isValid) {
       // if here means the bulk upload CSV has incorrect headers
-      res
-        .status(400)
-        .render('bulk-upload', {
-          errors: [{ message: 'There is a problem with the file. Check the file has the correct header layout.' }],
-        });
+      res.status(400).render('bulk-upload', {
+        errors: [{ message: 'There is a problem with the file. Check the file has the correct header layout.' }],
+      });
       return;
     }
 

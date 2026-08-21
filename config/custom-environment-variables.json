@@ -34,6 +34,14 @@
       "name": "SESSION_APP_COOKIE_NAME"
     }
   },
+  "redis": {
+    "enabled": {
+      "__name": "REDIS_ENABLED",
+      "__format": "boolean"
+    },
+    "keyPrefix": "REDIS_KEY_PREFIX",
+    "connectionString": "REDIS_CONNECTION_STRING"
+  },
   "RBAC": {
     "access": "RBAC_ACCESS"
   },
@@ -42,6 +50,8 @@
     "hmc": {
       "AppInsightsInstrumentationKey": "APPINSIGHTS_INSTRUMENTATIONKEY",
       "hmc-admin-ui-client-secret": "HMC_ADMIN_UI_CLIENT_SECRET",
+      "hmc-admin-ui-managed-redis-connection-string": "REDIS_CONNECTION_STRING",
+      "hmc-admin-ui-redis6-connection-string": "REDIS_CONNECTION_STRING",
       "hmc-admin-ui-s2s-secret": "HMC_ADMIN_UI_S2S_SECRET",
       "hmc-admin-ui-session-secret": "SESSION_SECRET"
     }

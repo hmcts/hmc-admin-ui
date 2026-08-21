@@ -1,0 +1,111 @@
+locals {
+  app_full_name     = "hmc-${var.component}"
+  ase_name          = "core-compute-${var.env}"
+  local_env         = (var.env == "preview" || var.env == "spreview") ? (var.env == "preview") ? "aat" : "saat" : var.env
+  shared_vault_name = "${var.shared_product_name}-${local.local_env}"
+}
+
+data "azurerm_key_vault" "key_vault" {
+  name                = local.shared_vault_name
+  resource_group_name = local.shared_vault_name
+}
+
+data "azurerm_key_vault_secret" "s2s_secret" {
+  name         = "hmc-admin-ui-s2s-secret"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "oauth2_secret" {
+  name         = "hmc-admin-ui-client-secret"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+data "azurerm_subnet" "core_infra_redis_subnet" {
+  name                 = "core-infra-subnet-1-${var.env}"
+  virtual_network_name = "core-infra-vnet-${var.env}"
+  resource_group_name  = "core-infra-${var.env}"
+}
+
+resource "azurerm_key_vault_secret" "redis6_connection_string" {
+  name         = "${var.component}-redis6-connection-string"
+  value        = "rediss://${urlencode(module.redis6-cache.access_key)}@${module.redis6-cache.host_name}:${module.redis6-cache.redis_port}"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "managed_redis_connection_string" {
+  name         = "${var.component}-managed-redis-connection-string"
+  value        = "rediss://ignore:${urlencode(module.managed_redis.primary_access_key)}@${module.managed_redis.hostname}:${module.managed_redis.port}"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+module "redis6-cache" {
+  source                        = "git@github.com:hmcts/cnp-module-redis?ref=4.x"
+  product                       = "${var.shared_product_name}-hmc-admin-redis6"
+  name                          = "${var.product}-${var.component}-${var.env}"
+  location                      = var.location
+  env                           = var.env
+  subnetid                      = data.azurerm_subnet.core_infra_redis_subnet.id
+  common_tags                   = var.common_tags
+  redis_version                 = "6"
+  business_area                 = "cft"
+  private_endpoint_enabled      = true
+  public_network_access_enabled = false
+  family                        = var.redis_family
+  capacity                      = var.redis_capacity
+  sku_name                      = var.redis_sku_name
+}
+
+module "managed_redis" {
+  source = "git@github.com:hmcts/terraform-module-azure-managed-redis?ref=main"
+
+  product     = var.product
+  component   = var.component
+  env         = var.env
+  location    = var.location
+  common_tags = var.common_tags
+
+  sku_name = var.managed_redis_sku_name
+
+  public_network_access   = "Disabled"
+  create_private_endpoint = true
+  subnet_id               = data.azurerm_subnet.core_infra_redis_subnet.id
+  private_dns_zone_ids = [
+    "/subscriptions/${var.private_dns_subscription_id}/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/privatelink.redis.azure.net"
+  ]
+
+  access_keys_authentication_enabled = true
+  persistence_rdb_backup_frequency   = "6h"
+}
+
+module "application_insights" {
+  source = "git@github.com:hmcts/terraform-module-application-insights?ref=4.x"
+
+  env                 = var.env
+  product             = var.product
+  name                = "${local.app_full_name}-appinsights"
+  location            = var.location
+  application_type    = var.application_type
+  resource_group_name = azurerm_resource_group.rg.name
+  sampling_percentage = var.sampling_percentage
+
+  common_tags = var.common_tags
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "${local.app_full_name}-${var.env}"
+  location = var.location
+
+  tags = var.common_tags
+}
+
+resource "azurerm_key_vault_secret" "app_insights_key" {
+  name         = "appinsights-instrumentationkey-hmc-admin"
+  value        = module.application_insights.instrumentation_key
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "app_insights_connection_string" {
+  name         = "appinsights-connection-string-hmc-admin"
+  value        = module.application_insights.connection_string
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}

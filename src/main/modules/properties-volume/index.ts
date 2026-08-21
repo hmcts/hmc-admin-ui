@@ -9,12 +9,16 @@ export class PropertiesVolume {
       propertiesVolume.addTo(config);
 
       this.setSecret('secrets.hmc.AppInsightsInstrumentationKey', 'appInsights.instrumentationKey');
+      this.setSecret('secrets.hmc.hmc-admin-ui-redis6-connection-string', 'redis.connectionString');
+      this.setSecret('secrets.hmc.hmc-admin-ui-managed-redis-connection-string', 'redis.connectionString');
     }
   }
 
   private setSecret(fromPath: string, toPath: string): void {
-    if (config.has(fromPath)) {
-      set(config, toPath, get(config, fromPath));
+    const value = config.has(fromPath) ? get(config, fromPath) : undefined;
+
+    if (value) {
+      set(config, toPath, value);
     }
   }
 }
