@@ -14,6 +14,6 @@ import {
 import {
   for_each = local.demo_resource_group_import
 
-  to = module.managed_redis.azurerm_resource_group.rg
+  to = module.managed_redis.azurerm_resource_group.rg[0]
   id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/hmc-admin-ui-demo-rg"
 }
