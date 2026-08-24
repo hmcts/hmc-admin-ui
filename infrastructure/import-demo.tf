@@ -21,6 +21,6 @@ import {
 import {
   for_each = local.demo_resource_group_import
 
-  to = module.application_insights.azurerm_application_insights.appinsights
+  to = module.application_insights.azurerm_application_insights.this
   id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/hmc-admin-ui-demo/providers/Microsoft.Insights/components/hmc-admin-ui-appinsights-demo"
 }
