@@ -9,7 +9,6 @@ export class PropertiesVolume {
       propertiesVolume.addTo(config);
 
       this.setSecret('secrets.hmc.AppInsightsInstrumentationKey', 'appInsights.instrumentationKey');
-      this.setSecret('secrets.hmc.hmc-admin-ui-redis6-connection-string', 'redis.connectionString');
       this.setSecret('secrets.hmc.hmc-admin-ui-managed-redis-connection-string', 'redis.connectionString');
     }
   }

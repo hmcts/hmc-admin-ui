@@ -11,7 +11,6 @@ nodejs:
         - hmc-admin-ui-session-secret
         - hmc-admin-ui-client-secret
         - hmc-admin-ui-s2s-secret
-        - hmc-admin-ui-redis6-connection-string
         - hmc-admin-ui-managed-redis-connection-string
   environment:
     ALLOW_CONFIG_MUTATIONS: true
@@ -23,11 +22,3 @@ nodejs:
     SERVICES_S2S: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
 idam-pr:
   enabled: false
-redis:
-  enabled: false
-  architecture: standalone
-  auth:
-    enabled: false
-  image:
-    registry: hmctsprod.azurecr.io
-    repository: imported/bitnami/redis

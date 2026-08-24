@@ -17,5 +17,3 @@ idam-pr:
   redirect_uris:
     hmc-admin-ui:
       - https://${SERVICE_FQDN}/oauth2/callback
-redis:
-  enabled: false

@@ -27,33 +27,10 @@ data "azurerm_subnet" "core_infra_redis_subnet" {
   resource_group_name  = "core-infra-${var.env}"
 }
 
-resource "azurerm_key_vault_secret" "redis6_connection_string" {
-  name         = "${var.component}-redis6-connection-string"
-  value        = "rediss://${urlencode(module.redis6-cache.access_key)}@${module.redis6-cache.host_name}:${module.redis6-cache.redis_port}"
-  key_vault_id = data.azurerm_key_vault.key_vault.id
-}
-
 resource "azurerm_key_vault_secret" "managed_redis_connection_string" {
   name         = "${var.component}-managed-redis-connection-string"
   value        = "rediss://ignore:${urlencode(module.managed_redis.primary_access_key)}@${module.managed_redis.hostname}:${module.managed_redis.port}"
   key_vault_id = data.azurerm_key_vault.key_vault.id
-}
-
-module "redis6-cache" {
-  source                        = "git@github.com:hmcts/cnp-module-redis?ref=4.x"
-  product                       = "${var.product}-${var.component}-redis6"
-  name                          = "${var.product}-${var.component}-${var.env}"
-  location                      = var.location
-  env                           = var.env
-  subnetid                      = data.azurerm_subnet.core_infra_redis_subnet.id
-  common_tags                   = var.common_tags
-  redis_version                 = "6"
-  business_area                 = "cft"
-  private_endpoint_enabled      = true
-  public_network_access_enabled = false
-  family                        = var.redis_family
-  capacity                      = var.redis_capacity
-  sku_name                      = var.redis_sku_name
 }
 
 module "managed_redis" {
