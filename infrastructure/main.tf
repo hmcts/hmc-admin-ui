@@ -1,13 +1,14 @@
 locals {
-  app_full_name     = "hmc-${var.component}"
-  ase_name          = "core-compute-${var.env}"
-  local_env         = (var.env == "preview" || var.env == "spreview") ? (var.env == "preview") ? "aat" : "saat" : var.env
-  shared_vault_name = "${var.shared_product_name}-${local.local_env}"
+  app_full_name              = "hmc-${var.component}"
+  ase_name                   = "core-compute-${var.env}"
+  local_env                  = (var.env == "preview" || var.env == "spreview") ? (var.env == "preview") ? "aat" : "saat" : var.env
+  shared_resource_group_name = "${var.shared_product_name}-shared-${local.local_env}"
+  shared_vault_name          = "${var.shared_product_name}-${local.local_env}"
 }
 
 data "azurerm_key_vault" "key_vault" {
   name                = local.shared_vault_name
-  resource_group_name = local.shared_vault_name
+  resource_group_name = local.shared_resource_group_name
 }
 
 data "azurerm_key_vault_secret" "s2s_secret" {
@@ -40,7 +41,7 @@ resource "azurerm_key_vault_secret" "managed_redis_connection_string" {
 
 module "redis6-cache" {
   source                        = "git@github.com:hmcts/cnp-module-redis?ref=4.x"
-  product                       = "${var.shared_product_name}-hmc-admin-redis6"
+  product                       = "${var.product}-${var.component}-redis6"
   name                          = "${var.product}-${var.component}-${var.env}"
   location                      = var.location
   env                           = var.env
