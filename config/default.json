@@ -12,6 +12,9 @@
     },
     "appCookie": {
       "name": "hmc-admin-ui-app"
+    },
+    "test": {
+      "enabled": false
     }
   },
   "redis": {

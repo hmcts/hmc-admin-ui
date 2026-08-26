@@ -32,6 +32,12 @@
     },
     "appCookie": {
       "name": "SESSION_APP_COOKIE_NAME"
+    },
+    "test": {
+      "enabled": {
+        "__name": "SESSION_TEST_ENABLED",
+        "__format": "boolean"
+      }
     }
   },
   "redis": {
