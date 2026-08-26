@@ -1,6 +1,7 @@
 import { Application } from 'express';
 
 import { app as myApp } from '../app';
+import { RedisHealth } from '../modules/redis-health';
 
 const healthcheck = require('@hmcts/nodejs-healthcheck');
 
@@ -9,10 +10,12 @@ function shutdownCheck(): boolean {
 }
 
 export default function healthRoute(app: Application): void {
+  const redisHealth = new RedisHealth();
   const healthCheckConfig = {
     checks: {
-      // TODO: replace this sample check with proper checks for your application
-      sampleCheck: healthcheck.raw(() => healthcheck.up()),
+      redis: healthcheck.raw(async () => {
+        return (await redisHealth.check()) ? healthcheck.up() : healthcheck.down();
+      }),
     },
     readinessChecks: {
       shutdownCheck: healthcheck.raw(() => {
