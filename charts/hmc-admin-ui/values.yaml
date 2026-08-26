@@ -11,7 +11,7 @@ nodejs:
         - hmc-admin-ui-session-secret
         - hmc-admin-ui-client-secret
         - hmc-admin-ui-s2s-secret
-        - hmc-admin-ui-managed-redis-connection-string
+        - admin-ui-managed-redis-connection-string
   environment:
     ALLOW_CONFIG_MUTATIONS: true
     REDIS_ENABLED: true

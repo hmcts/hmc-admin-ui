@@ -54,7 +54,7 @@
     "hmc": {
       "AppInsightsInstrumentationKey": false,
       "hmc-admin-ui-client-secret": "hmc_admin_ui_secret",
-      "hmc-admin-ui-managed-redis-connection-string": "",
+      "admin-ui-managed-redis-connection-string": "",
       "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
       "hmc-admin-ui-session-secret": "hmc-admin-ui-session-secret"
     }
