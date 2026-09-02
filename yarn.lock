@@ -9316,6 +9316,7 @@ __metadata:
     jest: "npm:^29.4.0"
     jest-html-reporter: "npm:3.10.2"
     jest-junit: "npm:16.0.0"
+    jest-util: "npm:29.7.0"
     jquery: "npm:3.7.1"
     lint-staged: "npm:13.3.0"
     lodash: "npm:4.18.1"
@@ -10748,7 +10749,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-util@npm:^29.7.0":
+"jest-util@npm:29.7.0, jest-util@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest-util@npm:29.7.0"
   dependencies:

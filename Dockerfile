@@ -1,5 +1,5 @@
 # ---- Base image ----
-FROM hmctspublic.azurecr.io/base/node:20-alpine as base
+FROM hmctsprod.azurecr.io/base/node:20-alpine as base
 
 USER root
 RUN corepack enable
@@ -10,7 +10,8 @@ COPY --chown=hmcts:hmcts . .
 # ---- Build image ----
 FROM base as build
 
-RUN yarn build:prod && \
+RUN yarn install --immutable && \
+    yarn build:prod && \
     rm -rf webpack/ webpack.config.js
 
 # ---- Runtime image ----
