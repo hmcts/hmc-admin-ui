@@ -3,12 +3,63 @@
   "appInsights": {
     "instrumentationKey": false
   },
+  "auth": {
+    "enabled": true
+  },
+  "session": {
+    "cookie": {
+      "name": "hmc-admin-ui-session"
+    },
+    "appCookie": {
+      "name": "hmc-admin-ui-app"
+    },
+    "test": {
+      "enabled": false
+    }
+  },
+  "redis": {
+    "enabled": false,
+    "connectionString": "",
+    "keyPrefix": "hmc-admin-sess:"
+  },
+  "RBAC": {
+    "access": ""
+  },
+  "requestBody": {
+    "urlencodedLimit": "512kb",
+    "urlencodedParameterLimit": 10000
+  },
   "security": {
     "referrerPolicy": "same-origin",
     "hsts": {
       "maxAge": 31536000,
       "includeSubDomains": true,
       "preload": true
+    }
+  },
+  "services": {
+    "hmc": {
+      "url": "http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal"
+    },
+    "idam": {
+      "clientID": "hmc-admin-ui",
+      "scope": "openid profile roles",
+      "url": {
+        "public": "https://hmcts-access.aat.platform.hmcts.net",
+        "api": "https://idam-api.aat.platform.hmcts.net",
+        "hmc": "http://localhost:3000"
+      }
+    },
+    "s2s": "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+  },
+  "microservice": "hmc-admin-ui",
+  "secrets": {
+    "hmc": {
+      "AppInsightsInstrumentationKey": false,
+      "hmc-admin-ui-client-secret": "hmc_admin_ui_secret",
+      "admin-ui-managed-redis-connection-string": "",
+      "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
+      "hmc-admin-ui-session-secret": "hmc-admin-ui-session-secret"
     }
   }
 }

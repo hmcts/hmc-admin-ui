@@ -2,6 +2,8 @@ nodejs:
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  ingressAnnotations:
+    external-dns.alpha.kubernetes.io/exclude: 'true'
   keyVaults:
     hmc:
       secrets:
@@ -12,3 +14,8 @@ nodejs:
   environment:
     HMC_ADMIN_UI_BASE_URL: https://${SERVICE_FQDN}
     REDIS_ENABLED: false
+idam-pr:
+  enabled: true
+  redirect_uris:
+    hmc-admin-ui:
+      - https://${SERVICE_FQDN}/oauth2/callback

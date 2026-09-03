@@ -25,9 +25,12 @@ npm-debug.log.*
 dist/
 public/
 src/main/views/govuk
+src/main/views/webpack/css.njk
+src/main/views/webpack/js.njk
 coverage/
 smoke-output/
 functional-output/
+.cache/
 version
 
 .eslintcache

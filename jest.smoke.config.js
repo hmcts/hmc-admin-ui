@@ -13,8 +13,15 @@ module.exports = {
       'jest-html-reporter',
       {
         pageTitle: 'Smoke Test Report',
-        outputPath: '<rootDir>/smoke-output/reports/test-report.html',
+        outputPath: '<rootDir>/functional-output/tests/jest-smoke/html-report/test-report.html',
         includeFailureMsg: true,
+      },
+    ],
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/functional-output/tests/jest-smoke',
+        outputName: 'junit.xml',
       },
     ],
   ],

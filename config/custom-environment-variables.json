@@ -1,0 +1,64 @@
+{
+  "auth": {
+    "enabled": {
+      "__name": "AUTH_ENABLED",
+      "__format": "boolean"
+    }
+  },
+  "requestBody": {
+    "urlencodedLimit": "REQUEST_BODY_URLENCODED_LIMIT",
+    "urlencodedParameterLimit": {
+      "__name": "REQUEST_BODY_URLENCODED_PARAMETER_LIMIT",
+      "__format": "number"
+    }
+  },
+  "services": {
+    "hmc": {
+      "url": "HMC_CFT_HEARING_SERVICE_URL"
+    },
+    "idam": {
+      "clientID": "IDAM_CLIENT_ID",
+      "scope": "IDAM_CLIENT_SCOPE",
+      "url": {
+        "hmc": "HMC_ADMIN_UI_BASE_URL",
+        "public": "IDAM_PUBLIC_URL"
+      }
+    },
+    "s2s": "SERVICES_S2S"
+  },
+  "session": {
+    "cookie": {
+      "name": "SESSION_COOKIE_NAME"
+    },
+    "appCookie": {
+      "name": "SESSION_APP_COOKIE_NAME"
+    },
+    "test": {
+      "enabled": {
+        "__name": "SESSION_TEST_ENABLED",
+        "__format": "boolean"
+      }
+    }
+  },
+  "redis": {
+    "enabled": {
+      "__name": "REDIS_ENABLED",
+      "__format": "boolean"
+    },
+    "keyPrefix": "REDIS_KEY_PREFIX",
+    "connectionString": "REDIS_CONNECTION_STRING"
+  },
+  "RBAC": {
+    "access": "RBAC_ACCESS"
+  },
+  "microservice": "MICROSERVICE",
+  "secrets": {
+    "hmc": {
+      "AppInsightsInstrumentationKey": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "hmc-admin-ui-client-secret": "HMC_ADMIN_UI_CLIENT_SECRET",
+      "admin-ui-managed-redis-connection-string": "REDIS_CONNECTION_STRING",
+      "hmc-admin-ui-s2s-secret": "HMC_ADMIN_UI_S2S_SECRET",
+      "hmc-admin-ui-session-secret": "SESSION_SECRET"
+    }
+  }
+}
