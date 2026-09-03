@@ -32,7 +32,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/eslint-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.7"],\
           ["@babel/preset-env", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.7"],\
           ["@codeceptjs/allure-legacy", "npm:1.0.2"],\
-          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0"],\
+          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.0.6"],\
           ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
@@ -4381,13 +4381,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codeceptjs/configure", [\
-      ["npm:0.10.0", {\
-        "packageLocation": "./.yarn/cache/@codeceptjs-configure-npm-0.10.0-ba73c0a5e7-afd4512fee.zip/node_modules/@codeceptjs/configure/",\
-        "packageDependencies": [\
-          ["@codeceptjs/configure", "npm:0.10.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:1.0.3", {\
         "packageLocation": "./.yarn/cache/@codeceptjs-configure-npm-1.0.3-456ecfd32e-bc6d1b3c82.zip/node_modules/@codeceptjs/configure/",\
         "packageDependencies": [\
@@ -4395,10 +4388,17 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0", {\
-        "packageLocation": "./.yarn/__virtual__/@codeceptjs-configure-virtual-9a99cc469d/0/cache/@codeceptjs-configure-npm-0.10.0-ba73c0a5e7-afd4512fee.zip/node_modules/@codeceptjs/configure/",\
+      ["npm:1.0.6", {\
+        "packageLocation": "./.yarn/cache/@codeceptjs-configure-npm-1.0.6-1497b1f8dc-43a95fb85f.zip/node_modules/@codeceptjs/configure/",\
         "packageDependencies": [\
-          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0"],\
+          ["@codeceptjs/configure", "npm:1.0.6"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.0.6", {\
+        "packageLocation": "./.yarn/__virtual__/@codeceptjs-configure-virtual-b3ec51fbd9/0/cache/@codeceptjs-configure-npm-1.0.6-1497b1f8dc-43a95fb85f.zip/node_modules/@codeceptjs/configure/",\
+        "packageDependencies": [\
+          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.0.6"],\
           ["@types/codeceptjs", null],\
           ["codeceptjs", "npm:3.7.3"],\
           ["lodash.merge", "npm:4.6.2"],\
@@ -13028,7 +13028,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/eslint-parser", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.7"],\
           ["@babel/preset-env", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.29.7"],\
           ["@codeceptjs/allure-legacy", "npm:1.0.2"],\
-          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:0.10.0"],\
+          ["@codeceptjs/configure", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.0.6"],\
           ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
