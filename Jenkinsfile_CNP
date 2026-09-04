@@ -11,7 +11,7 @@ pipelineTriggers([
 ])
 ])
 
-@Library("Infrastructure@2.4.4")
+@Library("Infrastructure@2.5.0")
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 
@@ -38,9 +38,12 @@ def secrets = [
   ]
 ]
 
+def branchesToSync = ['perftest', 'ithc']
+
 withPipeline(type, product, component) {
   enableFullFunctionalTest()
   loadVaultSecrets(secrets)
+  syncBranchesWithMaster(branchesToSync)
 
   def publishTestReports = {
     junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-unit/*.xml'

@@ -72,7 +72,7 @@ describe('AppSession', () => {
   test('uses a Redis connection string when Redis is enabled and a connection string is configured', () => {
     mockConfig({
       ...defaultConfig(true),
-      'redis.connectionString': 'rediss://ignore:redis-password@redis.internal:6380',
+      'redis.connectionString': 'rediss://:redis-password@redis.internal:6380',
     });
     jest.doMock(
       'redis',
@@ -99,7 +99,7 @@ describe('AppSession', () => {
       socket: {
         reconnectStrategy: expect.any(Function),
       },
-      url: 'rediss://ignore:redis-password@redis.internal:6380',
+      url: 'rediss://:redis-password@redis.internal:6380',
     });
     expect(on).toHaveBeenCalledWith('error', expect.any(Function));
     expect(connect).toHaveBeenCalled();

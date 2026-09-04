@@ -57,7 +57,7 @@ describe('RedisHealth', () => {
   test('pings Redis when Redis is enabled', async () => {
     mockConfig({
       'redis.enabled': true,
-      'redis.connectionString': 'rediss://ignore:redis-password@redis.internal:6380',
+      'redis.connectionString': 'rediss://:redis-password@redis.internal:6380',
     });
 
     const { RedisHealth } = require('../../../main/modules/redis-health');
@@ -68,7 +68,7 @@ describe('RedisHealth', () => {
         connectTimeout: 1000,
         reconnectStrategy: false,
       },
-      url: 'rediss://ignore:redis-password@redis.internal:6380',
+      url: 'rediss://:redis-password@redis.internal:6380',
     });
     expect(on).toHaveBeenCalledWith('error', expect.any(Function));
     expect(connect).toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('RedisHealth', () => {
   test('fails when Redis ping fails', async () => {
     mockConfig({
       'redis.enabled': true,
-      'redis.connectionString': 'rediss://ignore:redis-password@redis.internal:6380',
+      'redis.connectionString': 'rediss://:redis-password@redis.internal:6380',
     });
     ping.mockResolvedValue('NOPE');
 
@@ -105,7 +105,7 @@ describe('RedisHealth', () => {
   test('fails when Redis connection fails', async () => {
     mockConfig({
       'redis.enabled': true,
-      'redis.connectionString': 'rediss://ignore:redis-password@redis.internal:6380',
+      'redis.connectionString': 'rediss://:redis-password@redis.internal:6380',
     });
     connect.mockRejectedValue(new Error('connection refused'));
 

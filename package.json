@@ -15,7 +15,7 @@
     "build:prod": "NODE_ENV=production yarn webpack --mode production --config webpack.config.js",
     "test": "yarn test:unit",
     "test:unit": "jest",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "yarn install --immutable && jest --coverage",
     "test:routes": "jest -c jest.routes.config.js",
     "test:a11y": "node bin/run-a11y-tests.js",
     "test:smoke": "jest -c jest.smoke.config.js",
