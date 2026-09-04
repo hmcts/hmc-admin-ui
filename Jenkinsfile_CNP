@@ -15,21 +15,63 @@ pipelineTriggers([
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [
+    $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
 def type = "nodejs"
 def product = "hmc"
 def component = "admin-ui"
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 
+def secrets = [
+  'hmc-${env}': [
+    secret('hmc-admin-ui-test-user', 'TEST_IDAM_USERNAME'),
+    secret('hmc-admin-ui-test-password', 'TEST_IDAM_PASSWORD')
+  ]
+]
+
 def branchesToSync = ['perftest', 'ithc']
 
 withPipeline(type, product, component) {
-
+  enableFullFunctionalTest()
+  loadVaultSecrets(secrets)
   syncBranchesWithMaster(branchesToSync)
+
+  def publishTestReports = {
+    junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-unit/*.xml'
+    junit allowEmptyResults: true, testResults: 'functional-output/functional/reports/*-testsuite.xml'
+    junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-smoke/*.xml'
+
+    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*'
+  }
 
   afterSuccess('build') {
     yarnBuilder.yarn('playwright install')
     yarnBuilder.yarn('rebuild puppeteer')
     yarnBuilder.yarn('build')
+  }
+
+  afterSuccess('test') {
+    yarnBuilder.yarn('test:unit')
+  }
+
+  afterAlways('test') {
+    publishTestReports()
+  }
+
+  afterAlways('smoketest:preview') {
+    publishTestReports()
+  }
+
+  afterAlways('functionalTest:preview') {
+    publishTestReports()
   }
 }
