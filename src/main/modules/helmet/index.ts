@@ -40,7 +40,11 @@ export class Helmet {
             defaultSrc: ["'none'"],
             fontSrc: [self, 'data:'],
             imgSrc: [self, googleAnalyticsDomain],
-            manifestSrc: [self],
+            manifestSrc: [
+              self,
+              // If for any reason you need to remove csp logs add this line
+              //'https://hmcts-access.aat.platform.hmcts.net'
+            ],
             objectSrc: [self],
             scriptSrc,
             styleSrc: [self],
