@@ -36,7 +36,7 @@ const RAW_RUNTIME_STATE =
           ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
-          ["@hmcts/properties-volume", "npm:0.0.14"],\
+          ["@hmcts/properties-volume", "npm:1.4.1"],\
           ["@types/body-parser", "npm:1.19.6"],\
           ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
@@ -126,6 +126,21 @@ const RAW_RUNTIME_STATE =
         "linkType": "SOFT"\
       }]\
     ]],\
+    ["@azure-rest/core-client", [\
+      ["npm:2.8.0", {\
+        "packageLocation": "./.yarn/cache/@azure-rest-core-client-npm-2.8.0-13900df967-8bb9e2fa81.zip/node_modules/@azure-rest/core-client/",\
+        "packageDependencies": [\
+          ["@azure-rest/core-client", "npm:2.8.0"],\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.4.0"],\
+          ["@typespec/ts-http-runtime", "npm:0.3.2"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@azure/abort-controller", [\
       ["npm:2.1.2", {\
         "packageLocation": "./.yarn/cache/@azure-abort-controller-npm-2.1.2-a36d73ebb9-484e34a812.zip/node_modules/@azure/abort-controller/",\
@@ -137,6 +152,16 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@azure/core-auth", [\
+      ["npm:1.11.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-auth-npm-1.11.0-35b82438f9-035e1ef465.zip/node_modules/@azure/core-auth/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
       ["npm:1.7.2", {\
         "packageLocation": "./.yarn/cache/@azure-core-auth-npm-1.7.2-10196debae-c85325c597.zip/node_modules/@azure/core-auth/",\
         "packageDependencies": [\
@@ -158,6 +183,54 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@azure/core-client", [\
+      ["npm:1.11.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-client-npm-1.11.0-9e21fb3369-e2914f4d1e.zip/node_modules/@azure/core-client/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-client", "npm:1.11.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.4.0"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["@azure/logger", "npm:1.4.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/core-lro", [\
+      ["npm:2.7.2", {\
+        "packageLocation": "./.yarn/cache/@azure-core-lro-npm-2.7.2-8c7fa05bf6-73b4e1d74a.zip/node_modules/@azure/core-lro/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-lro", "npm:2.7.2"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["@azure/logger", "npm:1.1.4"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/core-paging", [\
+      ["npm:1.7.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-paging-npm-1.7.0-e17e45d4ce-bf13e46b0b.zip/node_modules/@azure/core-paging/",\
+        "packageDependencies": [\
+          ["@azure/core-paging", "npm:1.7.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/core-process", [\
+      ["npm:1.0.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-process-npm-1.0.0-166ced4765-760913c11b.zip/node_modules/@azure/core-process/",\
+        "packageDependencies": [\
+          ["@azure/core-process", "npm:1.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@azure/core-rest-pipeline", [\
       ["npm:1.16.3", {\
         "packageLocation": "./.yarn/cache/@azure-core-rest-pipeline-npm-1.16.3-4226fffbc7-c64e866fcc.zip/node_modules/@azure/core-rest-pipeline/",\
@@ -173,6 +246,20 @@ const RAW_RUNTIME_STATE =
           ["tslib", "npm:2.8.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:1.25.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-rest-pipeline-npm-1.25.0-9d9ef54ee3-a1066040f5.zip/node_modules/@azure/core-rest-pipeline/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.4.0"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["@azure/logger", "npm:1.4.0"],\
+          ["@typespec/ts-http-runtime", "npm:0.3.8"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@azure/core-tracing", [\
@@ -180,6 +267,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@azure-core-tracing-npm-1.2.0-cae64582fc-5d63ffc8f6.zip/node_modules/@azure/core-tracing/",\
         "packageDependencies": [\
           ["@azure/core-tracing", "npm:1.2.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:1.4.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-tracing-npm-1.4.0-28af778785-291bfcba04.zip/node_modules/@azure/core-tracing/",\
+        "packageDependencies": [\
+          ["@azure/core-tracing", "npm:1.4.0"],\
           ["tslib", "npm:2.8.1"]\
         ],\
         "linkType": "HARD"\
@@ -204,6 +299,74 @@ const RAW_RUNTIME_STATE =
           ["tslib", "npm:2.8.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:1.14.0", {\
+        "packageLocation": "./.yarn/cache/@azure-core-util-npm-1.14.0-7c87866458-a6f217ce02.zip/node_modules/@azure/core-util/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["@typespec/ts-http-runtime", "npm:0.3.2"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/identity", [\
+      ["npm:4.13.2", {\
+        "packageLocation": "./.yarn/cache/@azure-identity-npm-4.13.2-c400a0294d-b6ec2bde20.zip/node_modules/@azure/identity/",\
+        "packageDependencies": [\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-client", "npm:1.11.0"],\
+          ["@azure/core-process", "npm:1.0.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.4.0"],\
+          ["@azure/core-util", "npm:1.11.0"],\
+          ["@azure/identity", "npm:4.13.2"],\
+          ["@azure/logger", "npm:1.1.4"],\
+          ["@azure/msal-browser", "npm:5.21.0"],\
+          ["@azure/msal-node", "npm:5.6.0"],\
+          ["open", "npm:10.2.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/keyvault-common", [\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/@azure-keyvault-common-npm-2.1.0-196291c4aa-ce231f7812.zip/node_modules/@azure/keyvault-common/",\
+        "packageDependencies": [\
+          ["@azure-rest/core-client", "npm:2.8.0"],\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.4.0"],\
+          ["@azure/core-util", "npm:1.14.0"],\
+          ["@azure/keyvault-common", "npm:2.1.0"],\
+          ["@azure/logger", "npm:1.4.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/keyvault-secrets", [\
+      ["npm:4.11.2", {\
+        "packageLocation": "./.yarn/cache/@azure-keyvault-secrets-npm-4.11.2-eb06abf419-e38610e85e.zip/node_modules/@azure/keyvault-secrets/",\
+        "packageDependencies": [\
+          ["@azure-rest/core-client", "npm:2.8.0"],\
+          ["@azure/abort-controller", "npm:2.1.2"],\
+          ["@azure/core-auth", "npm:1.11.0"],\
+          ["@azure/core-lro", "npm:2.7.2"],\
+          ["@azure/core-paging", "npm:1.7.0"],\
+          ["@azure/core-rest-pipeline", "npm:1.25.0"],\
+          ["@azure/core-tracing", "npm:1.2.0"],\
+          ["@azure/core-util", "npm:1.11.0"],\
+          ["@azure/keyvault-common", "npm:2.1.0"],\
+          ["@azure/keyvault-secrets", "npm:4.11.2"],\
+          ["@azure/logger", "npm:1.4.0"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@azure/logger", [\
@@ -212,6 +375,52 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@azure/logger", "npm:1.1.4"],\
           ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:1.4.0", {\
+        "packageLocation": "./.yarn/cache/@azure-logger-npm-1.4.0-3b48f7b49f-84ee66109a.zip/node_modules/@azure/logger/",\
+        "packageDependencies": [\
+          ["@azure/logger", "npm:1.4.0"],\
+          ["@typespec/ts-http-runtime", "npm:0.3.2"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/msal-browser", [\
+      ["npm:5.21.0", {\
+        "packageLocation": "./.yarn/cache/@azure-msal-browser-npm-5.21.0-3458c7a890-0fef1fed0c.zip/node_modules/@azure/msal-browser/",\
+        "packageDependencies": [\
+          ["@azure/msal-browser", "npm:5.21.0"],\
+          ["@azure/msal-common", "npm:16.14.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/msal-common", [\
+      ["npm:16.13.0", {\
+        "packageLocation": "./.yarn/cache/@azure-msal-common-npm-16.13.0-5514c573cd-b9280efa0c.zip/node_modules/@azure/msal-common/",\
+        "packageDependencies": [\
+          ["@azure/msal-common", "npm:16.13.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:16.14.0", {\
+        "packageLocation": "./.yarn/cache/@azure-msal-common-npm-16.14.0-358e75046d-be2becb84a.zip/node_modules/@azure/msal-common/",\
+        "packageDependencies": [\
+          ["@azure/msal-common", "npm:16.14.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@azure/msal-node", [\
+      ["npm:5.6.0", {\
+        "packageLocation": "./.yarn/cache/@azure-msal-node-npm-5.6.0-dd87ed4591-6874002465.zip/node_modules/@azure/msal-node/",\
+        "packageDependencies": [\
+          ["@azure/msal-common", "npm:16.13.0"],\
+          ["@azure/msal-node", "npm:5.6.0"],\
+          ["jsonwebtoken", "npm:9.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4751,13 +4960,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@hmcts/properties-volume", [\
-      ["npm:0.0.14", {\
-        "packageLocation": "./.yarn/cache/@hmcts-properties-volume-npm-0.0.14-6d0ff04d5a-3859effd7c.zip/node_modules/@hmcts/properties-volume/",\
+      ["npm:1.4.1", {\
+        "packageLocation": "./.yarn/cache/@hmcts-properties-volume-npm-1.4.1-b28ede9351-e5c532a5a4.zip/node_modules/@hmcts/properties-volume/",\
         "packageDependencies": [\
+          ["@azure/identity", "npm:4.13.2"],\
+          ["@azure/keyvault-secrets", "npm:4.11.2"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
-          ["@hmcts/properties-volume", "npm:0.0.14"],\
-          ["lodash", "npm:4.17.21"],\
-          ["path", "npm:0.12.7"]\
+          ["@hmcts/properties-volume", "npm:1.4.1"],\
+          ["js-yaml", "npm:4.1.1"],\
+          ["lodash", "npm:4.18.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7109,6 +7320,16 @@ const RAW_RUNTIME_STATE =
           ["tslib", "npm:2.8.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:0.3.8", {\
+        "packageLocation": "./.yarn/cache/@typespec-ts-http-runtime-npm-0.3.8-eee6dbdf87-b6391907c2.zip/node_modules/@typespec/ts-http-runtime/",\
+        "packageDependencies": [\
+          ["@typespec/ts-http-runtime", "npm:0.3.8"],\
+          ["http-proxy-agent", "npm:7.0.2"],\
+          ["https-proxy-agent", "npm:7.0.6"],\
+          ["tslib", "npm:2.8.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@ungap/structured-clone", [\
@@ -8880,11 +9101,30 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["buffer-equal-constant-time", [\
+      ["npm:1.0.1", {\
+        "packageLocation": "./.yarn/cache/buffer-equal-constant-time-npm-1.0.1-41826f3419-80bb945f5d.zip/node_modules/buffer-equal-constant-time/",\
+        "packageDependencies": [\
+          ["buffer-equal-constant-time", "npm:1.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["buffer-from", [\
       ["npm:1.1.2", {\
         "packageLocation": "./.yarn/cache/buffer-from-npm-1.1.2-03d2f20d7e-0448524a56.zip/node_modules/buffer-from/",\
         "packageDependencies": [\
           ["buffer-from", "npm:1.1.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["bundle-name", [\
+      ["npm:4.1.0", {\
+        "packageLocation": "./.yarn/cache/bundle-name-npm-4.1.0-4688335533-1d966c8d2d.zip/node_modules/bundle-name/",\
+        "packageDependencies": [\
+          ["bundle-name", "npm:4.1.0"],\
+          ["run-applescript", "npm:7.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10448,6 +10688,26 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["default-browser", [\
+      ["npm:5.5.1", {\
+        "packageLocation": "./.yarn/cache/default-browser-npm-5.5.1-cc2985f14f-e2a74668f0.zip/node_modules/default-browser/",\
+        "packageDependencies": [\
+          ["bundle-name", "npm:4.1.0"],\
+          ["default-browser", "npm:5.5.1"],\
+          ["default-browser-id", "npm:5.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["default-browser-id", [\
+      ["npm:5.0.1", {\
+        "packageLocation": "./.yarn/cache/default-browser-id-npm-5.0.1-f5b6cb1fde-52c637637b.zip/node_modules/default-browser-id/",\
+        "packageDependencies": [\
+          ["default-browser-id", "npm:5.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["defaults", [\
       ["npm:1.0.4", {\
         "packageLocation": "./.yarn/cache/defaults-npm-1.0.4-f3fbaf2528-3a88b7a587.zip/node_modules/defaults/",\
@@ -10466,6 +10726,15 @@ const RAW_RUNTIME_STATE =
           ["es-define-property", "npm:1.0.1"],\
           ["es-errors", "npm:1.3.0"],\
           ["gopd", "npm:1.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["define-lazy-prop", [\
+      ["npm:3.0.0", {\
+        "packageLocation": "./.yarn/cache/define-lazy-prop-npm-3.0.0-6bb0fc1510-f28421cf9e.zip/node_modules/define-lazy-prop/",\
+        "packageDependencies": [\
+          ["define-lazy-prop", "npm:3.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10868,6 +11137,16 @@ const RAW_RUNTIME_STATE =
           ["ecc-jsbn", "npm:0.1.2"],\
           ["jsbn", "npm:0.1.1"],\
           ["safer-buffer", "npm:2.1.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["ecdsa-sig-formatter", [\
+      ["npm:1.0.11", {\
+        "packageLocation": "./.yarn/cache/ecdsa-sig-formatter-npm-1.0.11-b6784e7852-878e1aab8a.zip/node_modules/ecdsa-sig-formatter/",\
+        "packageDependencies": [\
+          ["ecdsa-sig-formatter", "npm:1.0.11"],\
+          ["safe-buffer", "npm:5.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13032,7 +13311,7 @@ const RAW_RUNTIME_STATE =
           ["@hmcts/info-provider", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:1.4.0"],\
           ["@hmcts/nodejs-healthcheck", "npm:1.8.6"],\
           ["@hmcts/nodejs-logging", "npm:4.0.4"],\
-          ["@hmcts/properties-volume", "npm:0.0.14"],\
+          ["@hmcts/properties-volume", "npm:1.4.1"],\
           ["@types/body-parser", "npm:1.19.6"],\
           ["@types/chai", "npm:5.2.3"],\
           ["@types/chai-as-promised", "npm:7.1.8"],\
@@ -13531,13 +13810,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["inherits", [\
-      ["npm:2.0.3", {\
-        "packageLocation": "./.yarn/cache/inherits-npm-2.0.3-401e64b080-8771303d66.zip/node_modules/inherits/",\
-        "packageDependencies": [\
-          ["inherits", "npm:2.0.3"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.0.4", {\
         "packageLocation": "./.yarn/cache/inherits-npm-2.0.4-c66b3957a0-cd45e923be.zip/node_modules/inherits/",\
         "packageDependencies": [\
@@ -13772,6 +14044,13 @@ const RAW_RUNTIME_STATE =
           ["is-docker", "npm:2.2.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:3.0.0", {\
+        "packageLocation": "./.yarn/cache/is-docker-npm-3.0.0-1570e32177-b698118f04.zip/node_modules/is-docker/",\
+        "packageDependencies": [\
+          ["is-docker", "npm:3.0.0"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["is-extglob", [\
@@ -13837,6 +14116,16 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["is-extglob", "npm:2.1.1"],\
           ["is-glob", "npm:4.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["is-inside-container", [\
+      ["npm:1.0.0", {\
+        "packageLocation": "./.yarn/cache/is-inside-container-npm-1.0.0-f2c9e9bb96-c50b75a2ab.zip/node_modules/is-inside-container/",\
+        "packageDependencies": [\
+          ["is-docker", "npm:3.0.0"],\
+          ["is-inside-container", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -14067,6 +14356,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["is-docker", "npm:2.2.1"],\
           ["is-wsl", "npm:2.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:3.1.1", {\
+        "packageLocation": "./.yarn/cache/is-wsl-npm-3.1.1-6334502662-513d95b89a.zip/node_modules/is-wsl/",\
+        "packageDependencies": [\
+          ["is-inside-container", "npm:1.0.0"],\
+          ["is-wsl", "npm:3.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15167,6 +15464,25 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["jsonwebtoken", [\
+      ["npm:9.0.3", {\
+        "packageLocation": "./.yarn/cache/jsonwebtoken-npm-9.0.3-c3c17849ba-a67a276db4.zip/node_modules/jsonwebtoken/",\
+        "packageDependencies": [\
+          ["jsonwebtoken", "npm:9.0.3"],\
+          ["jws", "npm:4.0.1"],\
+          ["lodash.includes", "npm:4.3.0"],\
+          ["lodash.isboolean", "npm:3.0.3"],\
+          ["lodash.isinteger", "npm:4.0.4"],\
+          ["lodash.isnumber", "npm:3.0.3"],\
+          ["lodash.isplainobject", "npm:4.0.6"],\
+          ["lodash.isstring", "npm:4.0.1"],\
+          ["lodash.once", "npm:4.1.1"],\
+          ["ms", "npm:2.1.3"],\
+          ["semver", "npm:7.7.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["jsprim", [\
       ["npm:1.4.2", {\
         "packageLocation": "./.yarn/cache/jsprim-npm-1.4.2-1ae6cade9a-df2bf234ea.zip/node_modules/jsprim/",\
@@ -15185,6 +15501,29 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/just-extend-npm-6.2.0-25e57ed812-1f487b074b.zip/node_modules/just-extend/",\
         "packageDependencies": [\
           ["just-extend", "npm:6.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jwa", [\
+      ["npm:2.0.1", {\
+        "packageLocation": "./.yarn/cache/jwa-npm-2.0.1-9ebe28a626-b04312a1de.zip/node_modules/jwa/",\
+        "packageDependencies": [\
+          ["buffer-equal-constant-time", "npm:1.0.1"],\
+          ["ecdsa-sig-formatter", "npm:1.0.11"],\
+          ["jwa", "npm:2.0.1"],\
+          ["safe-buffer", "npm:5.2.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jws", [\
+      ["npm:4.0.1", {\
+        "packageLocation": "./.yarn/cache/jws-npm-4.0.1-0d8c257cbe-75d7b15748.zip/node_modules/jws/",\
+        "packageDependencies": [\
+          ["jwa", "npm:2.0.1"],\
+          ["jws", "npm:4.0.1"],\
+          ["safe-buffer", "npm:5.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15440,6 +15779,60 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["lodash.includes", [\
+      ["npm:4.3.0", {\
+        "packageLocation": "./.yarn/cache/lodash.includes-npm-4.3.0-3a2f6fa22c-45e0a7c783.zip/node_modules/lodash.includes/",\
+        "packageDependencies": [\
+          ["lodash.includes", "npm:4.3.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.isboolean", [\
+      ["npm:3.0.3", {\
+        "packageLocation": "./.yarn/cache/lodash.isboolean-npm-3.0.3-b575b41488-b70068b4a8.zip/node_modules/lodash.isboolean/",\
+        "packageDependencies": [\
+          ["lodash.isboolean", "npm:3.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.isinteger", [\
+      ["npm:4.0.4", {\
+        "packageLocation": "./.yarn/cache/lodash.isinteger-npm-4.0.4-42add9f4e1-c971f5a2d6.zip/node_modules/lodash.isinteger/",\
+        "packageDependencies": [\
+          ["lodash.isinteger", "npm:4.0.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.isnumber", [\
+      ["npm:3.0.3", {\
+        "packageLocation": "./.yarn/cache/lodash.isnumber-npm-3.0.3-b3bb5f7347-913784275b.zip/node_modules/lodash.isnumber/",\
+        "packageDependencies": [\
+          ["lodash.isnumber", "npm:3.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.isplainobject", [\
+      ["npm:4.0.6", {\
+        "packageLocation": "./.yarn/cache/lodash.isplainobject-npm-4.0.6-d73937742f-29c6351f28.zip/node_modules/lodash.isplainobject/",\
+        "packageDependencies": [\
+          ["lodash.isplainobject", "npm:4.0.6"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.isstring", [\
+      ["npm:4.0.1", {\
+        "packageLocation": "./.yarn/cache/lodash.isstring-npm-4.0.1-721fee791c-eaac87ae96.zip/node_modules/lodash.isstring/",\
+        "packageDependencies": [\
+          ["lodash.isstring", "npm:4.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["lodash.memoize", [\
       ["npm:4.1.2", {\
         "packageLocation": "./.yarn/cache/lodash.memoize-npm-4.1.2-0e6250041f-192b2168f3.zip/node_modules/lodash.memoize/",\
@@ -15463,6 +15856,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/lodash.mergewith-npm-4.6.2-7d2d4201ec-aea75a4492.zip/node_modules/lodash.mergewith/",\
         "packageDependencies": [\
           ["lodash.mergewith", "npm:4.6.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash.once", [\
+      ["npm:4.1.1", {\
+        "packageLocation": "./.yarn/cache/lodash.once-npm-4.1.1-d8ba329ead-202f2c8c3d.zip/node_modules/lodash.once/",\
+        "packageDependencies": [\
+          ["lodash.once", "npm:4.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -16928,6 +17330,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["open", [\
+      ["npm:10.2.0", {\
+        "packageLocation": "./.yarn/unplugged/open-npm-10.2.0-e150b4e118/node_modules/open/",\
+        "packageDependencies": [\
+          ["default-browser", "npm:5.5.1"],\
+          ["define-lazy-prop", "npm:3.0.0"],\
+          ["is-inside-container", "npm:1.0.0"],\
+          ["open", "npm:10.2.0"],\
+          ["wsl-utils", "npm:0.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
       ["npm:7.4.2", {\
         "packageLocation": "./.yarn/unplugged/open-npm-7.4.2-a378c23959/node_modules/open/",\
         "packageDependencies": [\
@@ -17258,17 +17671,6 @@ const RAW_RUNTIME_STATE =
           ["no-case", "npm:3.0.4"],\
           ["pascal-case", "npm:3.1.2"],\
           ["tslib", "npm:2.8.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["path", [\
-      ["npm:0.12.7", {\
-        "packageLocation": "./.yarn/cache/path-npm-0.12.7-bddabe2e86-d49d101f95.zip/node_modules/path/",\
-        "packageDependencies": [\
-          ["path", "npm:0.12.7"],\
-          ["process", "npm:0.11.10"],\
-          ["util", "npm:0.10.4"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -17756,15 +18158,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/proc-log-npm-5.0.0-405173f9b4-35610bdb01.zip/node_modules/proc-log/",\
         "packageDependencies": [\
           ["proc-log", "npm:5.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["process", [\
-      ["npm:0.11.10", {\
-        "packageLocation": "./.yarn/cache/process-npm-0.11.10-aeb3b641ae-dbaa7e8d1d.zip/node_modules/process/",\
-        "packageDependencies": [\
-          ["process", "npm:0.11.10"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -18683,6 +19076,15 @@ const RAW_RUNTIME_STATE =
           ["parseurl", "npm:1.3.3"],\
           ["path-to-regexp", "npm:8.2.0"],\
           ["router", "npm:2.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["run-applescript", [\
+      ["npm:7.1.0", {\
+        "packageLocation": "./.yarn/cache/run-applescript-npm-7.1.0-2799ad8fdb-8659fb5f27.zip/node_modules/run-applescript/",\
+        "packageDependencies": [\
+          ["run-applescript", "npm:7.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -21004,16 +21406,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["util", [\
-      ["npm:0.10.4", {\
-        "packageLocation": "./.yarn/cache/util-npm-0.10.4-7c577db41a-1200a1ca2b.zip/node_modules/util/",\
-        "packageDependencies": [\
-          ["inherits", "npm:2.0.3"],\
-          ["util", "npm:0.10.4"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["util-deprecate", [\
       ["npm:1.0.2", {\
         "packageLocation": "./.yarn/cache/util-deprecate-npm-1.0.2-e3fe1a219c-474acf1146.zip/node_modules/util-deprecate/",\
@@ -21619,6 +22011,16 @@ const RAW_RUNTIME_STATE =
           "@types/utf-8-validate",\
           "bufferutil",\
           "utf-8-validate"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["wsl-utils", [\
+      ["npm:0.1.0", {\
+        "packageLocation": "./.yarn/cache/wsl-utils-npm-0.1.0-c5611c2140-de4c92187e.zip/node_modules/wsl-utils/",\
+        "packageDependencies": [\
+          ["is-wsl", "npm:3.1.1"],\
+          ["wsl-utils", "npm:0.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
