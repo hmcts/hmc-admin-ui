@@ -40,3 +40,4 @@ version
 !.yarn/versions
 
 config/local-development.json
+config/local-demo.json
