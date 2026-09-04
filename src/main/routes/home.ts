@@ -11,6 +11,11 @@ export default function (app: Application): void {
       return;
     }
 
+    if (req.body.requestType === 'singular') {
+      res.redirect(303, '/singular');
+      return;
+    }
+
     res.redirect(303, '/');
   });
 }
