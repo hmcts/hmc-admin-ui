@@ -29,13 +29,13 @@ data "azurerm_subnet" "core_infra_redis_subnet" {
 
 resource "azurerm_key_vault_secret" "managed_redis_connection_string" {
   name         = "${var.component}-managed-redis-connection-string"
-  value        = "rediss://:${urlencode(module.managed_redis.primary_access_key)}@${module.managed_redis.hostname}:${module.managed_redis.port}?tls=true"
+  value        = "rediss://:${urlencode(module.managed_redis.primary_access_key)}@${module.managed_redis.hostname}:${module.managed_redis.port}"
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
 module "managed_redis" {
   source = "git@github.com:hmcts/terraform-module-azure-managed-redis?ref=main"
-  name        = "${var.product}-${var.env}"
+
   product     = var.product
   component   = var.component
   env         = var.env
