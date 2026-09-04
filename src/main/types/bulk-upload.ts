@@ -1,4 +1,4 @@
-import { ManageExceptionsPayload } from './manage-exceptions';
+import { ManageExceptionsPayload, SupportRequest } from './manage-exceptions';
 
 export type BulkUploadValidationError = {
   row?: number;
@@ -9,6 +9,7 @@ export type BulkUploadParseResult =
   | {
       isValid: true;
       payload: ManageExceptionsPayload;
+      responseRows: BulkUploadResponseRow[];
       responseCsv: string;
     }
   | {
@@ -17,6 +18,10 @@ export type BulkUploadParseResult =
     };
 
 export type CsvRow = Record<string, string>;
+
+export type BulkUploadResponseRow = SupportRequest & {
+  validationIssue?: string;
+};
 
 export type BulkUploadSession = {
   bulkUploadRequestJson?: string;
