@@ -12,7 +12,8 @@ RUN yarn install --immutable
 # ---- Build image ----
 FROM base as build
 
-RUN yarn build:prod && \
+RUN yarn install --immutable && \
+    yarn build:prod && \
     rm -rf webpack/ webpack.config.js
 
 # ---- Runtime image ----
