@@ -1,0 +1,21 @@
+{% extends "template.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">Support tools</span>
+      <h1 class="govuk-heading-xl">Bulk request response</h1>
+
+      <p class="govuk-body">
+        The bulk request has been processed. Download the CSV response to view the success or error status for each hearing.
+      </p>
+
+      <div class="govuk-button-group">
+        <a class="govuk-button" data-module="govuk-button" href="/bulk-upload/response/download" download>
+          Download response CSV
+        </a>
+        <a href="/" class="govuk-link">Return to Support tools</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

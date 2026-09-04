@@ -1,1 +1,24 @@
-{}
+{
+  "auth": {
+    "enabled": false
+  },
+  "session": {
+    "cookie": {
+      "name": "hmc-admin-ui-session"
+    },
+    "appCookie": {
+      "name": "hmc-admin-ui-app"
+    }
+  },
+  "services": {
+    "hmc": {
+      "url": "http://localhost:3000"
+    }
+  },
+  "secrets": {
+    "hmc": {
+      "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
+      "hmc-admin-ui-session-secret": "local-development-session-secret"
+    }
+  }
+}

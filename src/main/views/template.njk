@@ -1,7 +1,25 @@
 {% extends "govuk/template.njk" %}
+{% from "govuk/components/header/macro.njk" import govukHeader %}
 
 {% block head %}
   {% include "webpack/css.njk" %}
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({
+    classes: 'hmc-header',
+    rebrand: _rebrand,
+    serviceName: 'HMC Admin UI',
+    serviceUrl: '/',
+    navigationClasses: 'hmc-header__navigation',
+    navigationLabel: 'Account',
+    navigation: [
+      {
+        href: '/logout',
+        text: 'Sign out'
+      }
+    ] if isAuthenticated else []
+  }) }}
 {% endblock %}
 
 {% block bodyEnd %}

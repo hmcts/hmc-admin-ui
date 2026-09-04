@@ -21,6 +21,7 @@ export class Nunjucks {
 
     app.use((req, res, next) => {
       res.locals.pagePath = req.path;
+      res.locals.isAuthenticated = false;
       next();
     });
   }
