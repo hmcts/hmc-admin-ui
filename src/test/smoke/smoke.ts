@@ -6,17 +6,22 @@ import { expect } from 'chai';
 const testUrl = process.env.TEST_URL || 'http://localhost:3000';
 
 describe('Smoke Test', () => {
-  describe('Home page loads', () => {
-    test('with correct content', async () => {
+  describe('Home page authentication', () => {
+    test('redirects unauthenticated users to IDAM', async () => {
       try {
         const response: AxiosResponse = await axios.get(testUrl, {
           headers: {
             'Accept-Encoding': 'gzip',
           },
+          maxRedirects: 0,
+          validateStatus: status => status >= 300 && status < 400,
         });
-        expect(response.data).includes('<h1 class="govuk-heading-xl">Default page template</h1>');
+
+        expect(response.status).to.equal(302);
+        expect(response.headers.location).to.contain('hmcts-access');
+        expect(response.headers.location).to.contain('/o/authorize');
       } catch {
-        fail('Heading not present and/or correct');
+        fail('IDAM redirect was not present and/or correct');
       }
     });
   });

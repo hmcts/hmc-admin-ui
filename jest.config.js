@@ -6,15 +6,14 @@ module.exports = {
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
-  collectCoverageFrom: [
-    'src/main/**/*.{ts,js}',
-    '!src/main/app.ts',
-    '!src/main/development.ts',
-    '!src/main/index.js',
-    '!src/main/server.ts',
-    '!src/main/modules/nunjucks/*.ts',
-    '!src/main/types/**/*.ts',
-    '!src/main/public/**',
-    '!src/main/views/**',
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/functional-output/tests/jest-unit',
+        outputName: 'junit.xml',
+      },
+    ],
   ],
 };

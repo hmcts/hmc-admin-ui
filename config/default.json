@@ -3,12 +3,48 @@
   "appInsights": {
     "instrumentationKey": false
   },
+  "auth": {
+    "enabled": true
+  },
+  "session": {
+    "cookie": {
+      "name": "hmc-admin-ui-session"
+    },
+    "appCookie": {
+      "name": "hmc-admin-ui-app"
+    }
+  },
+  "RBAC": {
+    "access": ""
+  },
+  "requestBody": {
+    "urlencodedLimit": "512kb",
+    "urlencodedParameterLimit": 10000
+  },
   "security": {
     "referrerPolicy": "same-origin",
     "hsts": {
       "maxAge": 31536000,
       "includeSubDomains": true,
       "preload": true
+    }
+  },
+  "services": {
+    "idam": {
+      "clientID": "hmc_admin_ui",
+      "scope": "openid profile roles",
+      "url": {
+        "public": "https://hmcts-access.aat.platform.hmcts.net",
+        "api": "https://idam-api.aat.platform.hmcts.net",
+        "hmc": "http://localhost:3000"
+      }
+    }
+  },
+  "secrets": {
+    "hmc": {
+      "AppInsightsInstrumentationKey": false,
+      "hmc-admin-ui-client-secret": "hmc_admin_ui_secret",
+      "hmc-admin-ui-session-secret": "hmc-admin-ui-session-secret"
     }
   }
 }
