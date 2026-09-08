@@ -29,6 +29,7 @@ coverage/
 smoke-output/
 functional-output/
 version
+.cache/
 
 .eslintcache
 
