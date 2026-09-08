@@ -11,7 +11,7 @@ pipelineTriggers([
 ])
 ])
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.0")
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 
@@ -21,7 +21,12 @@ def component = "admin-ui"
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 
+def branchesToSync = ['perftest', 'ithc']
+
 withPipeline(type, product, component) {
+
+  syncBranchesWithMaster(branchesToSync)
+
   afterSuccess('build') {
     yarnBuilder.yarn('playwright install')
     yarnBuilder.yarn('rebuild puppeteer')
