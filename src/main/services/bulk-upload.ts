@@ -130,14 +130,16 @@ function parseCsv(csvContent: string, headerStartLine = 0): { headers: string[];
   }
 
   const headers = parseCsvLine(lines[headerStartLine]).filter(header => header.trim() !== '');
-  const rows = lines.slice(headerStartLine + 1).map(line => {
-    const values = parseCsvLine(line);
-
-    return headers.reduce<CsvRow>((row, header, index) => {
-      row[header] = values[index] || '';
-      return row;
-    }, {});
-  });
+  const rows = lines
+    .slice(headerStartLine + 1)
+    .map(line => parseCsvLine(line))
+    .filter(values => values.some(value => value !== ''))
+    .map(values => {
+      return headers.reduce<CsvRow>((row, header, index) => {
+        row[header] = values[index] || '';
+        return row;
+      }, {});
+    });
 
   return { headers, rows };
 }
