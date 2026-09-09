@@ -11,14 +11,13 @@
     }
   },
   "services": {
-    "idam": {
-      "url": {
-        "hmc": "http://localhost:3000"
-      }
+    "hmc": {
+      "url": "http://localhost:3000"
     }
   },
   "secrets": {
     "hmc": {
+      "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
       "hmc-admin-ui-session-secret": "local-development-session-secret"
     }
   }

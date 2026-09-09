@@ -2,16 +2,17 @@ import { Application, Request, Response } from 'express';
 
 import homeRoute from '../../../main/routes/home';
 
-type RouteHandler = (req: Request, res: Response) => void;
+type RouteHandler = (req: Request, res: Response) => void | Promise<void>;
+type RegisteredRoute = [string, ...unknown[]];
 
 describe('Home route', () => {
-  let get: jest.Mock<void, [string, RouteHandler]>;
-  let post: jest.Mock<void, [string, RouteHandler]>;
+  let get: jest.Mock<void, RegisteredRoute>;
+  let post: jest.Mock<void, RegisteredRoute>;
   let app: Application;
 
   beforeEach(() => {
-    get = jest.fn<void, [string, RouteHandler]>();
-    post = jest.fn<void, [string, RouteHandler]>();
+    get = jest.fn<void, RegisteredRoute>();
+    post = jest.fn<void, RegisteredRoute>();
     app = { get, post } as unknown as Application;
 
     homeRoute(app);
@@ -22,7 +23,7 @@ describe('Home route', () => {
   });
 
   test('renders the home page on GET', () => {
-    const handler = get.mock.calls[0][1];
+    const handler = get.mock.calls[0][1] as RouteHandler;
     const render = jest.fn();
     const res = { render } as unknown as Response;
 
@@ -36,12 +37,22 @@ describe('Home route', () => {
   });
 
   test('redirects back to the home page on POST', () => {
-    const handler = post.mock.calls[0][1];
+    const handler = post.mock.calls[0][1] as RouteHandler;
     const redirect = jest.fn();
     const res = { redirect } as unknown as Response;
 
-    handler({} as Request, res);
+    handler({ body: { requestType: 'singular' } } as Request, res);
 
     expect(redirect).toHaveBeenCalledWith(303, '/');
+  });
+
+  test('redirects bulk requests to the bulk upload page on POST', () => {
+    const handler = post.mock.calls[0][1] as RouteHandler;
+    const redirect = jest.fn();
+    const res = { redirect } as unknown as Response;
+
+    handler({ body: { requestType: 'bulk' } } as Request, res);
+
+    expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload');
   });
 });

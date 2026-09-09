@@ -10,8 +10,14 @@
       "name": "hmc-admin-ui-test-app"
     }
   },
+  "services": {
+    "hmc": {
+      "url": "http://localhost:3000"
+    }
+  },
   "secrets": {
     "hmc": {
+      "hmc-admin-ui-s2s-secret": "AAAAAAAAAAAAAAAA",
       "hmc-admin-ui-session-secret": "test-session-secret"
     }
   }

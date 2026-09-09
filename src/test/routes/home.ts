@@ -42,6 +42,24 @@ describe('Home page', () => {
           requestType: 'bulk',
         })
         .expect(res => expect(res.status).to.equal(303))
+        .expect(res => expect(res.headers.location).to.equal('/bulk-upload'));
+    });
+
+    test('should keep singular requests on the home page', async () => {
+      const agent = request.agent(app);
+      const getResponse = await agent.get('/').expect(200);
+      const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
+
+      expect(csrfToken).to.not.be.undefined;
+
+      await agent
+        .post('/')
+        .type('form')
+        .send({
+          _csrf: csrfToken,
+          requestType: 'singular',
+        })
+        .expect(res => expect(res.status).to.equal(303))
         .expect(res => expect(res.headers.location).to.equal('/'));
     });
   });
