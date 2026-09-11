@@ -1,0 +1,119 @@
+{% extends "template.njk" %}
+{% from "macros/csrf.njk" import csrfProtection %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <a href="/singular" class="govuk-back-link">Back</a>
+
+      {% if successMessage %}
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="final-state-transition-success-title" data-module="govuk-notification-banner">
+          <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="final-state-transition-success-title">
+              Success
+            </h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">
+              {{ successMessage }}
+            </p>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if errors %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">
+              There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li>
+                    <a href="#{% if error.field == 'service' %}final-state-transition-heading{% else %}{{ error.field }}{% endif %}">{{ error.message }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <span class="govuk-caption-xl">Support tools</span>
+      <h1 class="govuk-heading-xl" id="final-state-transition-heading">Final state transition</h1>
+
+      <form method="post" action="/singular/final-state-transition" autocomplete="off" novalidate>
+        {{ csrfProtection(csrfToken) }}
+
+        <div class="govuk-form-group{% if errorMap['hearing-id'] %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="hearing-id">
+            Hearing ID
+          </label>
+          {% if errorMap['hearing-id'] %}
+            <p id="hearing-id-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> {{ errorMap['hearing-id'] }}
+            </p>
+          {% endif %}
+          <input class="govuk-input govuk-input--width-20{% if errorMap['hearing-id'] %} govuk-input--error{% endif %}" id="hearing-id" name="hearingId" type="text" maxlength="30" value="{{ form.hearingId }}"{% if errorMap['hearing-id'] %} aria-describedby="hearing-id-error"{% endif %}>
+        </div>
+
+        <div class="govuk-form-group{% if errorMap['case-ref'] %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="case-ref">
+            CCD Case Reference Number
+          </label>
+          <div id="case-ref-hint" class="govuk-visually-hidden">
+            This must be a 16-digit number.
+          </div>
+          {% if errorMap['case-ref'] %}
+            <p id="case-ref-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> {{ errorMap['case-ref'] }}
+            </p>
+          {% endif %}
+          <input class="govuk-input govuk-input--width-20{% if errorMap['case-ref'] %} govuk-input--error{% endif %}" id="case-ref" name="caseRef" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="16" value="{{ form.caseRef }}" aria-describedby="case-ref-hint{% if errorMap['case-ref'] %} case-ref-error{% endif %}">
+        </div>
+
+        <div class="govuk-form-group{% if errorMap.status %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="status">
+            Status
+          </label>
+          {% if errorMap.status %}
+            <p id="status-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> {{ errorMap.status }}
+            </p>
+          {% endif %}
+          <select class="govuk-select{% if errorMap.status %} govuk-select--error{% endif %}" id="status" name="status"{% if errorMap.status %} aria-describedby="status-error"{% endif %}>
+            <option value="">Select status</option>
+            {% for status in statuses %}
+              <option value="{{ status }}"{% if form.status == status %} selected{% endif %}>{{ status | capitalize }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="govuk-form-group{% if errorMap.notes %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="notes">
+            Incident Number / Notes
+          </label>
+          <div id="notes-hint" class="govuk-visually-hidden">
+            You can enter up to 5000 characters.
+          </div>
+          {% if errorMap.notes %}
+            <p id="notes-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> {{ errorMap.notes }}
+            </p>
+          {% endif %}
+          <textarea class="govuk-textarea{% if errorMap.notes %} govuk-textarea--error{% endif %}" id="notes" name="notes" rows="5" maxlength="5000" aria-describedby="notes-hint{% if errorMap.notes %} notes-error{% endif %}">{{ form.notes }}</textarea>
+        </div>
+
+        <div class="govuk-button-group">
+          <button class="govuk-button" data-module="govuk-button" type="submit">
+            Submit
+          </button>
+          <a class="govuk-button govuk-button--secondary" data-module="govuk-button" href="/">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

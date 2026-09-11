@@ -3,7 +3,6 @@ import request from 'supertest';
 
 import { app } from '../../main/app';
 
-// TODO: replace this sample test with proper route tests for the application
 /* eslint-disable jest/expect-expect */
 describe('Home page', () => {
   describe('on GET', () => {
@@ -45,7 +44,7 @@ describe('Home page', () => {
         .expect(res => expect(res.headers.location).to.equal('/bulk-upload'));
     });
 
-    test('should keep singular requests on the home page', async () => {
+    test('should redirect singular requests to the singular request type page', async () => {
       const agent = request.agent(app);
       const getResponse = await agent.get('/').expect(200);
       const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
@@ -60,7 +59,7 @@ describe('Home page', () => {
           requestType: 'singular',
         })
         .expect(res => expect(res.status).to.equal(303))
-        .expect(res => expect(res.headers.location).to.equal('/'));
+        .expect(res => expect(res.headers.location).to.equal('/singular'));
     });
   });
 });
