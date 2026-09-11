@@ -93,7 +93,8 @@ describe('Bulk upload response page', () => {
       .expect(res => expect(res.status).to.equal(200))
       .expect(res => expect(res.headers['content-type']).to.contain('text/csv'))
       .expect(res => expect(res.headers['content-disposition']).to.contain('bulk-upload-response.csv'))
-      .expect(res => expect(res.text).to.contain('hearingId,caseRef,action,state,status,message'));
+      .expect(res => expect(res.text).to.contain('hearingId,caseRef,action,state,status,message'))
+      .expect(res => expect(res.text).not.to.contain('Validation Issue'));
   });
 
   test('should download the processed CSV response after upload', async () => {
@@ -122,6 +123,44 @@ describe('Bulk upload response page', () => {
       .expect(res =>
         expect(res.text).to.contain(
           '12345678901234567890,1234567890123456,rollback,,UNKNOWN,No response message returned'
+        )
+      )
+      .expect(res => expect(res.text).not.to.contain('Validation Issue'));
+  });
+
+  test('should stay on the upload page and download validation issues after uploading a CSV with invalid rows', async () => {
+    const agent = request.agent(app);
+    const getResponse = await agent.get('/bulk-upload').expect(200);
+    const csrfToken = getResponse.text.match(/name="_csrf" value="([^"]+)"/)?.[1];
+
+    expect(csrfToken).to.not.be.undefined;
+    if (!csrfToken) {
+      throw new Error('CSRF token was not rendered');
+    }
+
+    await agent
+      .post('/bulk-upload')
+      .query({ _csrf: csrfToken })
+      .attach(
+        'bulkUploadFile',
+        Buffer.from('hearingId,caseRef,action,notes,state\n12345678901234567890,not-a-case-ref,rollback,,'),
+        'bulk-upload.csv'
+      )
+      .expect(res => expect(res.status).to.equal(400))
+      .expect(res =>
+        expect(res.text).to.contain('There were validation errors. Please check and edit the csv file and try again')
+      )
+      .expect(res => expect(res.text).to.contain('href="/bulk-upload/response/download"'))
+      .expect(res => expect(res.text).to.contain('data-validation-response-download'))
+      .expect(res => expect(res.text).not.to.contain('Bulk request response'));
+
+    await agent
+      .get('/bulk-upload/response/download')
+      .expect(res => expect(res.status).to.equal(200))
+      .expect(res => expect(res.text).to.contain('hearingId,caseRef,action,state,status,message,Validation Issue'))
+      .expect(res =>
+        expect(res.text).to.contain(
+          '12345678901234567890,not-a-case-ref,rollback,,INVALID,Validation failed,Case Reference Number must be a 16-digit numeric value.'
         )
       );
   });

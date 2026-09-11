@@ -1,9 +1,15 @@
-import type { BulkUploadParseResult, BulkUploadValidationError, CsvRow } from '../types/bulk-upload';
-import { ManageExceptionsResponse, SupportRequest } from '../types/manage-exceptions';
+import type {
+  BulkUploadParseResult,
+  BulkUploadResponseRow,
+  BulkUploadValidationError,
+  CsvRow,
+} from '../types/bulk-upload';
+import { ManageExceptionsResponse } from '../types/manage-exceptions';
 
 const expectedHeaders = ['hearingId', 'caseRef', 'action', 'notes', 'state'];
 const validActions = ['final_state_transition', 'rollback'];
 const validStates = ['CANCELLED', 'COMPLETED', 'ADJOURNED'];
+const defaultCsvData = 'unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"';
 
 // parse the uploaded csv into JSON
 export function parseBulkUploadCsv(csvContent: string): BulkUploadParseResult {
@@ -17,59 +23,77 @@ export function parseBulkUploadCsv(csvContent: string): BulkUploadParseResult {
     return { isValid: false, errors: headerErrors };
   }
 
-  const rowErrors = rows.flatMap((row, index) => validateRow(row, index + 2));
-
-  if (rowErrors.length > 0) {
-    return { isValid: false, errors: rowErrors };
-  }
-
   //convert rows into support request objects
-  const supportRequests = rows.map(row => ({
-    hearingId: row.hearingId,
-    caseRef: row.caseRef,
-    action: row.action,
-    notes: row.notes,
-    state: row.state === '' ? undefined : row.state,
-  }));
+  // note that this is run through twice to include validation if needed
+  const responseRows = rows.map((row, index) => {
+    const rowErrors = validateRow(row, index + 2);
+
+    return {
+      hearingId: row.hearingId,
+      caseRef: row.caseRef,
+      action: row.action,
+      notes: row.notes,
+      state: row.state === '' ? undefined : row.state,
+      validationIssue: rowErrors.map(error => error.message).join(' '),
+    };
+  });
+  // Only get valid rows here to build the payload for the manageExceptions service if able
+  const supportRequests = responseRows
+    .filter(row => !row.validationIssue)
+    .map(row => ({
+      hearingId: row.hearingId,
+      caseRef: row.caseRef,
+      action: row.action,
+      notes: row.notes,
+      state: row.state,
+    }));
 
   return {
     isValid: true,
     payload: { supportRequests },
-    responseCsv: buildBulkUploadResponseCsv(supportRequests),
+    responseRows,
+    responseCsv: buildBulkUploadResponseCsv(responseRows, undefined, { includeValidationIssues: true }),
   };
 }
 
 // convert the manageExceptions response into a downloadable CSV
+// or give validation errors if the bulk upload CSV was invalid
 export function buildBulkUploadResponseCsv(
-  supportRequests: SupportRequest[],
-  manageExceptionsResponse?: ManageExceptionsResponse
+  supportRequests: BulkUploadResponseRow[],
+  manageExceptionsResponse?: ManageExceptionsResponse,
+  options: { includeValidationIssues?: boolean } = {}
 ): string {
-  const rows = ['hearingId,caseRef,action,state,status,message'];
+  const rows = [
+    options.includeValidationIssues
+      ? 'hearingId,caseRef,action,state,status,message,Validation Issue'
+      : 'hearingId,caseRef,action,state,status,message',
+  ];
   const responseByHearingId = new Map(
     (manageExceptionsResponse?.supportRequestResponse || []).map(response => [response.hearingId, response])
   );
 
   if (supportRequests.length === 0) {
     // default row if no valid hearing rows were found in the CSV
-    rows.push('unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"');
+    rows.push(options.includeValidationIssues ? defaultCsvData + ',Validation failed' : defaultCsvData);
   } else {
     supportRequests.forEach(request => {
       const response = responseByHearingId.get(request.hearingId);
-      rows.push(
-        [
-          // Currently all hearing details returned back, may only need hearingId, status and message for users though
-          request.hearingId,
-          request.caseRef,
-          request.action,
-          request.state,
-          // added default messages in unlikely event that manageExceptions does not return the relevant fields
-          response?.status || 'UNKNOWN',
-          response?.message || 'No response message returned',
-        ]
-          .map(csvEscape)
-          // convert object into row
-          .join(',')
-      );
+      const responseRow = [
+        // Currently all hearing details returned back, may only need hearingId, status and message for users though
+        request.hearingId,
+        request.caseRef,
+        request.action,
+        request.state,
+        // If validation issue, else if validation issues are present, else if response is present
+        setStatusForCsv(!request.validationIssue, options.includeValidationIssues, response?.status),
+        setMessageForCsv(!request.validationIssue, options.includeValidationIssues, response?.message),
+      ];
+
+      if (options.includeValidationIssues) {
+        responseRow.push(request.validationIssue);
+      }
+
+      rows.push(responseRow.map(csvEscape).join(','));
     });
   }
 
@@ -204,4 +228,32 @@ function findHeaderRowIndex(lines: string[]): number {
     }
   }
   return 0; // fall back to first line if headers never found, validation will correctly fail
+}
+
+function setStatusForCsv(
+  isValid: boolean,
+  fileIsInvalid: boolean | undefined,
+  responseStatus: string | undefined
+): string {
+  if (!isValid) {
+    return 'INVALID';
+  } else if (fileIsInvalid) {
+    return 'VALID';
+  } else {
+    return responseStatus || 'UNKNOWN';
+  }
+}
+
+function setMessageForCsv(
+  isValid: boolean,
+  fileIsInvalid: boolean | undefined,
+  responseStatus: string | undefined
+): string {
+  if (!isValid) {
+    return 'Validation failed';
+  } else if (fileIsInvalid) {
+    return '';
+  } else {
+    return responseStatus || 'No response message returned';
+  }
 }

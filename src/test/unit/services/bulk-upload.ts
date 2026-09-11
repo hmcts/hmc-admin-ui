@@ -31,6 +31,24 @@ describe('parseBulkUploadCsv', () => {
           },
         ],
       },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          caseRef: '1234567890123456',
+          action: 'final_state_transition',
+          notes: 'Incident 123',
+          state: 'CANCELLED',
+          validationIssue: '',
+        },
+        {
+          hearingId: '22345678901234567890',
+          caseRef: '2234567890123456',
+          action: 'rollback',
+          notes: '',
+          state: undefined,
+          validationIssue: '',
+        },
+      ],
     });
   });
 
@@ -45,70 +63,153 @@ describe('parseBulkUploadCsv', () => {
     });
   });
 
-  test('rejects hearing IDs over 30 characters', () => {
+  test('records a validation issue for hearing IDs over 30 characters', () => {
     const result = parseBulkUploadCsv(
       'hearingId,caseRef,action,notes,state\n1234567890123456789012345678901,1234567890123456,rollback,,'
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: 'hearingId exceeds 30 character limit.' }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '1234567890123456789012345678901',
+          validationIssue: 'hearingId exceeds 30 character limit.',
+        },
+      ],
     });
   });
 
-  test('rejects notes over 5000 characters', () => {
+  test('records a validation issue for notes over 5000 characters', () => {
     const notes = 'a'.repeat(5001);
     const result = parseBulkUploadCsv(
       `hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,rollback,${notes},`
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: 'Notes/Incident Number exceeds 5000 character limit.' }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: 'Notes/Incident Number exceeds 5000 character limit.',
+        },
+      ],
     });
   });
 
-  test('rejects invalid case references', () => {
+  test('records a validation issue for invalid case references', () => {
     const result = parseBulkUploadCsv(
       'hearingId,caseRef,action,notes,state\n12345678901234567890,not-a-case-ref,rollback,,'
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: 'Case Reference Number must be a 16-digit numeric value.' }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: 'Case Reference Number must be a 16-digit numeric value.',
+        },
+      ],
     });
   });
 
-  test('rejects invalid actions', () => {
+  test('records a validation issue for invalid actions', () => {
     const result = parseBulkUploadCsv(
       'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,invalid,,CANCELLED'
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: "Action must be either 'final_state_transition' or 'rollback'." }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: "Action must be either 'final_state_transition' or 'rollback'.",
+        },
+      ],
     });
   });
 
-  test('rejects invalid states', () => {
+  test('records a validation issue for invalid states', () => {
     const result = parseBulkUploadCsv(
       'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,,INVALID'
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: 'State must be one of CANCELLED, COMPLETED, or ADJOURNED.' }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: 'State must be one of CANCELLED, COMPLETED, or ADJOURNED.',
+        },
+      ],
     });
   });
 
-  test('requires state for final state transition requests', () => {
+  test('records a validation issue when state is missing for final state transition requests', () => {
     const result = parseBulkUploadCsv(
       'hearingId,caseRef,action,notes,state\n12345678901234567890,1234567890123456,final_state_transition,,'
     );
 
     expect(result).toMatchObject({
-      isValid: false,
-      errors: [{ row: 2, message: 'State is mandatory for final_state_transition requests.' }],
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: 'State is mandatory for final_state_transition requests.',
+        },
+      ],
+    });
+  });
+
+  test('keeps valid rows in the payload when other rows have validation issues', () => {
+    const result = parseBulkUploadCsv(
+      [
+        'hearingId,caseRef,action,notes,state',
+        '12345678901234567890,1234567890123456,rollback,,',
+        '22345678901234567890,not-a-case-ref,rollback,,',
+      ].join('\n')
+    );
+
+    expect(result).toMatchObject({
+      isValid: true,
+      payload: {
+        supportRequests: [
+          {
+            hearingId: '12345678901234567890',
+            caseRef: '1234567890123456',
+            action: 'rollback',
+            notes: '',
+            state: undefined,
+          },
+        ],
+      },
+      responseRows: [
+        {
+          hearingId: '12345678901234567890',
+          validationIssue: '',
+        },
+        {
+          hearingId: '22345678901234567890',
+          validationIssue: 'Case Reference Number must be a 16-digit numeric value.',
+        },
+      ],
     });
   });
 });
@@ -158,6 +259,7 @@ describe('buildBulkUploadResponseCsv', () => {
     expect(responseCsv).toContain(
       '12345678901234567890,1234567890123456,rollback,,UNKNOWN,No response message returned'
     );
+    expect(responseCsv).not.toContain('Validation Issue');
   });
 
   test('escapes manageExceptions response messages for CSV output', () => {
@@ -184,6 +286,28 @@ describe('buildBulkUploadResponseCsv', () => {
 
     expect(responseCsv).toContain(
       '12345678901234567890,1234567890123456,rollback,,error,"Could not process ""rollback"", retry later"'
+    );
+  });
+
+  test('adds validation issues to invalid response rows', () => {
+    const responseCsv = buildBulkUploadResponseCsv(
+      [
+        {
+          hearingId: '12345678901234567890',
+          caseRef: 'not-a-case-ref',
+          action: 'rollback',
+          notes: '',
+          state: '',
+          validationIssue: 'Case Reference Number must be a 16-digit numeric value.',
+        },
+      ],
+      undefined,
+      { includeValidationIssues: true }
+    );
+
+    expect(responseCsv).toContain('hearingId,caseRef,action,state,status,message,Validation Issue');
+    expect(responseCsv).toContain(
+      '12345678901234567890,not-a-case-ref,rollback,,INVALID,Validation failed,Case Reference Number must be a 16-digit numeric value.'
     );
   });
 });

@@ -137,18 +137,33 @@ export default function (app: Application): void {
     const result = parseBulkUploadCsv(req.file.buffer.toString('utf8'));
 
     if (!result.isValid) {
-      // if here means the bulk upload CSV was not valid
-      res.status(400).render('bulk-upload', { errors: result.errors });
+      // if here means the bulk upload CSV has incorrect headers
+      res.status(400).render('bulk-upload', {
+        errors: [{ message: 'There is a problem with the file. Check the file has the correct header layout.' }],
+      });
       return;
     }
 
     const session = req.session as typeof req.session & BulkUploadSession;
     session.bulkUploadRequestJson = JSON.stringify(result.payload);
 
+    if (result.responseRows.some(row => row.validationIssue)) {
+      // any row validation issues will get picked up here
+      session.bulkUploadResponseCsv = buildBulkUploadResponseCsv(result.responseRows, undefined, {
+        includeValidationIssues: true,
+      });
+      res.status(400).render('bulk-upload', {
+        downloadValidationResponse: true,
+        // generic error message - specifics presented in CSV
+        errors: [{ message: 'There were validation errors. Please check and edit the csv file and try again' }],
+      });
+      return;
+    }
+
     let manageExceptionsResponse: ManageExceptionsResponse = { supportRequestResponse: [] };
 
     // below line to be removed once the manageExceptions service is fully implemented
-    if (authEnabled) {
+    if (authEnabled && result.payload.supportRequests.length > 0) {
       const { HearingService } = require('../services/hearing-service');
       const { getUserAccessToken } = require('../services/user-auth');
 
@@ -162,10 +177,7 @@ export default function (app: Application): void {
     }
 
     // now parse the manageExceptions response and build the CSV response for the user to download
-    session.bulkUploadResponseCsv = buildBulkUploadResponseCsv(
-      result.payload.supportRequests,
-      manageExceptionsResponse
-    );
+    session.bulkUploadResponseCsv = buildBulkUploadResponseCsv(result.responseRows, manageExceptionsResponse);
 
     res.redirect(303, '/bulk-upload/response');
   });

@@ -25,6 +25,14 @@
         </div>
       {% endif %}
 
+      {% if downloadValidationResponse %}
+        <p class="govuk-body">
+          <a class="govuk-link" href="/bulk-upload/response/download" download data-validation-response-download>
+            Download rejected CSV with issues again
+          </a>
+        </p>
+      {% endif %}
+
       <form method="post" action="/bulk-upload{% if csrfToken %}?_csrf={{ csrfToken }}{% endif %}" enctype="multipart/form-data" autocomplete="off" novalidate data-bulk-upload-form>
         {{ csrfProtection(csrfToken) }}
 
