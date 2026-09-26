@@ -81,7 +81,7 @@ const RAW_RUNTIME_STATE =
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
           ["glob", "npm:11.1.0"],\
           ["govuk-frontend", "npm:5.14.0"],\
-          ["helmet", "npm:8.1.0"],\
+          ["helmet", "npm:8.3.0"],\
           ["hmc-admin-ui", "workspace:."],\
           ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.8"],\
           ["husky", "npm:8.0.3"],\
@@ -13285,6 +13285,13 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:8.1.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:8.3.0", {\
+        "packageLocation": "./.yarn/cache/helmet-npm-8.3.0-010a4aefcf-077db98df8.zip/node_modules/helmet/",\
+        "packageDependencies": [\
+          ["helmet", "npm:8.3.0"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["hermes-estree", [\
@@ -13363,7 +13370,7 @@ const RAW_RUNTIME_STATE =
           ["express-rate-limit", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:7.5.1"],\
           ["glob", "npm:11.1.0"],\
           ["govuk-frontend", "npm:5.14.0"],\
-          ["helmet", "npm:8.1.0"],\
+          ["helmet", "npm:8.3.0"],\
           ["hmc-admin-ui", "workspace:."],\
           ["html-webpack-plugin", "virtual:8d3b7bc5762fb10d6bf41c10169eee20cebfcfa21545e53b18e248d5057e2609c097e63154d945c95174615fa0b27281a5540b772324284840961b09bcda7147#npm:5.6.8"],\
           ["husky", "npm:8.0.3"],\
