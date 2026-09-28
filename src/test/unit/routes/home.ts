@@ -36,12 +36,12 @@ describe('Home route', () => {
     expect(post).toHaveBeenCalledWith('/', expect.any(Function));
   });
 
-  test('redirects back to the home page on POST', () => {
+  test('redirects back to the home page when no request type is selected on POST', () => {
     const handler = post.mock.calls[0][1] as RouteHandler;
     const redirect = jest.fn();
     const res = { redirect } as unknown as Response;
 
-    handler({ body: { requestType: 'singular' } } as Request, res);
+    handler({ body: {} } as Request, res);
 
     expect(redirect).toHaveBeenCalledWith(303, '/');
   });
@@ -54,5 +54,15 @@ describe('Home route', () => {
     handler({ body: { requestType: 'bulk' } } as Request, res);
 
     expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload');
+  });
+
+  test('redirects singular requests to the singular request type page on POST', () => {
+    const handler = post.mock.calls[0][1] as RouteHandler;
+    const redirect = jest.fn();
+    const res = { redirect } as unknown as Response;
+
+    handler({ body: { requestType: 'singular' } } as Request, res);
+
+    expect(redirect).toHaveBeenCalledWith(303, '/singular');
   });
 });
