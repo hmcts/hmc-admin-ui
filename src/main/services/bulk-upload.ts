@@ -191,8 +191,12 @@ function validateRow(row: CsvRow, rowNumber: number): BulkUploadValidationError[
   const notes = row.notes || '';
   const state = row.state || '';
 
+  if (!/^\d+$/.test(hearingId)) {
+    errors.push({ row: rowNumber, message: 'Hearing ID must be a numeric value.' });
+  }
+
   if (hearingId.length > 30) {
-    errors.push({ row: rowNumber, message: 'hearingId exceeds 30 character limit.' });
+    errors.push({ row: rowNumber, message: 'Hearing ID exceeds 30 character limit.' });
   }
 
   if (notes.length > 5000) {
