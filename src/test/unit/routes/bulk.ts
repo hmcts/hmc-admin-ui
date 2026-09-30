@@ -6,6 +6,10 @@ import bulkRoute, { handleUploadError, hasCsvContent, isAllowedCsvFile, uploadLi
 type RouteHandler = (req: Request, res: Response) => void | Promise<void>;
 type RegisteredRoute = [string, ...unknown[]];
 
+function getBulkUploadResponseCsv(req: Request): string {
+  return (req.session as unknown as { bulkUploadResponseCsv: string }).bulkUploadResponseCsv;
+}
+
 describe('Bulk route', () => {
   let get: jest.Mock<void, RegisteredRoute>;
   let post: jest.Mock<void, RegisteredRoute>;
@@ -120,6 +124,37 @@ describe('Bulk route', () => {
         '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,UNKNOWN,No response message returned'
       ),
     });
+    expect(getBulkUploadResponseCsv(req)).not.toContain('Validation Issue');
+  });
+
+  test('renders the upload page and downloads a validation CSV when uploaded CSV rows have validation issues', async () => {
+    const handler = post.mock.calls[0][2] as RouteHandler;
+    const render = jest.fn();
+    const status = jest.fn(() => ({ render }));
+    const res = { status } as unknown as Response;
+    const req = {
+      file: {
+        buffer: Buffer.from('hearingId,caseRef,action,notes,state\n12345678901234567890,not-a-case-ref,rollback,,'),
+      },
+      session: {},
+    } as unknown as Request;
+
+    await handler(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(render).toHaveBeenCalledWith('bulk-upload', {
+      downloadValidationResponse: true,
+      errors: [{ message: 'There were validation errors. Please check and edit the csv file and try again' }],
+    });
+    expect(req.session).toMatchObject({
+      bulkUploadRequestJson: JSON.stringify({
+        supportRequests: [],
+      }),
+      bulkUploadResponseCsv: expect.stringContaining(
+        '12345678901234567890,not-a-case-ref,rollback,,INVALID,Validation failed,Case Reference Number must be a 16-digit numeric value.'
+      ),
+    });
+    expect(getBulkUploadResponseCsv(req)).toContain('Validation Issue');
   });
 
   test('renders an error when no file is uploaded', () => {
@@ -153,6 +188,26 @@ describe('Bulk route', () => {
     expect(status).toHaveBeenCalledWith(400);
     expect(render).toHaveBeenCalledWith('bulk-upload', {
       errors: [{ message: 'The selected file must be a valid CSV file.' }],
+    });
+  });
+
+  test('renders a general file error when uploaded CSV headers are invalid', () => {
+    const handler = post.mock.calls[0][2] as RouteHandler;
+    const render = jest.fn();
+    const status = jest.fn(() => ({ render }));
+    const res = { status } as unknown as Response;
+    const req = {
+      file: {
+        buffer: Buffer.from('hearingId,caseRef,action,notes,state,unexpected\n123,1234567890123456,rollback,,,extra'),
+      },
+      session: {},
+    } as unknown as Request;
+
+    handler(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(render).toHaveBeenCalledWith('bulk-upload', {
+      errors: [{ message: 'There is a problem with the file. Check the file has the correct header layout.' }],
     });
   });
 
@@ -283,6 +338,7 @@ describe('Bulk route with auth enabled', () => {
         '12345678901234567890,1234567890123456,final_state_transition,CANCELLED,error,Service rejected this request'
       ),
     });
+    expect(getBulkUploadResponseCsv(req)).not.toContain('Validation Issue');
     expect(redirect).toHaveBeenCalledWith(303, '/bulk-upload/response');
   });
 
