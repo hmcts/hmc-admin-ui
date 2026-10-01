@@ -32,6 +32,7 @@ smoke-output/
 functional-output/
 .cache/
 version
+.cache/
 
 .eslintcache
 
