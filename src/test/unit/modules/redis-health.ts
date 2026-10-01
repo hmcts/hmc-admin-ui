@@ -99,7 +99,9 @@ describe('RedisHealth', () => {
     const { RedisHealth } = require('../../../main/modules/redis-health');
 
     await expect(new RedisHealth().check()).resolves.toBe(false);
-    expect(quit).toHaveBeenCalled();
+    expect(connect).toHaveBeenCalledTimes(3);
+    expect(ping).toHaveBeenCalledTimes(3);
+    expect(quit).toHaveBeenCalledTimes(3);
   });
 
   test('fails when Redis connection fails', async () => {
@@ -112,7 +114,10 @@ describe('RedisHealth', () => {
     const { RedisHealth } = require('../../../main/modules/redis-health');
 
     await expect(new RedisHealth().check()).resolves.toBe(false);
-    expect(logger.error).toHaveBeenCalledWith('Redis health check failed: connection refused');
-    expect(quit).toHaveBeenCalled();
+    expect(connect).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith('Redis health check attempt 1 failed: connection refused');
+    expect(logger.error).toHaveBeenCalledWith('Redis health check attempt 2 failed: connection refused');
+    expect(logger.error).toHaveBeenCalledWith('Redis health check attempt 3 failed: connection refused');
+    expect(quit).toHaveBeenCalledTimes(3);
   });
 });

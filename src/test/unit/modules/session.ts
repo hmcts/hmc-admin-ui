@@ -97,6 +97,7 @@ describe('AppSession', () => {
 
     expect(createClient).toHaveBeenCalledWith({
       socket: {
+        connectTimeout: 5000,
         reconnectStrategy: expect.any(Function),
       },
       url: 'rediss://:redis-password@redis.internal:6380',

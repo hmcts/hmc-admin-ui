@@ -6,6 +6,9 @@ const { Logger } = require('@hmcts/nodejs-logging');
 
 const logger = Logger.getLogger('session');
 
+const REDIS_CONNECT_TIMEOUT_MS = 5000;
+const REDIS_MAX_RECONNECT_DELAY_MS = 2000;
+
 export class AppSession {
   private readonly sessionSecret: string = config.get('secrets.hmc.hmc-admin-ui-session-secret');
   private readonly cookieName: string = config.get('session.appCookie.name');
@@ -39,11 +42,14 @@ export class AppSession {
 
     const { RedisStore } = require('connect-redis');
     const { createClient } = require('redis');
-    const reconnectStrategy = (retries: number): number => Math.min(retries * 50, 2000);
+    const reconnectStrategy = (retries: number): number => Math.min(retries * 50, REDIS_MAX_RECONNECT_DELAY_MS);
 
     const redisClient = createClient({
       url: this.redisConnectionString,
-      socket: { reconnectStrategy },
+      socket: {
+        connectTimeout: REDIS_CONNECT_TIMEOUT_MS,
+        reconnectStrategy,
+      },
     });
 
     redisClient.on('error', (error: Error) => {
