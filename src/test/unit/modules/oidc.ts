@@ -27,6 +27,14 @@ jest.mock('express-openid-connect', () => ({
   auth: jest.fn(() => 'oidc-auth-middleware'),
 }));
 
+jest.mock('@hmcts/nodejs-logging', () => ({
+  Logger: {
+    getLogger: jest.fn(() => ({
+      info: jest.fn(),
+    })),
+  },
+}));
+
 type AuthOptions = {
   afterCallback: (req: Request, res: Response, session: { id_token?: string }) => unknown;
 };
