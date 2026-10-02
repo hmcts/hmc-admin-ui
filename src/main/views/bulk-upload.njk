@@ -1,0 +1,68 @@
+{% extends "template.njk" %}
+{% from "macros/csrf.njk" import csrfProtection %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <a href="/" class="govuk-back-link">Back</a>
+
+      {% if errors %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">
+              There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li>
+                    <a href="#bulk-upload-file">{{ error.message }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if downloadValidationResponse %}
+        <p class="govuk-body">
+          <a class="govuk-link" href="/bulk-upload/response/download" download data-validation-response-download>
+            Download rejected CSV with issues again
+          </a>
+        </p>
+      {% endif %}
+
+      <form method="post" action="/bulk-upload{% if csrfToken %}?_csrf={{ csrfToken }}{% endif %}" enctype="multipart/form-data" autocomplete="off" novalidate data-bulk-upload-form>
+        {{ csrfProtection(csrfToken) }}
+
+        <span class="govuk-caption-xl">Support tools</span>
+        <h1 class="govuk-heading-xl">Bulk request</h1>
+
+        <div class="govuk-form-group{% if errors %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="bulk-upload-file">
+            Please upload a file
+          </label>
+          <div id="bulk-upload-file-hint" class="govuk-hint">
+            The file must be a CSV with the headers hearingId, caseRef, action, notes and state.
+          </div>
+          {% if errors %}
+            <p id="bulk-upload-file-error" class="govuk-error-message">
+              <span class="govuk-visually-hidden">Error:</span> {{ errors[0].message }}
+            </p>
+          {% endif %}
+          <input class="govuk-file-upload" id="bulk-upload-file" name="bulkUploadFile" type="file" accept=".csv,text/csv" aria-describedby="bulk-upload-file-hint{% if errors %} bulk-upload-file-error{% endif %}" data-bulk-upload-file>
+        </div>
+
+        <div class="govuk-button-group">
+          <button class="govuk-button" data-module="govuk-button" type="submit">
+            Submit
+          </button>
+          <a class="govuk-button govuk-button--secondary" data-module="govuk-button" href="/">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
