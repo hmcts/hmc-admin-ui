@@ -37,15 +37,14 @@ export class OidcMiddleware {
         secret: this.sessionSecret,
         clientSecret: this.clientSecret,
         clientAuthMethod: 'client_secret_post',
-        idpLogout: true,
+        idpLogout: false,
         authorizationParams: {
           response_type: 'code',
           scope: this.clientScope,
         },
         routes: {
           callback: '/oauth2/callback',
-          logout: '/logout',
-          postLogoutRedirect: this.baseUrl,
+          logout: false,
         },
         session: {
           name: this.sessionCookieName,
@@ -77,6 +76,17 @@ export class OidcMiddleware {
       })
     );
 
+    app.get('/logout', async (req: Request, res: Response, next: NextFunction) => {
+      const redirectUrl = `${req.protocol}://${req.get('host')}`;
+      const ssoLogoutUrl = this.getSsoLogoutUrl(redirectUrl, req.oidc.idToken);
+
+      try {
+        await res.oidc.logout({ returnTo: ssoLogoutUrl ?? redirectUrl });
+      } catch (error) {
+        next(error);
+      }
+    });
+
     app.use((req: Request, _res: Response, next: NextFunction) => {
       if (!req.oidc?.isAuthenticated?.()) {
         throw new HTTPError('Forbidden', http.HTTP_STATUS_FORBIDDEN);
@@ -86,6 +96,19 @@ export class OidcMiddleware {
       _res.locals.isAuthenticated = true;
       next();
     });
+  }
+
+  public getSsoLogoutUrl(redirectUrl: string, idToken?: string): string | undefined {
+    if (!idToken) {
+      return undefined;
+    }
+
+    const params = new URLSearchParams({
+      id_token_hint: idToken,
+      post_logout_redirect_uri: redirectUrl,
+    });
+
+    return `${this.idamBaseUrl}/o/endSession?${params.toString()}`;
   }
 
   private assertAccess(roles: string[]): void {
