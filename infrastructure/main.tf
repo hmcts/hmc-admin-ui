@@ -43,7 +43,7 @@ module "managed_redis" {
   common_tags = var.common_tags
   clustering_policy = "EnterpriseCluster"
 
-  sku_name = local.demo_managed_redis_sku_name
+  sku_name = var.managed_redis_sku_name
 
   public_network_access   = "Disabled"
   create_private_endpoint = true
