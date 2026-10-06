@@ -154,14 +154,16 @@ function parseCsv(csvContent: string, headerStartLine = 0): { headers: string[];
   }
 
   const headers = parseCsvLine(lines[headerStartLine]).filter(header => header.trim() !== '');
-  const rows = lines.slice(headerStartLine + 1).map(line => {
-    const values = parseCsvLine(line);
-
-    return headers.reduce<CsvRow>((row, header, index) => {
-      row[header] = values[index] || '';
-      return row;
-    }, {});
-  });
+  const rows = lines
+    .slice(headerStartLine + 1)
+    .map(line => parseCsvLine(line))
+    .filter(values => values.some(value => value !== ''))
+    .map(values => {
+      return headers.reduce<CsvRow>((row, header, index) => {
+        row[header] = values[index] || '';
+        return row;
+      }, {});
+    });
 
   return { headers, rows };
 }
@@ -191,8 +193,12 @@ function validateRow(row: CsvRow, rowNumber: number): BulkUploadValidationError[
   const notes = row.notes || '';
   const state = row.state || '';
 
+  if (!/^\d+$/.test(hearingId)) {
+    errors.push({ row: rowNumber, message: 'Hearing ID must be a numeric value.' });
+  }
+
   if (hearingId.length > 30) {
-    errors.push({ row: rowNumber, message: 'hearingId exceeds 30 character limit.' });
+    errors.push({ row: rowNumber, message: 'Hearing ID exceeds 30 character limit.' });
   }
 
   if (notes.length > 5000) {

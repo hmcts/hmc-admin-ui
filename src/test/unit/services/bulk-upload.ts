@@ -76,7 +76,24 @@ describe('parseBulkUploadCsv', () => {
       responseRows: [
         {
           hearingId: '1234567890123456789012345678901',
-          validationIssue: 'hearingId exceeds 30 character limit.',
+          validationIssue: 'Hearing ID exceeds 30 character limit.',
+        },
+      ],
+    });
+  });
+
+  test('records a validation issue for hearing IDs that aren not numeric', () => {
+    const result = parseBulkUploadCsv('hearingId,caseRef,action,notes,state\n1234x,1234567890123456,rollback,,');
+
+    expect(result).toMatchObject({
+      isValid: true,
+      payload: {
+        supportRequests: [],
+      },
+      responseRows: [
+        {
+          hearingId: '1234x',
+          validationIssue: 'Hearing ID must be a numeric value.',
         },
       ],
     });

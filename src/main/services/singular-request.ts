@@ -23,6 +23,8 @@ export function validateSingularRequestForm(
     errors.push({ field: 'hearing-id', message: 'Enter a hearing ID' });
   } else if (form.hearingId.length > 30) {
     errors.push({ field: 'hearing-id', message: 'Hearing ID must be 30 characters or fewer' });
+  } else if (!/^\d+$/.test(form.hearingId)) {
+    errors.push({ field: 'hearing-id', message: 'Hearing ID must be a number' });
   }
 
   if (!form.caseRef) {
