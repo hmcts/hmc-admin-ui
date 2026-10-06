@@ -3314,6 +3314,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/hashes@npm:^2.2.0":
+  version: 2.4.0
+  resolution: "@noble/hashes@npm:2.4.0"
+  checksum: 10/88d4cdd6cef00f412a39f65bda1d24cba2264c6cacdd1c6c48d7ed66fd9be865ffb7231024fb81177975c684b8a463879b89c5ae6960370b05a546c0fd8afa2c
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -4242,6 +4249,63 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@otplib/core@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/core@npm:13.5.0"
+  checksum: 10/f1d32dcb99ae90a93580ca3f7d371f42e90716bd27fa4921b32be97f37aa6f532e4029e9893d0e5ca8c925eb43e5c38578e9db5e5d6300848abb26dd1d89e99a
+  languageName: node
+  linkType: hard
+
+"@otplib/hotp@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/hotp@npm:13.5.0"
+  dependencies:
+    "@otplib/core": "npm:13.5.0"
+    "@otplib/uri": "npm:13.5.0"
+  checksum: 10/88e7d3143a5770b73bb45c3ab2b615a538e1f387e4ed164e2bda16099288ee329c36c0c01766e6dec2533b575d4edb8b0dad5052b3628994b9907caec15679c5
+  languageName: node
+  linkType: hard
+
+"@otplib/plugin-base32-scure@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/plugin-base32-scure@npm:13.5.0"
+  dependencies:
+    "@otplib/core": "npm:13.5.0"
+    "@scure/base": "npm:^2.2.0"
+  checksum: 10/c48bdfc44d9e489836a3adfb52a76ce7b83790ca1767df557e17dd6a75ce615011f5d0065264865ef9471dba7173f1d39aa7ad0e51a476b494f23c729fb9dece
+  languageName: node
+  linkType: hard
+
+"@otplib/plugin-crypto-noble@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/plugin-crypto-noble@npm:13.5.0"
+  dependencies:
+    "@noble/hashes": "npm:^2.2.0"
+    "@otplib/core": "npm:13.5.0"
+  checksum: 10/4b13bb06dc61f1a266cd8d88565deb34d279763a09b73f66c19e4f119038f2ef357101f7334dfae4e85d4efce1615662bfd5fdc82b3e6528d0f4f495f9017b1d
+  languageName: node
+  linkType: hard
+
+"@otplib/totp@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/totp@npm:13.5.0"
+  dependencies:
+    "@otplib/core": "npm:13.5.0"
+    "@otplib/hotp": "npm:13.5.0"
+    "@otplib/uri": "npm:13.5.0"
+  checksum: 10/c2525de9e2561a2df033eff97b38858961809aaa1f54012630912deb961398d5dbd8fd8bad85a8fb834ac3546ecfb29dfe276ad5ad70ac0d56794a5290217f1b
+  languageName: node
+  linkType: hard
+
+"@otplib/uri@npm:13.5.0":
+  version: 13.5.0
+  resolution: "@otplib/uri@npm:13.5.0"
+  dependencies:
+    "@otplib/core": "npm:13.5.0"
+  checksum: 10/6d45d3a62bd31b023c663c321c7163547c82a308e1d838a8e5f6c286e51d5ef888e52b4e2fabd2bb25da90e40fefd0db6afee40aa503d5d9ae6992f14841287c
+  languageName: node
+  linkType: hard
+
 "@panva/asn1.js@npm:^1.0.0":
   version: 1.0.0
   resolution: "@panva/asn1.js@npm:1.0.0"
@@ -4687,6 +4751,13 @@ __metadata:
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
   checksum: 10/17d04adf404e04c1e61391ed97bca5117d4c2767a76ae3e879390d6dec7b317fcae68afbf9e98badee075d0b64fa60f287729c4942021b4d19cd01db77385c01
+  languageName: node
+  linkType: hard
+
+"@scure/base@npm:^2.2.0":
+  version: 2.4.0
+  resolution: "@scure/base@npm:2.4.0"
+  checksum: 10/acf3f04119fdba33365e387110edc01585616fe81e96b1b9685fc2e3970736c204613f94614d7b8f4a63d1d31b8b155405eed0ac7afb27d57cdaaf5ea76eb857
   languageName: node
   linkType: hard
 
@@ -5182,6 +5253,15 @@ __metadata:
   version: 2.1.0
   resolution: "@types/ms@npm:2.1.0"
   checksum: 10/532d2ebb91937ccc4a89389715e5b47d4c66e708d15942fe6cc25add6dc37b2be058230a327dd50f43f89b8b6d5d52b74685a9e8f70516edfc9bdd6be910eff4
+  languageName: node
+  linkType: hard
+
+"@types/multer@npm:^2.2.0":
+  version: 2.3.0
+  resolution: "@types/multer@npm:2.3.0"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: 10/93ba37a3301e551c2babc1cc11450a8918db54cfec2265441550ea917f62d862ef7b26094926f61ca612e08bfe24d3477bb52b016502172a9e6ab127967a1c25
   languageName: node
   linkType: hard
 
@@ -6143,6 +6223,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"append-field@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "append-field@npm:1.0.0"
+  checksum: 10/afb50f5ff668af1cb66bc5cfebb55ed9a1d99e24901782ee83d00aed1a499835f9375a149cf27b17f79595ecfcc3d1de0cd5b020b210a5359c43eaf607c217de
+  languageName: node
+  linkType: hard
+
 "applicationinsights@npm:3.16.0":
   version: 3.16.0
   resolution: "applicationinsights@npm:3.16.0"
@@ -7058,6 +7145,15 @@ __metadata:
   bin:
     bunyan: bin/bunyan
   checksum: 10/f6a8030dddf0c780b58eb0ab316054081714483ba9a56f7032c253009d589c7fa1f91d2dd26c5d740d6cc943cde7ac2803b805900375dd8442c1183d480dd51c
+  languageName: node
+  linkType: hard
+
+"busboy@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "busboy@npm:1.6.0"
+  dependencies:
+    streamsearch: "npm:^1.1.0"
+  checksum: 10/bee10fa10ea58e7e3e7489ffe4bda6eacd540a17de9f9cd21cc37e297b2dd9fe52b2715a5841afaec82900750d810d01d7edb4b2d456427f449b92b417579763
   languageName: node
   linkType: hard
 
@@ -10734,6 +10830,7 @@ __metadata:
     "@types/helmet": "npm:^4.0.0"
     "@types/jest": "npm:^29.5.14"
     "@types/lodash": "npm:4.17.25"
+    "@types/multer": "npm:^2.2.0"
     "@types/node": "npm:^24.13.3"
     "@types/nunjucks": "npm:3.2.6"
     "@types/pa11y": "npm:^5.3.7"
@@ -10779,9 +10876,11 @@ __metadata:
     lint-staged: "npm:13.3.0"
     lodash: "npm:4.18.1"
     mini-css-extract-plugin: "npm:2.10.2"
+    multer: "npm:^2.2.0"
     nock: "npm:13.5.6"
     nodemon: "npm:2.0.22"
     nunjucks: "npm:3.2.4"
+    otplib: "npm:^13.4.1"
     pa11y: "npm:^8.0.0"
     playwright: "npm:1.59.1"
     postcss: "npm:^8.4.27"
@@ -13282,6 +13381,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"media-typer@npm:0.3.0":
+  version: 0.3.0
+  resolution: "media-typer@npm:0.3.0"
+  checksum: 10/38e0984db39139604756903a01397e29e17dcb04207bb3e081412ce725ab17338ecc47220c1b186b6bbe79a658aad1b0d41142884f5a481f36290cdefbe6aa46
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:^1.1.0":
   version: 1.1.0
   resolution: "media-typer@npm:1.1.0"
@@ -13598,7 +13704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:^2.1.31, mime-types@npm:~2.1.19, mime-types@npm:~2.1.34":
+"mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:^2.1.31, mime-types@npm:~2.1.19, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
   version: 2.1.35
   resolution: "mime-types@npm:2.1.35"
   dependencies:
@@ -13971,6 +14077,17 @@ __metadata:
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: 10/aa92de608021b242401676e35cfa5aa42dd70cbdc082b916da7fb925c542173e36bce97ea3e804923fe92c0ad991434e4a38327e15a1b5b5f945d66df615ae6d
+  languageName: node
+  linkType: hard
+
+"multer@npm:^2.2.0":
+  version: 2.4.0
+  resolution: "multer@npm:2.4.0"
+  dependencies:
+    append-field: "npm:^1.0.0"
+    busboy: "npm:^1.6.0"
+    type-is: "npm:^1.6.18"
+  checksum: 10/644efb2eefa60079866c3ed9eb549e76c93bd642af2790c2579b224de9a4a4e0545d8e36aeafca21207445b6d2505e85779dca365351eb6f45fca8ce44a8e605
   languageName: node
   linkType: hard
 
@@ -14590,6 +14707,20 @@ __metadata:
   version: 1.0.2
   resolution: "os-tmpdir@npm:1.0.2"
   checksum: 10/5666560f7b9f10182548bf7013883265be33620b1c1b4a4d405c25be2636f970c5488ff3e6c48de75b55d02bde037249fe5dbfbb4c0fb7714953d56aed062e6d
+  languageName: node
+  linkType: hard
+
+"otplib@npm:^13.4.1":
+  version: 13.5.0
+  resolution: "otplib@npm:13.5.0"
+  dependencies:
+    "@otplib/core": "npm:13.5.0"
+    "@otplib/hotp": "npm:13.5.0"
+    "@otplib/plugin-base32-scure": "npm:13.5.0"
+    "@otplib/plugin-crypto-noble": "npm:13.5.0"
+    "@otplib/totp": "npm:13.5.0"
+    "@otplib/uri": "npm:13.5.0"
+  checksum: 10/bc5df7b47293c345511585a50e5e122b778a437578343b6ddd12d083d5aa6a16b10969c595dda8494d69f9faa05519f2ad30202b3cbd2a641cfb89e37fb312c6
   languageName: node
   linkType: hard
 
@@ -17022,6 +17153,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"streamsearch@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "streamsearch@npm:1.1.0"
+  checksum: 10/612c2b2a7dbcc859f74597112f80a42cbe4d448d03da790d5b7b39673c1197dd3789e91cd67210353e58857395d32c1e955a9041c4e6d5bae723436b3ed9ed14
+  languageName: node
+  linkType: hard
+
 "streamx@npm:^2.15.0, streamx@npm:^2.21.0":
   version: 2.22.0
   resolution: "streamx@npm:2.22.0"
@@ -17922,6 +18060,16 @@ __metadata:
   version: 4.41.0
   resolution: "type-fest@npm:4.41.0"
   checksum: 10/617ace794ac0893c2986912d28b3065ad1afb484cad59297835a0807dc63286c39e8675d65f7de08fafa339afcb8fe06a36e9a188b9857756ae1e92ee8bda212
+  languageName: node
+  linkType: hard
+
+"type-is@npm:^1.6.18":
+  version: 1.6.18
+  resolution: "type-is@npm:1.6.18"
+  dependencies:
+    media-typer: "npm:0.3.0"
+    mime-types: "npm:~2.1.24"
+  checksum: 10/0bd9eeae5efd27d98fd63519f999908c009e148039d8e7179a074f105362d4fcc214c38b24f6cda79c87e563cbd12083a4691381ed28559220d4a10c2047bed4
   languageName: node
   linkType: hard
 
