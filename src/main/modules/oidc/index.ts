@@ -6,6 +6,10 @@ import { Session, auth } from 'express-openid-connect';
 
 import { HTTPError } from '../../HttpError';
 
+const { Logger } = require('@hmcts/nodejs-logging');
+
+const logger = Logger.getLogger('oidc');
+
 type IdamUser = {
   uid?: string;
   sub?: string;
@@ -59,6 +63,7 @@ export class OidcMiddleware {
           const tokenUser = this.decodeIdToken(oidcSession.id_token);
           const roles = this.normaliseRoles(tokenUser.roles);
           this.assertAccess(roles);
+          logger.info(`User logged in: ${tokenUser.uid ?? tokenUser.sub ?? 'unknown'}`);
 
           return {
             ...oidcSession,

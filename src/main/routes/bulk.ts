@@ -100,7 +100,7 @@ export function handleUploadError(error: unknown, res: Response, next: NextFunct
 }
 
 function uploadSingleBulkUploadFile(req: Request, res: Response, next: NextFunction): void {
-  upload.single('bulkUploadFile')(req, res, (error: unknown) => {
+  void upload.single('bulkUploadFile')(req, res, (error: unknown) => {
     if (error) {
       handleUploadError(error, res, next);
       return;

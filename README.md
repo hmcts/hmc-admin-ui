@@ -6,7 +6,7 @@
 
 Running the application requires the following tools to be installed in your environment:
 
-- [Node.js](https://nodejs.org/) v20.20.2, as specified in [.nvmrc](.nvmrc)
+- [Node.js](https://nodejs.org/) v24.18.0, as specified in [.nvmrc](.nvmrc)
 - [Yarn](https://yarnpkg.com/) v4.15.0, managed by Corepack
 - [Docker](https://www.docker.com)
 
@@ -57,18 +57,24 @@ yarn start
 
 The application's home page will be available at http://localhost:3000.
 
-### Running with Docker
-
-Create docker image:
+Start the application against demo-style local configuration:
 
 ```bash
-docker-compose build
+yarn start:demo
 ```
 
-Run the application by executing the following command:
+### Running with Docker
+
+Build the Docker image:
 
 ```bash
-docker-compose up
+docker compose build
+```
+
+Run the application:
+
+```bash
+docker compose up
 ```
 
 This will start the frontend container exposing the application's port, `3000`.
@@ -130,6 +136,12 @@ Run functional tests with CodeceptJS and Playwright:
 yarn test:functional
 ```
 
+Run functional tests against a locally running application with authentication disabled:
+
+```bash
+yarn test:functional:local
+```
+
 Run the main local CI checks:
 
 ```bash
@@ -140,12 +152,11 @@ yarn cichecks
 
 #### CSRF prevention
 
-[Cross-Site Request Forgery](https://github.com/pillarjs/understanding-csrf) prevention has already been
-set up in this template, at the application level. However, you need to make sure that CSRF token
-is present in every HTML form that requires it. For that purpose you can use the `csrfProtection` macro,
-included in this template app. Your njk file would look like this:
+[Cross-Site Request Forgery](https://github.com/pillarjs/understanding-csrf) prevention is set up at the
+application level. Make sure the CSRF token is present in every HTML form that requires it. Use the
+`csrfProtection` macro from [csrf.njk](src/main/views/macros/csrf.njk):
 
-```
+```njk
 {% from "macros/csrf.njk" import csrfProtection %}
 ...
 <form ...>
@@ -168,12 +179,12 @@ There is a configuration section related with those headers, where you can speci
 
 - `referrerPolicy` - value of the `Referrer-Policy` header
 
-Here's an example setup:
+Configuration lives in [default.json](config/default.json), for example:
 
 ```json
-    "security": {
-      "referrerPolicy": "origin",
-    }
+"security": {
+  "referrerPolicy": "same-origin"
+}
 ```
 
 Make sure you have those values set correctly for your application.
@@ -182,9 +193,9 @@ Make sure you have those values set correctly for your application.
 
 The application exposes a health endpoint (http://localhost:3000/health), created with the use of
 [Nodejs Healthcheck](https://github.com/hmcts/nodejs-healthcheck) library. This endpoint is defined
-in [health.ts](src/main/routes/health.ts) file. Make sure you adjust it correctly in your application.
-In particular, remember to replace the sample check with checks specific to your frontend app,
-e.g. the ones verifying the state of each service it depends on.
+in [health.ts](src/main/routes/health.ts). It currently includes a readiness shutdown check and a basic
+sample check; replace the sample check with dependency-specific checks when adding external service health
+requirements.
 
 ## License
 
