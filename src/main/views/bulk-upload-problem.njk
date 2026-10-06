@@ -1,0 +1,27 @@
+{% extends "template.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">Support tools</span>
+      <h1 class="govuk-heading-xl">Sorry, there is a problem with the service</h1>
+
+      <p class="govuk-body">
+        The bulk request could not be processed because the manage exceptions service is unavailable.
+      </p>
+
+      <p class="govuk-body">
+        Try again later.
+      </p>
+
+      <div class="govuk-button-group">
+        <a class="govuk-button" data-module="govuk-button" href="/bulk-upload">
+          Try bulk upload again
+        </a>
+        <a class="govuk-link" href="/">
+          Return to Support tools
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

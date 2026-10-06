@@ -4,4 +4,18 @@ export default function (app: Application): void {
   app.get('/', (req, res) => {
     res.render('home');
   });
+
+  app.post('/', (req, res) => {
+    if (req.body.requestType === 'bulk') {
+      res.redirect(303, '/bulk-upload');
+      return;
+    }
+
+    if (req.body.requestType === 'singular') {
+      res.redirect(303, '/singular');
+      return;
+    }
+
+    res.redirect(303, '/');
+  });
 }

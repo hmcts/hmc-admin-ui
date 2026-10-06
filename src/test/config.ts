@@ -4,9 +4,11 @@ process.on('unhandledRejection', reason => {
 });
 
 const url = process.env.TEST_URL ? `${process.env.TEST_URL}/` : 'http://localhost:3000/';
+const authEnabled = process.env.FUNCTIONAL_TEST_AUTH_ENABLED !== 'false';
 
 export const config = {
   TEST_URL: url,
+  AuthEnabled: authEnabled,
   TestHeadlessBrowser: true,
   TestSlowMo: 250,
   WaitForTimeout: 10000,
