@@ -13,6 +13,9 @@
     }
   },
   "services": {
+    "hmc": {
+      "url": "HMC_CFT_HEARING_SERVICE_URL"
+    },
     "idam": {
       "clientID": "IDAM_CLIENT_ID",
       "scope": "IDAM_CLIENT_SCOPE",
@@ -20,7 +23,8 @@
         "hmc": "HMC_ADMIN_UI_BASE_URL",
         "public": "IDAM_PUBLIC_URL"
       }
-    }
+    },
+    "s2s": "SERVICES_S2S"
   },
   "session": {
     "cookie": {
@@ -33,10 +37,12 @@
   "RBAC": {
     "access": "RBAC_ACCESS"
   },
+  "microservice": "MICROSERVICE",
   "secrets": {
     "hmc": {
       "AppInsightsInstrumentationKey": "APPINSIGHTS_INSTRUMENTATIONKEY",
       "hmc-admin-ui-client-secret": "HMC_ADMIN_UI_CLIENT_SECRET",
+      "hmc-admin-ui-s2s-secret": "HMC_ADMIN_UI_S2S_SECRET",
       "hmc-admin-ui-session-secret": "SESSION_SECRET"
     }
   }

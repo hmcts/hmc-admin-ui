@@ -9,7 +9,7 @@ import { OidcMiddleware } from '../../../main/modules/oidc';
 jest.mock('config', () => ({
   get: jest.fn((key: string) => {
     const values: Record<string, string> = {
-      'services.idam.clientID': 'hmc_admin_ui',
+      'services.idam.clientID': 'hmc-admin-ui',
       'secrets.hmc.hmc-admin-ui-client-secret': 'client-secret',
       'services.idam.scope': 'openid profile roles',
       'services.idam.url.hmc': 'https://hmc-admin-ui.preview.platform.hmcts.net',
@@ -59,7 +59,7 @@ describe('OidcMiddleware', () => {
       expect.objectContaining({
         issuerBaseURL: 'https://hmcts-access.aat.platform.hmcts.net/o',
         baseURL: 'https://hmc-admin-ui.preview.platform.hmcts.net',
-        clientID: 'hmc_admin_ui',
+        clientID: 'hmc-admin-ui',
         clientSecret: 'client-secret',
         clientAuthMethod: 'client_secret_post',
         authorizationParams: {
