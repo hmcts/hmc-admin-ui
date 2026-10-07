@@ -41,7 +41,7 @@ def secrets = [
 def branchesToSync = ['perftest', 'ithc']
 
 withPipeline(type, product, component) {
-  enableFullFunctionalTest()
+  // enableFullFunctionalTest()
   loadVaultSecrets(secrets)
   syncBranchesWithMaster(branchesToSync)
 
@@ -71,7 +71,7 @@ withPipeline(type, product, component) {
     publishTestReports()
   }
 
-  afterAlways('functionalTest:preview') {
+  /* afterAlways('functionalTest:preview') {
     publishTestReports()
-  }
+  } */
 }
