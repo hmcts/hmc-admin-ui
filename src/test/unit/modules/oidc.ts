@@ -51,13 +51,15 @@ function createIdToken(payload: Record<string, unknown>): string {
 
 describe('OidcMiddleware', () => {
   let use: jest.Mock;
+  let get: jest.Mock;
   let app: Application;
   const mockedAuth = auth as jest.Mock;
 
   beforeEach(() => {
     mockedAuth.mockClear();
     use = jest.fn();
-    app = { use } as unknown as Application;
+    get = jest.fn();
+    app = { get, use } as unknown as Application;
   });
 
   test('configures express-openid-connect and registers auth middleware', () => {
@@ -70,14 +72,14 @@ describe('OidcMiddleware', () => {
         clientID: 'hmc-admin-ui',
         clientSecret: 'client-secret',
         clientAuthMethod: 'client_secret_post',
+        idpLogout: false,
         authorizationParams: {
           response_type: 'code',
           scope: 'openid profile roles',
         },
         routes: {
           callback: '/oauth2/callback',
-          logout: '/logout',
-          postLogoutRedirect: 'https://hmc-admin-ui.preview.platform.hmcts.net',
+          logout: false,
         },
         session: expect.objectContaining({
           name: 'hmc-admin-ui-session',
@@ -86,6 +88,48 @@ describe('OidcMiddleware', () => {
       })
     );
     expect(use).toHaveBeenCalledWith('oidc-auth-middleware');
+    expect(get).toHaveBeenCalledWith('/logout', expect.any(Function));
+  });
+
+  test('logs out through IDAM with the ID token and current origin', async () => {
+    new OidcMiddleware().enableFor(app);
+    const logoutHandler = get.mock.calls[0][1] as (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    const logout = jest.fn().mockResolvedValue(undefined);
+
+    await logoutHandler(
+      {
+        protocol: 'https',
+        get: jest.fn().mockReturnValue('hmc-admin-ui.demo.platform.hmcts.net'),
+        oidc: { idToken: 'id-token-value' },
+      } as unknown as Request,
+      { oidc: { logout } } as unknown as Response,
+      jest.fn()
+    );
+
+    const returnTo = logout.mock.calls[0][0].returnTo as string;
+    const logoutUrl = new URL(returnTo);
+
+    expect(`${logoutUrl.origin}${logoutUrl.pathname}`).toBe('https://hmcts-access.aat.platform.hmcts.net/o/endSession');
+    expect(logoutUrl.searchParams.get('id_token_hint')).toBe('id-token-value');
+    expect(logoutUrl.searchParams.get('post_logout_redirect_uri')).toBe('https://hmc-admin-ui.demo.platform.hmcts.net');
+  });
+
+  test('performs a local logout to the current origin when there is no ID token', async () => {
+    new OidcMiddleware().enableFor(app);
+    const logoutHandler = get.mock.calls[0][1] as (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    const logout = jest.fn().mockResolvedValue(undefined);
+
+    await logoutHandler(
+      {
+        protocol: 'http',
+        get: jest.fn().mockReturnValue('localhost:3000'),
+        oidc: {},
+      } as unknown as Request,
+      { oidc: { logout } } as unknown as Response,
+      jest.fn()
+    );
+
+    expect(logout).toHaveBeenCalledWith({ returnTo: 'http://localhost:3000' });
   });
 
   test('adds user details from a valid IDAM token after callback', () => {
