@@ -17,6 +17,7 @@ class HmcOdhinAdaptiveReporter {
     this.outputFolder = options.outputFolder;
     this.featureStats = new Map();
     this.testMetadata = [];
+    this.pendingInnerCallbacks = Promise.resolve();
   }
 
   onBegin(...args) {
@@ -37,15 +38,15 @@ class HmcOdhinAdaptiveReporter {
       retry: result?.retry ?? 0,
     });
     this.recordFeatureStat(args[0], args[1]);
-    return this.inner.onTestEnd?.(...args);
+    this.enqueueInnerCallback(() => this.inner.onTestEnd?.(...args));
   }
 
   onStdOut(...args) {
-    return this.inner.onStdOut?.(...args);
+    this.enqueueInnerCallback(() => this.inner.onStdOut?.(...args));
   }
 
   onStdErr(...args) {
-    return this.inner.onStdErr?.(...args);
+    this.enqueueInnerCallback(() => this.inner.onStdErr?.(...args));
   }
 
   onError(...args) {
@@ -53,13 +54,23 @@ class HmcOdhinAdaptiveReporter {
   }
 
   onEnd(...args) {
-    return Promise.resolve(this.inner.onEnd?.(...args)).then(() => {
-      try {
-        enhanceGeneratedReport(this.outputFolder, this.featureStats, this.testMetadata);
-      } catch (error) {
-        process.stderr.write(`[odhin] report enhancement failed: ${formatErrorMessage(error)}\n`);
-      }
-    });
+    return this.flushInnerCallbacks()
+      .then(() => this.inner.onEnd?.(...args))
+      .then(() => {
+        try {
+          enhanceGeneratedReport(this.outputFolder, this.featureStats, this.testMetadata);
+        } catch (error) {
+          process.stderr.write(`[odhin] report enhancement failed: ${formatErrorMessage(error)}\n`);
+        }
+      });
+  }
+
+  enqueueInnerCallback(invoke) {
+    this.pendingInnerCallbacks = this.pendingInnerCallbacks.then(() => Promise.resolve().then(invoke));
+  }
+
+  flushInnerCallbacks() {
+    return this.pendingInnerCallbacks;
   }
 
   recordFeatureStat(test, result) {

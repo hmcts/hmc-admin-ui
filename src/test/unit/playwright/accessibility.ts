@@ -2,6 +2,7 @@ import {
   WCAG_AA_TAGS,
   accessibilityEvidenceFilenames,
   buildAccessibilitySummaryHtml,
+  buildPublishedAccessibilityEvidenceEntry,
 } from '../../../../playwright/functional/accessibility';
 
 describe('accessibility rules', () => {
@@ -42,6 +43,40 @@ describe('buildAccessibilitySummaryHtml', () => {
       html: 'final-state-validation-axe-summary.html',
       json: 'final-state-validation-axe-results.json',
       screenshot: 'final-state-validation.png',
+    });
+  });
+});
+
+describe('buildPublishedAccessibilityEvidenceEntry', () => {
+  test('creates the report manifest shape consumed by the Odhín enhancer', () => {
+    const entry = buildPublishedAccessibilityEvidenceEntry(
+      { file: '/workspace/playwright/functional/home.spec.ts', title: 'home accessibility' },
+      'home-page',
+      {
+        violations: [
+          {
+            id: 'button-name',
+            help: 'Buttons need accessible names',
+            helpUrl: 'https://example.test/button-name',
+            nodes: [{ target: ['#submit'] }, { target: ['#submit'] }],
+          },
+        ],
+      },
+      {
+        html: 'home-accessibility-axe-summary.html',
+        json: 'home-accessibility-axe-results.json',
+        screenshot: 'home-accessibility.png',
+      }
+    );
+
+    expect(entry).toMatchObject({
+      engine: 'axe',
+      feature: 'home',
+      pageState: 'home-page',
+      testTitle: 'home accessibility',
+      violationCount: 1,
+      rules: ['button-name'],
+      targets: ['#submit'],
     });
   });
 });

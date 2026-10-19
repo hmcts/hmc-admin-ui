@@ -23,6 +23,20 @@ type AccessibilityEvidenceFilenames = {
   screenshot: string;
 };
 
+export type PublishedAccessibilityEvidenceEntry = {
+  engine: 'axe';
+  feature: string;
+  pageState: string;
+  testTitle: string;
+  attachmentPrefix: string;
+  htmlFileName: string;
+  jsonFileName: string;
+  screenshotFileName: string;
+  violationCount: number;
+  rules: string[];
+  targets: string[];
+};
+
 export const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 function escapeHtml(value: string): string {
@@ -40,6 +54,85 @@ export function accessibilityEvidenceFilenames(evidenceName: string): Accessibil
     json: `${evidenceName}-axe-results.json`,
     screenshot: `${evidenceName}.png`,
   };
+}
+
+function sanitiseFileName(value: string): string {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'accessibility'
+  );
+}
+
+export function buildPublishedAccessibilityEvidenceEntry(
+  testInfo: Pick<TestInfo, 'file' | 'title'>,
+  evidenceName: string,
+  results: AccessibilityAuditResults,
+  filenames: AccessibilityEvidenceFilenames
+): PublishedAccessibilityEvidenceEntry {
+  const violations = results.violations ?? [];
+  return {
+    engine: 'axe',
+    feature: path.basename(testInfo.file).replace(/\.spec\.[^.]+$/, ''),
+    pageState: evidenceName,
+    testTitle: testInfo.title,
+    attachmentPrefix: evidenceName,
+    htmlFileName: filenames.html,
+    jsonFileName: filenames.json,
+    screenshotFileName: filenames.screenshot,
+    violationCount: violations.length,
+    rules: Array.from(new Set(violations.map(violation => violation.id))),
+    targets: Array.from(new Set(violations.flatMap(violation => violation.nodes.flatMap(node => node.target)))),
+  };
+}
+
+async function publishReportLevelEvidence(
+  testInfo: Pick<TestInfo, 'file' | 'title' | 'outputPath'>,
+  evidenceName: string,
+  results: AccessibilityAuditResults,
+  sourceDirectory: string,
+  filenames: AccessibilityEvidenceFilenames
+): Promise<void> {
+  const reportDirectory = path.resolve(
+    process.env.PLAYWRIGHT_REPORT_FOLDER ?? 'functional-output/tests/playwright-functional/odhin-report'
+  );
+  const evidenceDirectory = path.join(reportDirectory, 'accessibility-evidence');
+  const baseName = `${sanitiseFileName(testInfo.title)}-${sanitiseFileName(evidenceName)}`;
+  const reportFilenames = {
+    html: `${baseName}-${filenames.html}`,
+    json: `${baseName}-${filenames.json}`,
+    screenshot: `${baseName}-${filenames.screenshot}`,
+  };
+  const entry = buildPublishedAccessibilityEvidenceEntry(testInfo, evidenceName, results, reportFilenames);
+
+  await fs.mkdir(evidenceDirectory, { recursive: true });
+  await Promise.all([
+    fs.copyFile(path.join(sourceDirectory, filenames.html), path.join(evidenceDirectory, reportFilenames.html)),
+    fs.copyFile(path.join(sourceDirectory, filenames.json), path.join(evidenceDirectory, reportFilenames.json)),
+    fs.copyFile(
+      path.join(sourceDirectory, filenames.screenshot),
+      path.join(evidenceDirectory, reportFilenames.screenshot)
+    ),
+  ]);
+
+  const manifestPath = path.join(evidenceDirectory, 'manifest.json');
+  let entries: PublishedAccessibilityEvidenceEntry[] = [];
+  try {
+    const parsed = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+    if (Array.isArray(parsed)) {
+      entries = parsed.filter(item => item && typeof item.testTitle === 'string');
+    }
+  } catch {
+    // A missing manifest is expected on the first accessibility audit.
+  }
+  entries = entries.filter(
+    existing => existing.testTitle !== entry.testTitle || existing.attachmentPrefix !== entry.attachmentPrefix
+  );
+  await Promise.all([
+    fs.writeFile(manifestPath, JSON.stringify([...entries, entry], null, 2)),
+    fs.writeFile(path.join(evidenceDirectory, `manifest-entry-${baseName}.json`), JSON.stringify(entry, null, 2)),
+  ]);
 }
 
 export function buildAccessibilitySummaryHtml(
@@ -103,6 +196,8 @@ export async function auditPageAccessibility(
       contentType: 'image/png',
     }),
   ]);
+
+  await publishReportLevelEvidence(testInfo, evidenceName, results, evidenceDirectory, filenames);
 
   return results;
 }
