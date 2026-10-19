@@ -36,4 +36,35 @@ describe('HMC Odhín adaptive reporter', () => {
       fs.rmSync(outputFolder, { recursive: true, force: true });
     }
   });
+
+  test('continues finalisation when an inner callback rejects', async () => {
+    const outputFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'hmc-odhin-adaptive-'));
+    const events: string[] = [];
+    const reporter = new HmcOdhinAdaptiveReporter({ outputFolder });
+    reporter.inner = {
+      onTestEnd: async () => {
+        throw new Error('inner callback failure');
+      },
+      onEnd: async () => {
+        events.push('end');
+      },
+    };
+
+    try {
+      reporter.onTestEnd(
+        {
+          id: 'test-id',
+          retries: 0,
+          tags: [],
+          location: { file: '/workspace/playwright/functional/home.spec.ts' },
+        },
+        { duration: 1, retry: 0, status: 'passed' }
+      );
+      await reporter.onEnd({ status: 'passed' });
+
+      expect(events).toEqual(['end']);
+    } finally {
+      fs.rmSync(outputFolder, { recursive: true, force: true });
+    }
+  });
 });

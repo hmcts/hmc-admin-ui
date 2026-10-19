@@ -1,8 +1,13 @@
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import {
   WCAG_AA_TAGS,
   accessibilityEvidenceFilenames,
   buildAccessibilitySummaryHtml,
   buildPublishedAccessibilityEvidenceEntry,
+  publishReportLevelAccessibilityEvidence,
 } from '../../../../playwright/functional/accessibility';
 
 describe('accessibility rules', () => {
@@ -78,5 +83,50 @@ describe('buildPublishedAccessibilityEvidenceEntry', () => {
       rules: ['button-name'],
       targets: ['#submit'],
     });
+  });
+
+  test('publishes report-level evidence files and manifest entries', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hmc-a11y-publication-'));
+    const sourceDirectory = path.join(root, 'test-results');
+    const reportDirectory = path.join(root, 'odhin-report');
+    const filenames = accessibilityEvidenceFilenames('home-page');
+    const previousReportFolder = process.env.PLAYWRIGHT_REPORT_FOLDER;
+    process.env.PLAYWRIGHT_REPORT_FOLDER = reportDirectory;
+
+    try {
+      fs.mkdirSync(sourceDirectory, { recursive: true });
+      fs.writeFileSync(path.join(sourceDirectory, filenames.html), '<html>evidence</html>');
+      fs.writeFileSync(path.join(sourceDirectory, filenames.json), '{}');
+      fs.writeFileSync(path.join(sourceDirectory, filenames.screenshot), 'png');
+
+      await publishReportLevelAccessibilityEvidence(
+        { file: '/workspace/playwright/functional/home.spec.ts', title: 'home accessibility' },
+        'home-page',
+        { violations: [] },
+        sourceDirectory,
+        filenames
+      );
+
+      const evidenceDirectory = path.join(reportDirectory, 'accessibility-evidence');
+      const manifest = JSON.parse(fs.readFileSync(path.join(evidenceDirectory, 'manifest.json'), 'utf8'));
+      expect(manifest).toHaveLength(1);
+      expect(manifest[0].feature).toBe('home');
+      expect(fs.readdirSync(evidenceDirectory)).toEqual(
+        expect.arrayContaining([
+          'manifest.json',
+          expect.stringMatching(/^manifest-entry-/),
+          expect.stringMatching(/\.html$/),
+          expect.stringMatching(/\.json$/),
+          expect.stringMatching(/\.png$/),
+        ])
+      );
+    } finally {
+      if (previousReportFolder === undefined) {
+        delete process.env.PLAYWRIGHT_REPORT_FOLDER;
+      } else {
+        process.env.PLAYWRIGHT_REPORT_FOLDER = previousReportFolder;
+      }
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 });

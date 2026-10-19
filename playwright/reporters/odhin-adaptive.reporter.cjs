@@ -66,7 +66,13 @@ class HmcOdhinAdaptiveReporter {
   }
 
   enqueueInnerCallback(invoke) {
-    this.pendingInnerCallbacks = this.pendingInnerCallbacks.then(() => Promise.resolve().then(invoke));
+    const run = () =>
+      Promise.resolve()
+        .then(invoke)
+        .catch(error => {
+          process.stderr.write(`[odhin] inner reporter callback failed: ${formatErrorMessage(error)}\n`);
+        });
+    this.pendingInnerCallbacks = this.pendingInnerCallbacks.then(run, run);
   }
 
   flushInnerCallbacks() {

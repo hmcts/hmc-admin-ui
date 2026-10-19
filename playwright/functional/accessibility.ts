@@ -87,8 +87,8 @@ export function buildPublishedAccessibilityEvidenceEntry(
   };
 }
 
-async function publishReportLevelEvidence(
-  testInfo: Pick<TestInfo, 'file' | 'title' | 'outputPath'>,
+export async function publishReportLevelAccessibilityEvidence(
+  testInfo: Pick<TestInfo, 'file' | 'title'>,
   evidenceName: string,
   results: AccessibilityAuditResults,
   sourceDirectory: string,
@@ -197,7 +197,7 @@ export async function auditPageAccessibility(
     }),
   ]);
 
-  await publishReportLevelEvidence(testInfo, evidenceName, results, evidenceDirectory, filenames);
+  await publishReportLevelAccessibilityEvidence(testInfo, evidenceName, results, evidenceDirectory, filenames);
 
   return results;
 }
