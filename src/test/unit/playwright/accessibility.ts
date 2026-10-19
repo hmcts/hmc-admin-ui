@@ -1,7 +1,14 @@
 import {
+  WCAG_AA_TAGS,
   accessibilityEvidenceFilenames,
   buildAccessibilitySummaryHtml,
 } from '../../../../playwright/functional/accessibility';
+
+describe('accessibility rules', () => {
+  test('uses all WCAG A and AA tags required by the audit contract', () => {
+    expect(WCAG_AA_TAGS).toEqual(expect.arrayContaining(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']));
+  });
+});
 
 describe('buildAccessibilitySummaryHtml', () => {
   test('renders a readable escaped summary of violations and evidence path', () => {

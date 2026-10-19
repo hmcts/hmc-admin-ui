@@ -23,7 +23,7 @@ type AccessibilityEvidenceFilenames = {
   screenshot: string;
 };
 
-const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
+export const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 function escapeHtml(value: string): string {
   return value

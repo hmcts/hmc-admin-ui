@@ -97,6 +97,24 @@ withPipeline(type, product, component) {
     publishTestReports()
   }
 
+  before('functionalTest:preview') {
+    configurePlaywrightFunctional('preview')
+  }
+
+  afterAlways('functionalTest:preview') {
+    publishTestReports()
+    publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
+  }
+
+  before('functionalTest:aat') {
+    configurePlaywrightFunctional('aat')
+  }
+
+  afterAlways('functionalTest:aat') {
+    publishTestReports()
+    publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+  }
+
   before('fullFunctionalTest:preview') {
     configurePlaywrightFunctional('preview')
   }

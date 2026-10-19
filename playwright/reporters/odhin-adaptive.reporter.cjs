@@ -1,6 +1,5 @@
-/* global module, require */
-
 const odhinModule = require('odhin-reports-playwright');
+
 const { normalizeOdhinReportFilename } = require('./odhin-filename.cjs');
 
 const OdhinReporter = odhinModule.default ?? odhinModule;
