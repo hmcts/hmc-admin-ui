@@ -41,8 +41,12 @@ def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functio
 def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
 def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
 def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
+def playwrightBrowsersEnv = {
+  ["PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright"]
+}
 
 def configurePlaywrightFunctional = { String targetEnvironment ->
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
   env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
   env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightFunctionalOutputRoot}/odhin-report"
@@ -67,6 +71,7 @@ def publishPlaywrightFunctional = { String reportName ->
 }
 
 def configurePlaywrightAccessibility = { String targetEnvironment ->
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
   env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
   env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightAccessibilityOutputRoot}/odhin-report"
@@ -127,9 +132,19 @@ withPipeline(type, product, component) {
   }
 
   afterSuccess('build') {
-    yarnBuilder.yarn('playwright install')
     yarnBuilder.yarn('rebuild puppeteer')
     yarnBuilder.yarn('build')
+  }
+
+  afterSuccess('checkout') {
+    stage('Playwright Install Chromium') {
+      withEnv(playwrightBrowsersEnv()) {
+        steps.sh 'mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"'
+        yarnBuilder.yarn('playwright --version')
+        yarnBuilder.yarn('test:setup:playwright-install-chromium')
+        yarnBuilder.yarn('test:setup:playwright-verify-chromium')
+      }
+    }
   }
 
   afterSuccess('test') {

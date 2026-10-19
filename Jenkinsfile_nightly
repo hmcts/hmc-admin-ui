@@ -22,6 +22,9 @@ def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functio
 def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
 def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
 def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
+def playwrightBrowsersEnv = {
+  ["PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright"]
+}
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [
@@ -41,6 +44,7 @@ def secrets = [
 ]
 
 def configurePlaywrightFunctional = {
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.TEST_URL = env.TEST_URL ?: 'https://hmc-admin-ui.aat.platform.hmcts.net'
   env.IDAM_PUBLIC_URL = 'https://hmcts-access.aat.platform.hmcts.net'
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
@@ -64,6 +68,7 @@ def publishPlaywrightFunctional = {
 }
 
 def runPlaywrightAccessibility = {
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.TEST_URL = env.TEST_URL ?: 'https://hmc-admin-ui.aat.platform.hmcts.net'
   env.IDAM_PUBLIC_URL = 'https://hmcts-access.aat.platform.hmcts.net'
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
@@ -96,6 +101,16 @@ def runPlaywrightAccessibility = {
 withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableFullFunctionalTest(60)
+  afterSuccess('checkout') {
+    stage('Playwright Install Chromium') {
+      withEnv(playwrightBrowsersEnv()) {
+        steps.sh 'mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"'
+        yarnBuilder.yarn('playwright --version')
+        yarnBuilder.yarn('test:setup:playwright-install-chromium')
+        yarnBuilder.yarn('test:setup:playwright-verify-chromium')
+      }
+    }
+  }
   before('fullFunctionalTest') {
     configurePlaywrightFunctional()
   }

@@ -58,4 +58,14 @@ describe('native Playwright CNP contract', () => {
     expect(nightlyJenkinsfile).toContain('functional-output/tests/playwright-accessibility');
     expect(nightlyJenkinsfile).toContain('Nightly HMC Admin UI Playwright Accessibility Test');
   });
+
+  test.each([
+    ['CNP', jenkinsfile],
+    ['nightly', nightlyJenkinsfile],
+  ])('preflights the pinned Chromium runtime before %s Playwright stages', (_pipeline, source) => {
+    expect(source).toContain('PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright');
+    expect(source).toContain("afterSuccess('checkout')");
+    expect(source).toContain("yarnBuilder.yarn('test:setup:playwright-install-chromium')");
+    expect(source).toContain("yarnBuilder.yarn('test:setup:playwright-verify-chromium')");
+  });
 });
