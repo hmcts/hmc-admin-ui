@@ -136,15 +136,31 @@ Run the native Playwright functional test against an OIDC-enabled deployed envir
 TEST_URL=https://your-environment.example TEST_IDAM_USERNAME=... TEST_IDAM_PASSWORD=... yarn test:functional
 ```
 
-This command requires a non-local `TEST_URL` and the IDAM credentials. It fails when either is absent, when zero tests are selected, or when the JUnit/Odhín reports are missing. After the OIDC home journey reaches its ready state, it runs the same strict WCAG 2.2 AA axe audit as the local check. CNP supplies the credentials from Key Vault. Its evidence is written beneath `functional-output/tests/playwright-functional/`.
+This command requires a non-local `TEST_URL` and the IDAM credentials. It fails when either is absent, when zero tests are selected, or when the JUnit/Odhín reports are missing. CNP supplies the credentials from Key Vault. Functional evidence is written beneath `functional-output/tests/playwright-functional/`.
 
-Run the deterministic local home-page and accessibility checks with authentication disabled:
+Run the native Playwright accessibility test against an OIDC-enabled deployed environment:
+
+```bash
+TEST_URL=https://your-environment.example TEST_IDAM_USERNAME=... TEST_IDAM_PASSWORD=... yarn test:accessibility:playwright
+```
+
+This command uses the same OIDC prerequisites as the functional lane and writes Axe WCAG 2.2 AA evidence beneath `functional-output/tests/playwright-accessibility/`. CNP runs this report-only pack on its manual/nightly accessibility paths.
+
+Run the deterministic local functional checks with authentication disabled:
 
 ```bash
 yarn test:functional:local
 ```
 
-This command starts the application with `AUTH_ENABLED=false`, checks the home page and WCAG 2.2 AA axe results, and writes the same report structure. Each accessibility audit persists `axe-results.json`, a readable `axe-summary.html`, and `home-page.png` below the archived functional output and attaches them to the JUnit evidence. It proves local UI rendering only; it does not prove OIDC, roles, or Hearing Service calls. Legacy Codecept files remain as migration evidence until EXUI-5429 retires them.
+This command starts the application with `AUTH_ENABLED=false` and runs the local functional journeys. Its JUnit and Odhín evidence is written beneath `functional-output/tests/playwright-functional/`. It proves local UI rendering only; it does not prove OIDC, roles, or Hearing Service calls.
+
+Run the deterministic local accessibility checks with authentication disabled:
+
+```bash
+yarn test:accessibility:local
+```
+
+This command starts the application with `AUTH_ENABLED=false`, runs the local Axe WCAG 2.2 AA checks, and writes JUnit/Odhín output beneath `functional-output/tests/playwright-accessibility/`. Each accessibility audit persists JSON, HTML summary, and screenshot evidence in the accessibility output; CI archives these files with the published report. Legacy Codecept files remain as migration evidence until EXUI-5429 retires them.
 
 Run the main local CI checks:
 
