@@ -115,6 +115,7 @@
     "lint-staged": "13.3.0",
     "mini-css-extract-plugin": "2.10.2",
     "nock": "13.5.6",
+    "node-html-parser": "^7.0.0",
     "nodemon": "2.0.22",
     "odhin-reports-playwright": "patch:odhin-reports-playwright@npm%3A1.1.8#~/.yarn/patches/odhin-reports-playwright-npm-1.1.8-a445ed88b7.patch",
     "pa11y": "^8.0.0",

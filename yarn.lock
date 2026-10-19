@@ -10570,7 +10570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"he@npm:^1.2.0":
+"he@npm:1.2.0, he@npm:^1.2.0":
   version: 1.2.0
   resolution: "he@npm:1.2.0"
   bin:
@@ -10686,6 +10686,7 @@ __metadata:
     mini-css-extract-plugin: "npm:2.10.2"
     multer: "npm:^2.2.0"
     nock: "npm:13.5.6"
+    node-html-parser: "npm:^7.0.0"
     nodemon: "npm:2.0.22"
     nunjucks: "npm:3.2.4"
     odhin-reports-playwright: "patch:odhin-reports-playwright@npm%3A1.1.8#~/.yarn/patches/odhin-reports-playwright-npm-1.1.8-a445ed88b7.patch"
@@ -14214,6 +14215,16 @@ __metadata:
   bin:
     node-gyp: bin/node-gyp.js
   checksum: 10/806fd8e3adc9157e17bf0d4a2c899cf6b98a0bbe9f453f630094ce791866271f6cddcaf2133e6513715d934fcba2014d287c7053d5d7934937b3a34d5a3d84ad
+  languageName: node
+  linkType: hard
+
+"node-html-parser@npm:^7.0.0":
+  version: 7.1.0
+  resolution: "node-html-parser@npm:7.1.0"
+  dependencies:
+    css-select: "npm:^5.1.0"
+    he: "npm:1.2.0"
+  checksum: 10/370569dd329e56bc46883aa6f7123dd67c2f428325ec71788c167c1d216e1d45832fd75e068ce9f08be2750f692178e74391ea0921ad11fea6b990d58006bf6c
   languageName: node
   linkType: hard
 
