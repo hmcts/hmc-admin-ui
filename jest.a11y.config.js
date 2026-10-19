@@ -5,5 +5,7 @@ module.exports = {
   testEnvironment: 'node',
   transform: {
     '^.+\\.ts?$': 'ts-jest',
+    '^.+\\.js$': ['babel-jest', { presets: [['@babel/preset-env', { targets: { node: 'current' } }]] }],
   },
+  transformIgnorePatterns: ['/node_modules/(?!@dr\\.pogodin/csurf/|cookie/)'],
 };
