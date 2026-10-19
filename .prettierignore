@@ -7,5 +7,5 @@ src/main/views/govuk
 .yarn/
 .cache/
 coverage/
+functional-output/
 catalog-info.yaml
-coverage/

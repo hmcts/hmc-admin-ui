@@ -130,17 +130,21 @@ Run smoke tests against a deployed or locally running application:
 TEST_URL=http://localhost:3000 yarn test:smoke
 ```
 
-Run functional tests with CodeceptJS and Playwright:
+Run the native Playwright functional test against an OIDC-enabled deployed environment:
 
 ```bash
-yarn test:functional
+TEST_URL=https://your-environment.example TEST_IDAM_USERNAME=... TEST_IDAM_PASSWORD=... yarn test:functional
 ```
 
-Run functional tests against a locally running application with authentication disabled:
+This command requires a non-local `TEST_URL` and the IDAM credentials. It fails when either is absent, when zero tests are selected, or when the JUnit/Odhín reports are missing. After the OIDC home journey reaches its ready state, it runs the same strict WCAG 2.2 AA axe audit as the local check. CNP supplies the credentials from Key Vault. Its evidence is written beneath `functional-output/tests/playwright-functional/`.
+
+Run the deterministic local home-page and accessibility checks with authentication disabled:
 
 ```bash
 yarn test:functional:local
 ```
+
+This command starts the application with `AUTH_ENABLED=false`, checks the home page and WCAG 2.2 AA axe results, and writes the same report structure. Each accessibility audit persists `axe-results.json`, a readable `axe-summary.html`, and `home-page.png` below the archived functional output and attaches them to the JUnit evidence. It proves local UI rendering only; it does not prove OIDC, roles, or Hearing Service calls. Legacy Codecept files remain as migration evidence until EXUI-5429 retires them.
 
 Run the main local CI checks:
 

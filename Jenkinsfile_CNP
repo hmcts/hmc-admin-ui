@@ -30,6 +30,32 @@ def product = "hmc"
 def component = "admin-ui"
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
+def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
+def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
+
+def configurePlaywrightFunctional = { String targetEnvironment ->
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightFunctionalOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightFunctionalReportFile
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  env.IDAM_PUBLIC_URL = "https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"
+  env.TEST_TYPE = targetEnvironment
+}
+
+def publishPlaywrightFunctional = { String reportName ->
+  steps.sh "node bin/verify-playwright-functional-report.js"
+  steps.publishHTML([
+    allowMissing         : false,
+    alwaysLinkToLastBuild: true,
+    keepAll              : true,
+    reportDir            : "${playwrightFunctionalOutputRoot}/odhin-report/",
+    reportFiles          : playwrightFunctionalReportFile,
+    reportName           : reportName
+  ])
+  steps.junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
+}
 
 def secrets = [
   'hmc-${env}': [
@@ -41,7 +67,7 @@ def secrets = [
 def branchesToSync = ['perftest', 'ithc']
 
 withPipeline(type, product, component) {
-  // enableFullFunctionalTest()
+  enableFullFunctionalTest()
   loadVaultSecrets(secrets)
   syncBranchesWithMaster(branchesToSync)
 
@@ -71,7 +97,21 @@ withPipeline(type, product, component) {
     publishTestReports()
   }
 
-  /* afterAlways('functionalTest:preview') {
+  before('fullFunctionalTest:preview') {
+    configurePlaywrightFunctional('preview')
+  }
+
+  afterAlways('fullFunctionalTest:preview') {
     publishTestReports()
-  } */
+    publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
+  }
+
+  before('fullFunctionalTest:aat') {
+    configurePlaywrightFunctional('aat')
+  }
+
+  afterAlways('fullFunctionalTest:aat') {
+    publishTestReports()
+    publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+  }
 }
