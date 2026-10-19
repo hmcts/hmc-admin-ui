@@ -25,5 +25,6 @@ describe('native functional Playwright configuration', () => {
     const config = require('../../../../playwright.functional.config.ts').default;
 
     expect(config.use.ignoreHTTPSErrors).toBe(true);
+    expect(config.testMatch).toEqual(['**/*.local.spec.ts']);
   });
 });

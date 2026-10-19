@@ -17,6 +17,7 @@ function deriveFeatureName(filePath) {
   }
 
   const rootedPatterns = [
+    /\/playwright\/(?:functional|accessibility)\/(?:[^/]+\/)?([^/]+?)(?:\.(?:local|oidc))?(?:\.a11y)?(?:\.spec)?\.[^.]+$/i,
     /\/playwright\/functional\/([^/]+?)(?:\.spec)?\.[^.]+$/i,
     /\/playwright_tests_new\/integration\/test\/([^/]+)\//i,
     /\/playwright_tests_new\/E2E\/tests?\/([^/]+)\//i,

@@ -72,9 +72,14 @@ export function buildPublishedAccessibilityEvidenceEntry(
   filenames: AccessibilityEvidenceFilenames
 ): PublishedAccessibilityEvidenceEntry {
   const violations = results.violations ?? [];
+  const feature = path
+    .basename(testInfo.file)
+    .replace(/\.(?:local|oidc)(?:\.a11y)?\.spec\.[^.]+$/, '')
+    .replace(/\.a11y\.spec\.[^.]+$/, '')
+    .replace(/\.spec\.[^.]+$/, '');
   return {
     engine: 'axe',
-    feature: path.basename(testInfo.file).replace(/\.spec\.[^.]+$/, ''),
+    feature,
     pageState: evidenceName,
     testTitle: testInfo.title,
     attachmentPrefix: evidenceName,

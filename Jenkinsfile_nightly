@@ -2,7 +2,14 @@
 
 properties([
 // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
-pipelineTriggers([cron('H 07 * * 1-5')])
+pipelineTriggers([cron('H 07 * * 1-5')]),
+parameters([
+  booleanParam(
+    name: 'RUN_PLAYWRIGHT_ACCESSIBILITY',
+    defaultValue: true,
+    description: 'Run the non-blocking Playwright accessibility pack and publish its separate Odhín report.'
+  )
+])
 ])
 
 @Library("Infrastructure@2.5.0")
@@ -10,7 +17,100 @@ pipelineTriggers([cron('H 07 * * 1-5')])
 def type = "nodejs"
 def product = "hmc"
 def component = "admin-ui"
+def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
+def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
+def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
+def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
+def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [
+    $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
+def secrets = [
+  'hmc-${env}': [
+    secret('hmc-admin-ui-test-user', 'TEST_IDAM_USERNAME'),
+    secret('hmc-admin-ui-test-password', 'TEST_IDAM_PASSWORD')
+  ]
+]
+
+def configurePlaywrightFunctional = {
+  env.TEST_URL = env.TEST_URL ?: 'https://hmc-admin-ui.aat.platform.hmcts.net'
+  env.IDAM_PUBLIC_URL = 'https://hmcts-access.aat.platform.hmcts.net'
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightFunctionalOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightFunctionalReportFile
+  env.TEST_TYPE = 'aat'
+}
+
+def publishPlaywrightFunctional = {
+  steps.publishHTML([
+    allowMissing         : false,
+    alwaysLinkToLastBuild: true,
+    keepAll              : true,
+    reportDir            : "${playwrightFunctionalOutputRoot}/odhin-report/",
+    reportFiles          : playwrightFunctionalReportFile,
+    reportName           : 'Nightly HMC Admin UI Playwright Functional Test'
+  ])
+  steps.junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
+}
+
+def runPlaywrightAccessibility = {
+  env.TEST_URL = env.TEST_URL ?: 'https://hmc-admin-ui.aat.platform.hmcts.net'
+  env.IDAM_PUBLIC_URL = 'https://hmcts-access.aat.platform.hmcts.net'
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightAccessibilityOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightAccessibilityReportFile
+  env.TEST_TYPE = 'aat'
+  try {
+    yarnBuilder.yarn('test:accessibility:playwright')
+  } catch (Exception e) {
+    if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+      throw e
+    }
+    echo "[playwright-accessibility] Nightly accessibility pack failed but is non-blocking: ${e.getClass().getName()}: ${e.getMessage()}"
+  } finally {
+    publishHTML([
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "${playwrightAccessibilityOutputRoot}/odhin-report/",
+      reportFiles          : playwrightAccessibilityReportFile,
+      reportName           : 'Nightly HMC Admin UI Playwright Accessibility Test'
+    ])
+    steps.junit allowEmptyResults: true, skipMarkingBuildUnstable: true,
+      testResults: "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: "${playwrightAccessibilityOutputRoot}/**"
+  }
+}
 
 withNightlyPipeline(type, product, component) {
+  loadVaultSecrets(secrets)
+  enableFullFunctionalTest(60)
+  before('fullFunctionalTest') {
+    configurePlaywrightFunctional()
+  }
+  afterAlways('fullFunctionalTest') {
+    try {
+      publishPlaywrightFunctional()
+    } finally {
+      if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+        stage('Nightly HMC Admin UI Playwright Accessibility') {
+          runPlaywrightAccessibility()
+        }
+      } else {
+        echo '[playwright-accessibility] Nightly accessibility pack disabled by RUN_PLAYWRIGHT_ACCESSIBILITY=false.'
+      }
+    }
+  }
 
 }

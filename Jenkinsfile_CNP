@@ -8,6 +8,13 @@ projectUrlStr: 'https://github.com/hmcts/hmc-admin-ui/'
 ],
 pipelineTriggers([
 [$class: 'GitHubPushTrigger']
+]),
+parameters([
+  booleanParam(
+    name: 'RUN_PLAYWRIGHT_ACCESSIBILITY',
+    defaultValue: false,
+    description: 'Manual-only: run the non-blocking Playwright accessibility pack and publish its separate Odhín report.'
+  )
 ])
 ])
 
@@ -32,6 +39,8 @@ def component = "admin-ui"
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
 def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
+def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
+def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
 
 def configurePlaywrightFunctional = { String targetEnvironment ->
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
@@ -55,6 +64,44 @@ def publishPlaywrightFunctional = { String reportName ->
   ])
   steps.junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
   steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
+}
+
+def configurePlaywrightAccessibility = { String targetEnvironment ->
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightAccessibilityOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightAccessibilityReportFile
+  env.IDAM_PUBLIC_URL = "https://hmcts-access.${env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'}.platform.hmcts.net"
+  env.TEST_TYPE = targetEnvironment
+}
+
+def publishPlaywrightAccessibility = { String reportName ->
+  steps.publishHTML([
+    allowMissing         : true,
+    alwaysLinkToLastBuild: true,
+    keepAll              : true,
+    reportDir            : "${playwrightAccessibilityOutputRoot}/odhin-report/",
+    reportFiles          : playwrightAccessibilityReportFile,
+    reportName           : reportName
+  ])
+  steps.junit allowEmptyResults: true, skipMarkingBuildUnstable: true,
+    testResults: "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  steps.archiveArtifacts allowEmptyArchive: true, artifacts: "${playwrightAccessibilityOutputRoot}/**"
+}
+
+def runPlaywrightAccessibility = { String targetEnvironment, String reportName ->
+  configurePlaywrightAccessibility(targetEnvironment)
+  try {
+    yarnBuilder.yarn('test:accessibility:playwright')
+  } catch (Exception e) {
+    if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+      throw e
+    }
+    currentBuild.result = 'UNSTABLE'
+    echo "[playwright-accessibility] Accessibility pack failed but remains report-only: ${e.getClass().getName()}: ${e.getMessage()}"
+  } finally {
+    publishPlaywrightAccessibility(reportName)
+  }
 }
 
 def secrets = [
@@ -106,6 +153,16 @@ withPipeline(type, product, component) {
     publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
   }
 
+  afterSuccess('smoketest:preview') {
+    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+      stage('PREVIEW HMC Admin UI Playwright Accessibility') {
+        runPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
+      }
+    } else {
+      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
+    }
+  }
+
   before('functionalTest:aat') {
     configurePlaywrightFunctional('aat')
   }
@@ -113,6 +170,16 @@ withPipeline(type, product, component) {
   afterAlways('functionalTest:aat') {
     publishTestReports()
     publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+  }
+
+  afterSuccess('smoketest:aat') {
+    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+      stage('AAT HMC Admin UI Playwright Accessibility') {
+        runPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
+      }
+    } else {
+      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
+    }
   }
 
   before('fullFunctionalTest:preview') {

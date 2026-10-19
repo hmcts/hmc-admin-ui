@@ -1,19 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-import { readDownloadedText } from './downloads';
-import { openBulkUpload, openSingularSelection, selectSingularRequestType } from './journeys';
+import { readDownloadedText } from '../downloads';
+import { openBulkUpload, openSingularSelection, selectSingularRequestType } from '../journeys';
 
-const authDisabled = process.env.FUNCTIONAL_TEST_AUTH_ENABLED === 'false';
 const hearingId = '12345678901234567890';
 const caseReference = '1234567890123456';
 
 test.describe('HMC Admin UI local form journeys', () => {
   test('shows three visible field errors when final state transition is submitted blank', async ({ page }) => {
-    test.skip(
-      !authDisabled,
-      'This deterministic local form journey runs only with FUNCTIONAL_TEST_AUTH_ENABLED=false.'
-    );
-
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Final state transition');
     await page.getByRole('button', { name: 'Submit' }).click();
@@ -25,11 +19,6 @@ test.describe('HMC Admin UI local form journeys', () => {
   });
 
   test('submits a valid local rollback and shows its fallback response', async ({ page }) => {
-    test.skip(
-      !authDisabled,
-      'This deterministic local form journey runs only with FUNCTIONAL_TEST_AUTH_ENABLED=false.'
-    );
-
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Rollback');
     await page.getByLabel('Hearing ID').fill(hearingId);
@@ -44,11 +33,6 @@ test.describe('HMC Admin UI local form journeys', () => {
   });
 
   test('shows the bulk no-file error', async ({ page }) => {
-    test.skip(
-      !authDisabled,
-      'This deterministic local form journey runs only with FUNCTIONAL_TEST_AUTH_ENABLED=false.'
-    );
-
     await openBulkUpload(page);
     await page.getByRole('button', { name: 'Submit' }).click();
 
@@ -57,11 +41,6 @@ test.describe('HMC Admin UI local form journeys', () => {
   });
 
   test('shows validation errors and inspects the rejected CSV download', async ({ page }) => {
-    test.skip(
-      !authDisabled,
-      'This deterministic local form journey runs only with FUNCTIONAL_TEST_AUTH_ENABLED=false.'
-    );
-
     await openBulkUpload(page);
     await page.getByLabel('Please upload a file').setInputFiles({
       name: 'invalid-bulk-upload.csv',
@@ -84,11 +63,6 @@ test.describe('HMC Admin UI local form journeys', () => {
   });
 
   test('shows the bulk response screen and inspects its response CSV download', async ({ page }) => {
-    test.skip(
-      !authDisabled,
-      'This deterministic local form journey runs only with FUNCTIONAL_TEST_AUTH_ENABLED=false.'
-    );
-
     await openBulkUpload(page);
     await page.getByLabel('Please upload a file').setInputFiles({
       name: 'valid-bulk-upload.csv',

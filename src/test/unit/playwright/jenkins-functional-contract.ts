@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 const jenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_CNP'), 'utf8');
+const nightlyJenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_nightly'), 'utf8');
 
 function callbackBody(stage: string): string {
   const callback = jenkinsfile.match(new RegExp(`afterAlways\\('${stage}'\\)\\s*\\{([^}]*)\\}`));
@@ -38,5 +39,23 @@ describe('native Playwright CNP contract', () => {
     expect(body).toContain(
       `publishPlaywrightFunctional('${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
     );
+  });
+
+  test('keeps accessibility in its own opt-in report lane', () => {
+    expect(jenkinsfile).toContain("name: 'RUN_PLAYWRIGHT_ACCESSIBILITY'");
+    expect(jenkinsfile).toContain(
+      "def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'"
+    );
+    expect(jenkinsfile).toContain("yarnBuilder.yarn('test:accessibility:playwright')");
+    expect(jenkinsfile).toContain('hmc-playwright-accessibility.html');
+    expect(jenkinsfile).toContain('skipMarkingBuildUnstable: true');
+  });
+
+  test('runs the same separate accessibility report on the nightly AAT contract', () => {
+    expect(nightlyJenkinsfile).toContain('enableFullFunctionalTest(60)');
+    expect(nightlyJenkinsfile).toContain("name: 'RUN_PLAYWRIGHT_ACCESSIBILITY'");
+    expect(nightlyJenkinsfile).toContain("yarnBuilder.yarn('test:accessibility:playwright')");
+    expect(nightlyJenkinsfile).toContain('functional-output/tests/playwright-accessibility');
+    expect(nightlyJenkinsfile).toContain('Nightly HMC Admin UI Playwright Accessibility Test');
   });
 });

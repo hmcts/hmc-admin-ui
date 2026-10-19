@@ -40,6 +40,7 @@ function resolveBaseUrl(): string {
 
 export default defineConfig({
   testDir: './playwright/functional',
+  testMatch: authDisabled ? ['**/*.local.spec.ts'] : ['**/*.oidc.spec.ts'],
   forbidOnly: !!process.env.CI,
   outputDir:
     process.env.PLAYWRIGHT_OUTPUT_DIR ??

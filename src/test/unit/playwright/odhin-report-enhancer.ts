@@ -104,6 +104,8 @@ describe('Odhín report enhancer', () => {
   test('derives stable feature names for Admin UI functional specs', () => {
     expect(enhancer.deriveFeatureName('/workspace/playwright/functional/home.spec.ts')).toBe('home');
     expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local-forms.spec.ts')).toBe('local-forms');
+    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local/home.local.spec.ts')).toBe('home');
+    expect(enhancer.deriveFeatureName('/workspace/playwright/accessibility/home.oidc.a11y.spec.ts')).toBe('home');
   });
 
   test('counts a flaky retry as an effective pass in the feature overview', () => {
