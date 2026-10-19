@@ -25,8 +25,8 @@ export async function signInThroughOidc(page: Page): Promise<void> {
   await page.getByRole('textbox', { name: /email|username/i }).fill(username);
   await page.getByRole('button', { name: 'Continue' }).click();
   await expectIdamLoginOrigin(page);
-  await expect(page.getByLabel(/password/i)).toBeVisible();
-  await page.getByLabel(/password/i).fill(password);
+  await expect(page.getByRole('textbox', { name: /password/i })).toBeVisible();
+  await page.getByRole('textbox', { name: /password/i }).fill(password);
   await page.getByRole('button', { name: 'Continue' }).click();
 }
 
