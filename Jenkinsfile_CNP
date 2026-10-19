@@ -157,6 +157,13 @@ withPipeline(type, product, component) {
 
   afterAlways('smoketest:preview') {
     publishTestReports()
+    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+      stage('PREVIEW HMC Admin UI Playwright Accessibility') {
+        runPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
+      }
+    } else {
+      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
+    }
   }
 
   before('functionalTest:preview') {
@@ -166,16 +173,6 @@ withPipeline(type, product, component) {
   afterAlways('functionalTest:preview') {
     publishTestReports()
     publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
-  }
-
-  afterAlways('smoketest:preview') {
-    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
-      stage('PREVIEW HMC Admin UI Playwright Accessibility') {
-        runPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
-      }
-    } else {
-      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
-    }
   }
 
   before('functionalTest:aat') {
@@ -188,6 +185,7 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('smoketest:aat') {
+    publishTestReports()
     if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
       stage('AAT HMC Admin UI Playwright Accessibility') {
         runPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')

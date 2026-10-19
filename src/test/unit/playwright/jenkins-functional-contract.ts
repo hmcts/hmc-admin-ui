@@ -9,6 +9,12 @@ function callbackBody(stage: string): string {
   return callback?.[1] ?? '';
 }
 
+function smokeCallbackSection(environment: string): string {
+  const start = jenkinsfile.indexOf(`afterAlways('smoketest:${environment}')`);
+  const end = jenkinsfile.indexOf('\n  before(', start);
+  return jenkinsfile.slice(start, end === -1 ? jenkinsfile.length : end);
+}
+
 describe('native Playwright CNP contract', () => {
   test('uses the CNP deployment environment, not the callback name, for the IDAM public origin', () => {
     expect(jenkinsfile).toContain("def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'");
@@ -51,11 +57,15 @@ describe('native Playwright CNP contract', () => {
     expect(jenkinsfile).toContain('skipMarkingBuildUnstable: true');
   });
 
-  test('runs a manually requested accessibility pack after smoke failures as well as successes', () => {
-    expect(jenkinsfile).toContain("afterAlways('smoketest:preview')");
-    expect(jenkinsfile).toContain("afterAlways('smoketest:aat')");
-    expect(jenkinsfile).not.toContain("afterSuccess('smoketest:preview')");
-    expect(jenkinsfile).not.toContain("afterSuccess('smoketest:aat')");
+  test.each(['preview', 'aat'])('keeps manual accessibility and smoke reports in one callback for %s', environment => {
+    const callback = `afterAlways('smoketest:${environment}')`;
+    const registrations = jenkinsfile.split(callback).length - 1;
+    const section = smokeCallbackSection(environment);
+
+    expect(registrations).toBe(1);
+    expect(section).toContain('publishTestReports()');
+    expect(section).toContain('runPlaywrightAccessibility');
+    expect(jenkinsfile).not.toContain(`afterSuccess('smoketest:${environment}')`);
   });
 
   test('runs the same separate accessibility report on the nightly AAT contract', () => {
