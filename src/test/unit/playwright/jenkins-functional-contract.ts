@@ -51,6 +51,13 @@ describe('native Playwright CNP contract', () => {
     expect(jenkinsfile).toContain('skipMarkingBuildUnstable: true');
   });
 
+  test('runs a manually requested accessibility pack after smoke failures as well as successes', () => {
+    expect(jenkinsfile).toContain("afterAlways('smoketest:preview')");
+    expect(jenkinsfile).toContain("afterAlways('smoketest:aat')");
+    expect(jenkinsfile).not.toContain("afterSuccess('smoketest:preview')");
+    expect(jenkinsfile).not.toContain("afterSuccess('smoketest:aat')");
+  });
+
   test('runs the same separate accessibility report on the nightly AAT contract', () => {
     expect(nightlyJenkinsfile).toContain('enableFullFunctionalTest(60)');
     expect(nightlyJenkinsfile).toContain("name: 'RUN_PLAYWRIGHT_ACCESSIBILITY'");

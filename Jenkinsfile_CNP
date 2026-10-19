@@ -168,7 +168,7 @@ withPipeline(type, product, component) {
     publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
   }
 
-  afterSuccess('smoketest:preview') {
+  afterAlways('smoketest:preview') {
     if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
       stage('PREVIEW HMC Admin UI Playwright Accessibility') {
         runPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
@@ -187,7 +187,7 @@ withPipeline(type, product, component) {
     publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
   }
 
-  afterSuccess('smoketest:aat') {
+  afterAlways('smoketest:aat') {
     if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
       stage('AAT HMC Admin UI Playwright Accessibility') {
         runPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
