@@ -122,7 +122,7 @@ test.describe('HMC Admin UI local bulk upload journeys', () => {
 
   test('accepts quoted notes containing commas and quotes', async ({ page }) => {
     await openBulkUpload(page);
-    const csv = `${validCsvHeaders}\n${hearingId},${caseReference},rollback,"Migration, ""quoted"" note",`;
+    const csv = `${validCsvHeaders}\n${hearingId},${caseReference},final_state_transition,"Migration, ""quoted"" note",COMPLETED`;
     await page.getByLabel('Please upload a file').setInputFiles(uploadFile('quoted-notes.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
@@ -130,7 +130,7 @@ test.describe('HMC Admin UI local bulk upload journeys', () => {
     const responseDownload = page.waitForEvent('download');
     await page.getByRole('link', { name: 'Download response CSV' }).click();
     await expect(await readDownloadedText(await responseDownload)).toContain(
-      `${hearingId},${caseReference},rollback,,UNKNOWN,No response message returned`
+      `${hearingId},${caseReference},final_state_transition,COMPLETED,UNKNOWN,No response message returned`
     );
   });
 
