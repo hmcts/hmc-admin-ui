@@ -117,9 +117,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
     await page.getByLabel('Please upload a file').setInputFiles(uploadFile('invalid-rows.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
-    await expect(
-      page.getByText('There were validation errors. Please check and edit the csv file and try again')
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: /There were validation errors/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Download rejected CSV with issues again' })).toBeVisible();
 
     const results = await auditPageAccessibility(page, testInfo, 'oidc-bulk-upload-row-validation');
