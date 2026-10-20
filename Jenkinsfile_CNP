@@ -70,6 +70,15 @@ def publishPlaywrightFunctional = { String reportName ->
   steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
 }
 
+def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
+  configurePlaywrightFunctional(targetEnvironment)
+  try {
+    yarnBuilder.yarn('test:playwright:functional')
+  } finally {
+    publishPlaywrightFunctional(reportName)
+  }
+}
+
 def configurePlaywrightAccessibility = { String targetEnvironment ->
   env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
@@ -166,22 +175,18 @@ withPipeline(type, product, component) {
     }
   }
 
-  before('functionalTest:preview') {
-    configurePlaywrightFunctional('preview')
-  }
-
   afterAlways('functionalTest:preview') {
     publishTestReports()
-    publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
-  }
-
-  before('functionalTest:aat') {
-    configurePlaywrightFunctional('aat')
+    stage('PREVIEW HMC Admin UI Playwright Functional Test') {
+      runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
+    }
   }
 
   afterAlways('functionalTest:aat') {
     publishTestReports()
-    publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+    stage('AAT HMC Admin UI Playwright Functional Test') {
+      runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
+    }
   }
 
   afterAlways('smoketest:aat') {
@@ -195,21 +200,17 @@ withPipeline(type, product, component) {
     }
   }
 
-  before('fullFunctionalTest:preview') {
-    configurePlaywrightFunctional('preview')
-  }
-
   afterAlways('fullFunctionalTest:preview') {
     publishTestReports()
-    publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
-  }
-
-  before('fullFunctionalTest:aat') {
-    configurePlaywrightFunctional('aat')
+    stage('PREVIEW HMC Admin UI Playwright Functional Test') {
+      runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
+    }
   }
 
   afterAlways('fullFunctionalTest:aat') {
     publishTestReports()
-    publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+    stage('AAT HMC Admin UI Playwright Functional Test') {
+      runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
+    }
   }
 }

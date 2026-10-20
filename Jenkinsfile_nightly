@@ -67,6 +67,15 @@ def publishPlaywrightFunctional = {
   steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
 }
 
+def runPlaywrightFunctional = {
+  configurePlaywrightFunctional()
+  try {
+    yarnBuilder.yarn('test:playwright:functional')
+  } finally {
+    publishPlaywrightFunctional()
+  }
+}
+
 def runPlaywrightAccessibility = {
   env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
   env.TEST_URL = env.TEST_URL ?: 'https://hmc-admin-ui.aat.platform.hmcts.net'
@@ -111,12 +120,11 @@ withNightlyPipeline(type, product, component) {
       }
     }
   }
-  before('fullFunctionalTest') {
-    configurePlaywrightFunctional()
-  }
   afterAlways('fullFunctionalTest') {
     try {
-      publishPlaywrightFunctional()
+      stage('Nightly HMC Admin UI Playwright Functional Test') {
+        runPlaywrightFunctional()
+      }
     } finally {
       if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
         stage('Nightly HMC Admin UI Playwright Accessibility') {

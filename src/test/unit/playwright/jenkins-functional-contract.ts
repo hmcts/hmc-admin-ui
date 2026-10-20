@@ -3,6 +3,7 @@ import * as path from 'node:path';
 
 const jenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_CNP'), 'utf8');
 const nightlyJenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_nightly'), 'utf8');
+const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../../package.json'), 'utf8'));
 
 function callbackBody(stage: string): string {
   const callback = jenkinsfile.match(new RegExp(`afterAlways\\('${stage}'\\)\\s*\\{([^}]*)\\}`));
@@ -16,6 +17,17 @@ function smokeCallbackSection(environment: string): string {
 }
 
 describe('native Playwright CNP contract', () => {
+  test('keeps the legacy Codecept functional command separate from native Playwright', () => {
+    expect(packageJson.scripts['test:functional']).toBe('yarn test:functional:codecept');
+    expect(packageJson.scripts['test:functional:codecept']).toBe('node bin/run-functional-tests.js');
+    expect(packageJson.scripts['test:fullfunctional']).toBe('yarn test:functional');
+    expect(packageJson.scripts['test:functional:local']).toContain('test:functional:codecept');
+    expect(packageJson.scripts['test:a11y']).toBe('node bin/run-a11y-tests.js');
+    expect(packageJson.scripts['test:playwright:functional']).toContain('npx playwright test');
+    expect(packageJson.scripts['test:playwright:functional:local']).toContain('test:playwright:functional');
+    expect(packageJson.scripts['test:functional']).not.toContain('playwright');
+  });
+
   test('uses the CNP deployment environment, not the callback name, for the IDAM public origin', () => {
     expect(jenkinsfile).toContain("def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'");
     expect(jenkinsfile).toContain(
@@ -27,15 +39,17 @@ describe('native Playwright CNP contract', () => {
   });
 
   test.each(['preview', 'aat'])('configures and publishes the %s full functional stage', environment => {
-    expect(jenkinsfile).toContain(`before('fullFunctionalTest:${environment}')`);
-    expect(jenkinsfile).toContain(`configurePlaywrightFunctional('${environment}')`);
     expect(jenkinsfile).toContain(`afterAlways('fullFunctionalTest:${environment}')`);
+    expect(jenkinsfile).toContain(
+      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
+    );
   });
 
   test.each(['preview', 'aat'])('configures and publishes the %s normal functional stage', environment => {
-    expect(jenkinsfile).toContain(`before('functionalTest:${environment}')`);
-    expect(jenkinsfile).toContain(`configurePlaywrightFunctional('${environment}')`);
     expect(jenkinsfile).toContain(`afterAlways('functionalTest:${environment}')`);
+    expect(jenkinsfile).toContain(
+      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
+    );
   });
 
   test.each(['preview', 'aat'])('publishes the %s functional Odhín report', environment => {
@@ -43,7 +57,7 @@ describe('native Playwright CNP contract', () => {
 
     expect(body).toContain('publishTestReports()');
     expect(body).toContain(
-      `publishPlaywrightFunctional('${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
+      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
     );
   });
 
@@ -74,6 +88,12 @@ describe('native Playwright CNP contract', () => {
     expect(nightlyJenkinsfile).toContain("yarnBuilder.yarn('test:accessibility:playwright')");
     expect(nightlyJenkinsfile).toContain('functional-output/tests/playwright-accessibility');
     expect(nightlyJenkinsfile).toContain('Nightly HMC Admin UI Playwright Accessibility Test');
+  });
+
+  test('runs native Playwright after the retained nightly full-functional command', () => {
+    expect(nightlyJenkinsfile).toContain("afterAlways('fullFunctionalTest')");
+    expect(nightlyJenkinsfile).toContain('runPlaywrightFunctional()');
+    expect(nightlyJenkinsfile).toContain("yarnBuilder.yarn('test:playwright:functional')");
   });
 
   test.each([
