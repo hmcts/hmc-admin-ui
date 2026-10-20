@@ -51,4 +51,19 @@ test.describe('HMC Admin UI protected home journeys', () => {
     await expect(page.getByRole('heading', { name: 'Rollback' })).toBeVisible();
     await expect(page.getByLabel('Incident Number / Notes')).toBeVisible();
   });
+
+  test('signs in through OIDC and preserves protected final-state validation errors', async ({ page }) => {
+    await openHomePage(page);
+    await signInThroughOidc(page);
+    await page.goto('/singular/final-state-transition?lng=en');
+    await page.getByLabel('Hearing ID').fill('not-a-number');
+    await page.getByLabel('CCD Case Reference Number').fill('not-a-case-reference');
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(page.locator('#hearing-id-error')).toHaveText(/Hearing ID must be a number/);
+    await expect(page.locator('#case-ref-error')).toHaveText(/must be a 16-digit number/);
+    await expect(page.locator('#status-error')).toHaveText(/Select a status/);
+    await expect(page.getByLabel('Hearing ID')).toHaveValue('not-a-number');
+  });
 });

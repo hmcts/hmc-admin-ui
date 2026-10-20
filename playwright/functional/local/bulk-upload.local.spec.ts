@@ -86,6 +86,93 @@ test.describe('HMC Admin UI local bulk upload journeys', () => {
     );
   });
 
+  test('reports when a CSV contains only its header row', async ({ page }) => {
+    await openBulkUpload(page);
+    await page
+      .getByLabel('Please upload a file')
+      .setInputFiles(uploadFile('headers-only.csv', 'text/csv', validCsvHeaders));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+    const responseDownload = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Download response CSV' }).click();
+    await expect(await readDownloadedText(await responseDownload)).toContain(
+      'unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"'
+    );
+  });
+
+  test('finds CSV headers after a short preamble', async ({ page }) => {
+    await openBulkUpload(page);
+    const csv = [
+      'HMC migration upload',
+      'Generated for test evidence',
+      validCsvHeaders,
+      `${hearingId},${caseReference},rollback,Migration preamble,`,
+    ].join('\n');
+    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('preamble.csv', 'text/csv', csv));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+    const responseDownload = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Download response CSV' }).click();
+    await expect(await readDownloadedText(await responseDownload)).toContain(
+      `${hearingId},${caseReference},rollback,,UNKNOWN,No response message returned`
+    );
+  });
+
+  test('accepts quoted notes containing commas and quotes', async ({ page }) => {
+    await openBulkUpload(page);
+    const csv = `${validCsvHeaders}\n${hearingId},${caseReference},rollback,"Migration, ""quoted"" note",`;
+    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('quoted-notes.csv', 'text/csv', csv));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+    const responseDownload = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Download response CSV' }).click();
+    await expect(await readDownloadedText(await responseDownload)).toContain(
+      `${hearingId},${caseReference},rollback,,UNKNOWN,No response message returned`
+    );
+  });
+
+  test('processes every supported final state and rollback action in one upload', async ({ page }) => {
+    await openBulkUpload(page);
+    const rows = [
+      `${hearingId},${caseReference},final_state_transition,,CANCELLED`,
+      `${hearingId},${caseReference},final_state_transition,,ADJOURNED`,
+      `${hearingId},${caseReference},final_state_transition,,COMPLETED`,
+      `${hearingId},${caseReference},rollback,,`,
+    ].join('\n');
+    await page
+      .getByLabel('Please upload a file')
+      .setInputFiles(uploadFile('all-supported-actions.csv', 'text/csv', `${validCsvHeaders}\n${rows}`));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+    const responseDownload = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Download response CSV' }).click();
+    const response = await readDownloadedText(await responseDownload);
+    for (const state of ['CANCELLED', 'ADJOURNED', 'COMPLETED']) {
+      await expect(response).toContain(
+        `${hearingId},${caseReference},final_state_transition,${state},UNKNOWN,No response message returned`
+      );
+    }
+    await expect(response).toContain(`${hearingId},${caseReference},rollback,,UNKNOWN,No response message returned`);
+  });
+
+  test('rejects an upload larger than the configured 10MB limit', async ({ page }) => {
+    await openBulkUpload(page);
+    await page.getByLabel('Please upload a file').setInputFiles({
+      name: 'oversized.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.alloc(10 * 1024 * 1024 + 1, 'x'),
+    });
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload(?:\?.*)?$/);
+    await expect(page.locator('#bulk-upload-file-error')).toHaveText(/must be smaller than 10MB/);
+    await expect(page.getByRole('link', { name: 'Download response CSV' })).toHaveCount(0);
+  });
+
   test('processes a valid final state transition CSV and downloads its response', async ({ page }) => {
     await openBulkUpload(page);
     await page
@@ -154,6 +241,14 @@ test.describe('HMC Admin UI local bulk upload journeys', () => {
     await expect(await readDownloadedText(download)).toContain(
       'unavailable,unavailable,unavailable,unavailable,error,"No bulk upload response is available"'
     );
+  });
+
+  test('returns to Support tools from the bulk response page', async ({ page }) => {
+    await page.goto('/bulk-upload/response');
+    await page.getByRole('link', { name: 'Return to Support tools' }).click();
+
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { name: 'What type of request would you like to make?' })).toBeVisible();
   });
 
   test('renders the service problem page and offers retry and home links', async ({ page }) => {

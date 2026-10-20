@@ -45,6 +45,12 @@ test.describe('HMC Admin UI local singular journeys', () => {
     await expect(page.getByLabel('Hearing ID')).toHaveValue('not-a-number');
     await expect(page.getByLabel('CCD Case Reference Number')).toHaveValue('not-a-case-refer');
     await expect(page.getByLabel('Incident Number / Notes')).toHaveValue('Incident details');
+    await expect(page.getByLabel('Hearing ID')).toHaveAttribute('aria-describedby', 'hearing-id-error');
+    await expect(page.getByLabel('CCD Case Reference Number')).toHaveAttribute(
+      'aria-describedby',
+      'case-ref-hint case-ref-error'
+    );
+    await expect(page.getByLabel('Status')).toHaveAttribute('aria-describedby', 'status-error');
   });
 
   test('accepts the final state transition field boundaries', async ({ page }) => {
@@ -188,6 +194,37 @@ test.describe('HMC Admin UI local singular journeys', () => {
     await expect(page.getByRole('definition').filter({ hasText: 'No response message returned' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Make another singular request' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Return to Support tools' })).toBeVisible();
+  });
+
+  test('submits each supported final state and shows the fallback response', async ({ page }) => {
+    for (const status of ['CANCELLED', 'ADJOURNED', 'COMPLETED']) {
+      await openSingularSelection(page);
+      await selectSingularRequestType(page, 'Final state transition');
+      await page.getByLabel('Hearing ID').fill(hearingId);
+      await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+      await page.getByLabel('Status').selectOption(status);
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page).toHaveURL(/\/singular\/response$/);
+      await expect(page.getByRole('heading', { name: 'Final state transition request unsuccessful' })).toBeVisible();
+      await expect(page.getByRole('definition').filter({ hasText: hearingId })).toBeVisible();
+    }
+  });
+
+  test('follows the response link to start another singular request', async ({ page }) => {
+    await openSingularSelection(page);
+    await selectSingularRequestType(page, 'Rollback');
+    await page.getByLabel('Hearing ID').fill(hearingId);
+    await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await expect(page.getByRole('heading', { name: 'Rollback request unsuccessful' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Make another singular request' }).click();
+
+    await expect(page).toHaveURL(/\/singular$/);
+    await expect(
+      page.getByRole('heading', { name: 'What type of singular request would you like to make?' })
+    ).toBeVisible();
   });
 
   test('redirects an uninitialised singular response page to Support tools', async ({ page }) => {

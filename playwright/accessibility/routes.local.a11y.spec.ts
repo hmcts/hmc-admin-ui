@@ -106,6 +106,24 @@ test.describe('HMC Admin UI local route accessibility', () => {
     await expectNoAccessibilityViolations(page, testInfo, 'bulk-upload-no-file');
   });
 
+  test('audits the bulk upload size-limit error state', async ({ page }, testInfo) => {
+    await openBulkUpload(page);
+    await page.getByLabel('Please upload a file').setInputFiles({
+      name: 'oversized.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.alloc(10 * 1024 * 1024 + 1, 'x'),
+    });
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page.locator('#bulk-upload-file-error')).toHaveText(/must be smaller than 10MB/);
+    await expect(page.getByLabel('Please upload a file')).toHaveAttribute(
+      'aria-describedby',
+      /bulk-upload-file-hint bulk-upload-file-error/
+    );
+
+    await expectNoAccessibilityViolations(page, testInfo, 'bulk-upload-size-limit');
+  });
+
   test('audits the bulk upload invalid file type state', async ({ page }, testInfo) => {
     await openBulkUpload(page);
     await page.getByLabel('Please upload a file').setInputFiles(uploadFile('requests.txt', 'text/plain', 'not csv'));
