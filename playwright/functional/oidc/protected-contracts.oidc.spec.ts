@@ -13,16 +13,6 @@ test.describe('HMC Admin UI protected shared contracts', () => {
     await signInThroughOidc(page);
   });
 
-  test('renders a protected home form with CSRF protection', { tag: '@feature:authentication' }, async ({ page }) => {
-    await expectHomePage(page);
-
-    const form = page.locator('form[method="post"][action="/"]');
-    await expect(form).toHaveCount(1);
-    await expect(form.locator('input[type="hidden"][name="_csrf"]')).toHaveAttribute('value', /\S+/);
-    await expect(page.getByRole('radio', { name: 'Bulk' })).toBeEnabled();
-    await expect(page.getByRole('radio', { name: 'Singular' })).toBeEnabled();
-  });
-
   test(
     'reports a missing protected request selection without changing route',
     { tag: '@feature:request-selection' },

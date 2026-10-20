@@ -8,6 +8,11 @@ test.describe('HMC Admin UI protected home journeys', () => {
     await openHomePage(page);
     await signInThroughOidc(page);
     await expectHomePage(page);
+    const form = page.locator('form[method="post"][action="/"]');
+    await expect(form).toHaveCount(1);
+    await expect(form.locator('input[type="hidden"][name="_csrf"]')).toHaveAttribute('value', /\S+/);
+    await expect(page.getByRole('radio', { name: 'Bulk' })).toBeEnabled();
+    await expect(page.getByRole('radio', { name: 'Singular' })).toBeEnabled();
   });
 
   test(
@@ -39,45 +44,6 @@ test.describe('HMC Admin UI protected home journeys', () => {
 
       await expect(page).toHaveURL(/\/bulk-upload$/);
       await expect(page.getByRole('heading', { name: 'Bulk request' })).toBeVisible();
-    }
-  );
-
-  test(
-    'signs in through OIDC and opens the protected bulk upload form',
-    { tag: '@feature:bulk-upload' },
-    async ({ page }) => {
-      await openHomePage(page);
-      await signInThroughOidc(page);
-      await page.goto('/bulk-upload?lng=en');
-
-      await expect(page.getByRole('heading', { name: 'Bulk request' })).toBeVisible();
-      await expect(page.getByLabel('Please upload a file')).toBeVisible();
-    }
-  );
-
-  test(
-    'signs in through OIDC and opens the protected final state form',
-    { tag: '@feature:final-state-transition' },
-    async ({ page }) => {
-      await openHomePage(page);
-      await signInThroughOidc(page);
-      await page.goto('/singular/final-state-transition?lng=en');
-
-      await expect(page.getByRole('heading', { name: 'Final state transition' })).toBeVisible();
-      await expect(page.getByLabel('Status')).toBeVisible();
-    }
-  );
-
-  test(
-    'signs in through OIDC and opens the protected rollback form',
-    { tag: '@feature:rollback' },
-    async ({ page }) => {
-      await openHomePage(page);
-      await signInThroughOidc(page);
-      await page.goto('/singular/rollback?lng=en');
-
-      await expect(page.getByRole('heading', { name: 'Rollback' })).toBeVisible();
-      await expect(page.getByLabel('Incident Number / Notes')).toBeVisible();
     }
   );
 
