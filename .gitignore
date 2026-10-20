@@ -2,6 +2,7 @@ node_modules/
 .nyc_output
 .sass-cache
 *.css
+!playwright/reporters/presentation/report.css
 
 .idea/
 *.iml
