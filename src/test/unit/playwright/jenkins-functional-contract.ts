@@ -3,6 +3,10 @@ import * as path from 'node:path';
 
 const jenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_CNP'), 'utf8');
 const nightlyJenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_nightly'), 'utf8');
+const parameterizedJenkinsfile = fs.readFileSync(
+  path.resolve(__dirname, '../../../../Jenkinsfile_parameterized'),
+  'utf8'
+);
 const codeceptRunner = fs.readFileSync(path.resolve(__dirname, '../../../../bin/run-functional-tests.js'), 'utf8');
 const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../../package.json'), 'utf8'));
 
@@ -110,5 +114,79 @@ describe('native Playwright CNP contract', () => {
     expect(source).toContain("afterSuccess('checkout')");
     expect(source).toContain("yarnBuilder.yarn('test:setup:playwright-install-chromium')");
     expect(source).toContain("yarnBuilder.yarn('test:setup:playwright-verify-chromium')");
+  });
+});
+
+describe('manual parameterized pipeline contract', () => {
+  test('uses the sandbox job convention and HMC deployment identity', () => {
+    expect(parameterizedJenkinsfile).toContain("name: 'ENVIRONMENT'");
+    expect(parameterizedJenkinsfile).toContain("choices: 'saat\\nsandbox\\nsprod'");
+    expect(parameterizedJenkinsfile).toContain("name: 'RUN_PLAYWRIGHT_ACCESSIBILITY'");
+    expect(parameterizedJenkinsfile).toContain('defaultValue: false');
+    expect(parameterizedJenkinsfile).toContain('@Library("Infrastructure@2.5.0")');
+    expect(parameterizedJenkinsfile).toContain("def product = 'hmc'");
+    expect(parameterizedJenkinsfile).toContain("def component = 'admin-ui'");
+    expect(parameterizedJenkinsfile).toContain(
+      "withParameterizedPipeline(type, product, component, params.ENVIRONMENT, 'sandbox')"
+    );
+  });
+
+  test('loads the existing HMC test-user secrets without WebApp-only variables', () => {
+    expect(parameterizedJenkinsfile).toContain("secret('hmc-admin-ui-test-user', 'TEST_IDAM_USERNAME')");
+    expect(parameterizedJenkinsfile).toContain("secret('hmc-admin-ui-test-password', 'TEST_IDAM_PASSWORD')");
+    expect(parameterizedJenkinsfile).not.toContain('ORG_USER_ASSIGNMENT_MODE');
+    expect(parameterizedJenkinsfile).not.toContain('PW_ACCESSIBILITY_WORKERS');
+  });
+
+  test('installs and verifies the pinned workspace Chromium before native Playwright runs', () => {
+    expect(parameterizedJenkinsfile).toContain('PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright');
+    expect(parameterizedJenkinsfile).toContain("yarnBuilder.yarn('test:setup:playwright-install-chromium')");
+    expect(parameterizedJenkinsfile).toContain("yarnBuilder.yarn('test:setup:playwright-verify-chromium')");
+  });
+
+  test('adds native functional coverage alongside the retained Codecept functional stage', () => {
+    expect(parameterizedJenkinsfile).toContain(
+      "def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'"
+    );
+    expect(parameterizedJenkinsfile).toContain('hmc-playwright-functional.html');
+    expect(parameterizedJenkinsfile).toContain("yarnBuilder.yarn('test:playwright:functional')");
+    expect(parameterizedJenkinsfile).toContain('node bin/verify-playwright-functional-report.js');
+    expect(parameterizedJenkinsfile).toContain('allowMissing: false');
+  });
+
+  test.each(['preview', 'aat'])(
+    'preserves the %s smoke and legacy functional publications while adding native Playwright lanes',
+    environment => {
+      const smokeCallback = `after('smoketest:${environment}')`;
+      const callback = `after('functionalTest:${environment}')`;
+      expect(parameterizedJenkinsfile.split(smokeCallback).length - 1).toBe(1);
+      expect(parameterizedJenkinsfile).toContain(`publishSmokeTestReport('${environment.toUpperCase()}')`);
+      const registrations = parameterizedJenkinsfile.split(callback).length - 1;
+
+      expect(registrations).toBe(1);
+      expect(parameterizedJenkinsfile).toContain('publishLegacyFunctionalReport');
+      expect(parameterizedJenkinsfile).toContain(
+        `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
+      );
+      const accessibilityCall = `runManualPlaywrightAccessibility('${environment}'`;
+      expect(parameterizedJenkinsfile).toContain(accessibilityCall);
+      const callbackStart = parameterizedJenkinsfile.indexOf(callback);
+      const callbackEnd = parameterizedJenkinsfile.indexOf('\n  }', callbackStart);
+      const callbackSource = parameterizedJenkinsfile.slice(callbackStart, callbackEnd);
+      expect(callbackSource).toContain('try {');
+      expect(callbackSource).toContain(`finally {\n      ${accessibilityCall}`);
+    }
+  );
+
+  test('keeps manual accessibility evidence in its own report-only lane', () => {
+    expect(parameterizedJenkinsfile).toContain(
+      "def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'"
+    );
+    expect(parameterizedJenkinsfile).toContain('hmc-playwright-accessibility.html');
+    expect(parameterizedJenkinsfile).toContain("yarnBuilder.yarn('test:accessibility:playwright')");
+    expect(parameterizedJenkinsfile).toContain('junit allowEmptyResults: false, skipMarkingBuildUnstable: true');
+    expect(parameterizedJenkinsfile).toContain('skipMarkingBuildUnstable: true');
+    expect(parameterizedJenkinsfile).toContain("currentBuild.result = 'UNSTABLE'");
+    expect(parameterizedJenkinsfile).toContain('FlowInterruptedException');
   });
 });

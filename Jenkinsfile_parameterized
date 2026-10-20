@@ -1,0 +1,223 @@
+#!groovy
+
+properties([
+  [
+    $class: 'GithubProjectProperty',
+    displayName: 'Admin UI Webapp',
+    projectUrlStr: 'https://github.com/hmcts/hmc-admin-ui/'
+  ],
+  pipelineTriggers([
+    [$class: 'GitHubPushTrigger']
+  ]),
+  parameters([
+    choice(
+      name: 'ENVIRONMENT',
+      choices: 'saat\nsandbox\nsprod',
+      description: 'Environment where code should be built and deployed'
+    ),
+    booleanParam(
+      name: 'RUN_PLAYWRIGHT_ACCESSIBILITY',
+      defaultValue: false,
+      description: 'Manual-only: run the non-blocking Playwright accessibility pack and publish its separate Odhín report.'
+    )
+  ])
+])
+
+@Library("Infrastructure@2.5.0")
+
+def type = 'nodejs'
+def product = 'hmc'
+def component = 'admin-ui'
+def vault = 'hmc'
+def channel = '#hmc-pipeline'
+def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
+def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
+def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
+def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
+def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
+def playwrightBrowsersEnv = {
+  ["PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright"]
+}
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [
+    $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
+def secrets = [
+  'hmc-${env}': [
+    secret('hmc-admin-ui-test-user', 'TEST_IDAM_USERNAME'),
+    secret('hmc-admin-ui-test-password', 'TEST_IDAM_PASSWORD')
+  ]
+]
+
+def configurePlaywrightFunctional = { String targetEnvironment ->
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: params.ENVIRONMENT ?: 'sandbox'
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightFunctionalOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightFunctionalReportFile
+  env.TEST_URL = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
+  env.IDAM_PUBLIC_URL = "https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"
+  env.TEST_TYPE = targetEnvironment
+}
+
+def publishPlaywrightFunctional = { String reportName ->
+  steps.sh 'node bin/verify-playwright-functional-report.js'
+  publishHTML([
+    allowMissing: false,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: "${playwrightFunctionalOutputRoot}/odhin-report/",
+    reportFiles: playwrightFunctionalReportFile,
+    reportName: reportName
+  ])
+  junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
+}
+
+def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
+  configurePlaywrightFunctional(targetEnvironment)
+  try {
+    yarnBuilder.yarn('test:playwright:functional')
+  } finally {
+    publishPlaywrightFunctional(reportName)
+  }
+}
+
+def configurePlaywrightAccessibility = { String targetEnvironment ->
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: params.ENVIRONMENT ?: 'sandbox'
+  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
+  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
+  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightAccessibilityOutputRoot}/odhin-report"
+  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightAccessibilityReportFile
+  env.TEST_URL = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
+  env.IDAM_PUBLIC_URL = "https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"
+  env.TEST_TYPE = targetEnvironment
+}
+
+def isInfrastructureAbort = { Exception exception ->
+  exception instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException ||
+    (exception instanceof hudson.AbortException && ((exception.getMessage() ?: '') =~ /(exit code|status)\s+(129|137|143)/).find())
+}
+
+def publishLegacyFunctionalReport = { String environmentName ->
+  publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: 'functional-output/functional/html-report',
+    reportFiles: 'test-report.html',
+    reportName: "${environmentName} Legacy Functional Test"
+  ])
+  junit allowEmptyResults: true, testResults: 'functional-output/functional/reports/*-testsuite.xml'
+}
+
+def publishSmokeTestReport = { String environmentName ->
+  publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: 'functional-output/tests/jest-smoke/html-report',
+    reportFiles: 'test-report.html',
+    reportName: "${environmentName} Smoke Test"
+  ])
+  junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-smoke/*.xml'
+}
+
+def publishPlaywrightAccessibility = { String reportName ->
+  publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: "${playwrightAccessibilityOutputRoot}/odhin-report/",
+    reportFiles: playwrightAccessibilityReportFile,
+    reportName: reportName
+  ])
+  junit allowEmptyResults: false, skipMarkingBuildUnstable: true,
+    testResults: "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  archiveArtifacts allowEmptyArchive: true, artifacts: "${playwrightAccessibilityOutputRoot}/**"
+}
+
+def runManualPlaywrightAccessibility = { String targetEnvironment, String reportName ->
+  if (!params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+    echo '[playwright-accessibility] Manual accessibility pack disabled for this parameterized build.'
+    return
+  }
+
+  stage("${targetEnvironment.toUpperCase()} Manual Playwright Accessibility") {
+    configurePlaywrightAccessibility(targetEnvironment)
+    try {
+      yarnBuilder.yarn('test:accessibility:playwright')
+    } catch (Exception exception) {
+      if (isInfrastructureAbort(exception)) {
+        throw exception
+      }
+      currentBuild.result = 'UNSTABLE'
+      echo "[playwright-accessibility] Accessibility failed but remains report-only: ${exception.getClass().getName()}: ${exception.getMessage()}"
+    } finally {
+      try {
+        publishPlaywrightAccessibility(reportName)
+      } catch (Exception exception) {
+        if (isInfrastructureAbort(exception)) {
+          throw exception
+        }
+        echo "[playwright-accessibility] Report/evidence publish failed but is non-blocking: ${exception.getClass().getName()}: ${exception.getMessage()}"
+      }
+    }
+  }
+}
+
+withParameterizedPipeline(type, product, component, params.ENVIRONMENT, 'sandbox') {
+  enableSlackNotifications(channel)
+  enableDockerBuild()
+  loadVaultSecrets(secrets)
+  setVaultName(vault)
+  installCharts()
+
+  after('checkout') {
+    withEnv(playwrightBrowsersEnv()) {
+      steps.sh 'mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"'
+      yarnBuilder.yarn('playwright --version')
+      yarnBuilder.yarn('test:setup:playwright-install-chromium')
+      yarnBuilder.yarn('test:setup:playwright-verify-chromium')
+    }
+  }
+
+  after('smoketest:preview') {
+    publishSmokeTestReport('PREVIEW')
+  }
+
+  after('functionalTest:preview') {
+    publishLegacyFunctionalReport('PREVIEW')
+    try {
+      stage('PREVIEW HMC Admin UI Playwright Functional Test') {
+        runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
+      }
+    } finally {
+      runManualPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
+    }
+  }
+
+  after('smoketest:aat') {
+    publishSmokeTestReport('AAT')
+  }
+
+  after('functionalTest:aat') {
+    publishLegacyFunctionalReport('AAT')
+    try {
+      stage('AAT HMC Admin UI Playwright Functional Test') {
+        runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
+      }
+    } finally {
+      runManualPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
+    }
+  }
+}
