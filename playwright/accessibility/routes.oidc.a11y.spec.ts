@@ -19,7 +19,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
 
   test(
     'audits the protected singular request selection page',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }, testInfo) => {
       await page.goto('/singular?lng=en');
       await expect(
@@ -33,43 +33,55 @@ test.describe('HMC Admin UI protected route accessibility', () => {
     }
   );
 
-  test('audits protected singular selection validation', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
-    await page.goto('/singular?lng=en');
-    await page.getByRole('button', { name: 'Continue' }).click();
+  test(
+    'audits protected singular selection validation',
+    { tag: '@feature:request-selection' },
+    async ({ page }, testInfo) => {
+      await page.goto('/singular?lng=en');
+      await page.getByRole('button', { name: 'Continue' }).click();
 
-    await expect(page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(page.locator('#singular-request-type-error')).toHaveText(/Select a singular request type/);
+      await expect(page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+      await expect(page.locator('#singular-request-type-error')).toHaveText(/Select a singular request type/);
 
-    const results = await auditPageAccessibility(page, testInfo, 'oidc-singular-selection-validation');
-    expect(results.violations).toEqual([]);
-  });
+      const results = await auditPageAccessibility(page, testInfo, 'oidc-singular-selection-validation');
+      expect(results.violations).toEqual([]);
+    }
+  );
 
-  test('audits the protected final state transition form', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
-    await page.goto('/singular/final-state-transition?lng=en');
-    await expect(page.getByRole('heading', { name: 'Final state transition' })).toBeVisible();
-    await expect(page.getByLabel('Status')).toBeVisible();
+  test(
+    'audits the protected final state transition form',
+    { tag: '@feature:final-state-transition' },
+    async ({ page }, testInfo) => {
+      await page.goto('/singular/final-state-transition?lng=en');
+      await expect(page.getByRole('heading', { name: 'Final state transition' })).toBeVisible();
+      await expect(page.getByLabel('Status')).toBeVisible();
 
-    const results = await auditPageAccessibility(page, testInfo, 'oidc-final-state-transition');
-    expect(results.violations).toEqual([]);
-  });
+      const results = await auditPageAccessibility(page, testInfo, 'oidc-final-state-transition');
+      expect(results.violations).toEqual([]);
+    }
+  );
 
-  test('audits protected final state validation', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
-    await page.goto('/singular/final-state-transition?lng=en');
-    await page.getByLabel('Hearing ID').fill('not-a-number');
-    await page.getByLabel('CCD Case Reference Number').fill('not-a-case-reference');
-    await page.getByRole('button', { name: 'Submit' }).click();
+  test(
+    'audits protected final state validation',
+    { tag: '@feature:final-state-transition' },
+    async ({ page }, testInfo) => {
+      await page.goto('/singular/final-state-transition?lng=en');
+      await page.getByLabel('Hearing ID').fill('not-a-number');
+      await page.getByLabel('CCD Case Reference Number').fill('not-a-case-reference');
+      await page.getByRole('button', { name: 'Submit' }).click();
 
-    await expect(page.locator('#hearing-id-error')).toHaveText(/Hearing ID must be a number/);
-    await expect(page.locator('#case-ref-error')).toHaveText(/must be a 16-digit number/);
-    await expect(page.locator('#status-error')).toHaveText(/Select a status/);
+      await expect(page.locator('#hearing-id-error')).toHaveText(/Hearing ID must be a number/);
+      await expect(page.locator('#case-ref-error')).toHaveText(/must be a 16-digit number/);
+      await expect(page.locator('#status-error')).toHaveText(/Select a status/);
 
-    const results = await auditPageAccessibility(page, testInfo, 'oidc-final-state-validation');
-    expect(results.violations).toEqual([]);
-  });
+      const results = await auditPageAccessibility(page, testInfo, 'oidc-final-state-validation');
+      expect(results.violations).toEqual([]);
+    }
+  );
 
   test(
     'audits the protected rollback form and validation',
-    { tag: '@feature:singular' },
+    { tag: '@feature:rollback' },
     async ({ page }, testInfo) => {
       await page.goto('/singular/rollback?lng=en');
       await expect(page.getByRole('heading', { name: 'Rollback' })).toBeVisible();
@@ -142,7 +154,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
 
   test(
     'audits the protected singular service problem page',
-    { tag: '@feature:singular' },
+    { tag: '@feature:service-recovery' },
     async ({ page }, testInfo) => {
       const response = await page.goto('/singular/problem?lng=en');
 
@@ -157,7 +169,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
 
   test(
     'audits the protected bulk service problem page',
-    { tag: '@feature:bulk-upload' },
+    { tag: '@feature:service-recovery' },
     async ({ page }, testInfo) => {
       const response = await page.goto('/bulk-upload/problem?lng=en');
 
@@ -179,7 +191,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('audits the protected not-found page', { tag: '@feature:error-pages' }, async ({ page }, testInfo) => {
+  test('audits the protected not-found page', { tag: '@feature:service-recovery' }, async ({ page }, testInfo) => {
     const response = await page.goto('/route-that-does-not-exist?lng=en');
 
     await expect(response?.status()).toBe(404);

@@ -5,7 +5,7 @@ import { expectHomePage, openHomePage } from '../functional/home';
 
 test(
   'checks the local home page against WCAG 2.2 AA',
-  { tag: '@feature:request-routing' },
+  { tag: '@feature:request-selection' },
   async ({ page }, testInfo) => {
     await openHomePage(page);
     await expectHomePage(page);
@@ -18,7 +18,7 @@ test(
 
 test(
   'checks the local final state validation state against WCAG 2.2 AA',
-  { tag: '@feature:singular' },
+  { tag: '@feature:final-state-transition' },
   async ({ page }, testInfo) => {
     await page.goto('/singular/final-state-transition?lng=en');
     await page.getByRole('button', { name: 'Submit' }).click();

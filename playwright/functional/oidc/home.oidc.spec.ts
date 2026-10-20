@@ -12,7 +12,7 @@ test.describe('HMC Admin UI protected home journeys', () => {
 
   test(
     'signs in through OIDC and opens the protected singular selection page without submitting a request',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }) => {
       await openHomePage(page);
       await signInThroughOidc(page);
@@ -42,7 +42,7 @@ test.describe('HMC Admin UI protected home journeys', () => {
 
   test(
     'signs in through OIDC and opens the protected final state form',
-    { tag: '@feature:singular' },
+    { tag: '@feature:final-state-transition' },
     async ({ page }) => {
       await openHomePage(page);
       await signInThroughOidc(page);
@@ -55,7 +55,7 @@ test.describe('HMC Admin UI protected home journeys', () => {
 
   test(
     'signs in through OIDC and opens the protected rollback form',
-    { tag: '@feature:singular' },
+    { tag: '@feature:rollback' },
     async ({ page }) => {
       await openHomePage(page);
       await signInThroughOidc(page);
@@ -68,7 +68,7 @@ test.describe('HMC Admin UI protected home journeys', () => {
 
   test(
     'signs in through OIDC and preserves protected final-state validation errors',
-    { tag: '@feature:singular' },
+    { tag: '@feature:final-state-transition' },
     async ({ page }) => {
       await openHomePage(page);
       await signInThroughOidc(page);

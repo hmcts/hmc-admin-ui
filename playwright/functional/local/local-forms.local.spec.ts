@@ -9,7 +9,7 @@ const caseReference = '1234567890123456';
 test.describe('HMC Admin UI local form journeys', () => {
   test(
     'shows three visible field errors when final state transition is submitted blank',
-    { tag: '@feature:singular' },
+    { tag: '@feature:final-state-transition' },
     async ({ page }) => {
       await openSingularSelection(page);
       await selectSingularRequestType(page, 'Final state transition');
@@ -24,7 +24,7 @@ test.describe('HMC Admin UI local form journeys', () => {
 
   test(
     'submits a valid local rollback and shows its fallback response',
-    { tag: '@feature:singular' },
+    { tag: '@feature:rollback' },
     async ({ page }) => {
       await openSingularSelection(page);
       await selectSingularRequestType(page, 'Rollback');

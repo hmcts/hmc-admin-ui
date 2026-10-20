@@ -17,7 +17,7 @@ async function expectNoAccessibilityViolations(
 
 test(
   'checks singular request selection against WCAG 2.2 AA',
-  { tag: '@feature:singular' },
+  { tag: '@feature:request-selection' },
   async ({ page }, testInfo) => {
     await openSingularSelection(page);
     await expect(
@@ -28,7 +28,7 @@ test(
   }
 );
 
-test('checks rollback validation against WCAG 2.2 AA', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
+test('checks rollback validation against WCAG 2.2 AA', { tag: '@feature:rollback' }, async ({ page }, testInfo) => {
   await openSingularSelection(page);
   await selectSingularRequestType(page, 'Rollback');
   await page.getByRole('button', { name: 'Submit' }).click();
@@ -80,7 +80,7 @@ test(
 
 test(
   'checks the singular response failure page against WCAG 2.2 AA',
-  { tag: '@feature:singular' },
+  { tag: '@feature:final-state-transition' },
   async ({ page }, testInfo) => {
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Final state transition');

@@ -11,7 +11,7 @@ function uploadFile(name: string, mimeType: string, contents: string) {
   return { name, mimeType, buffer: Buffer.from(contents) };
 }
 
-test.describe('HMC Admin UI local bulk upload journeys', () => {
+test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-upload' }, () => {
   test('renders the CSV upload form contract', async ({ page }) => {
     await openBulkUpload(page);
 

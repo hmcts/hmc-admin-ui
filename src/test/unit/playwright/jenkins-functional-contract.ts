@@ -40,9 +40,7 @@ describe('native Playwright CNP contract', () => {
 
   test('uses the CNP deployment environment, not the callback name, for the IDAM public origin', () => {
     expect(jenkinsfile).toContain("def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'");
-    expect(jenkinsfile).toContain(
-      'env.IDAM_PUBLIC_URL = "https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"'
-    );
+    expect(jenkinsfile).toContain('"IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"');
     expect(jenkinsfile).not.toContain(
       'env.IDAM_PUBLIC_URL = "https://hmcts-access.${targetEnvironment}.platform.hmcts.net"'
     );
@@ -50,10 +48,8 @@ describe('native Playwright CNP contract', () => {
 
   test.each(['preview', 'aat'])('configures and publishes the %s normal functional stage', environment => {
     expect(jenkinsfile).toContain(`afterAlways('functionalTest:${environment}')`);
-    expect(jenkinsfile).toContain(
-      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
-    );
-    expect(jenkinsfile.split(`runPlaywrightFunctional('${environment}'`).length - 1).toBe(1);
+    expect(jenkinsfile).toContain(`runPlaywrightSuitesInParallel(\n      '${environment}'`);
+    expect(jenkinsfile.split('runPlaywrightFunctional(targetEnvironment, functionalReportName)').length - 1).toBe(1);
     expect(jenkinsfile).not.toContain(`afterAlways('fullFunctionalTest:${environment}')`);
   });
 
@@ -61,9 +57,7 @@ describe('native Playwright CNP contract', () => {
     const body = callbackBody(`functionalTest:${environment}`);
 
     expect(body).toContain('publishTestReports()');
-    expect(body).toContain(
-      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
-    );
+    expect(body).toContain(`runPlaywrightSuitesInParallel(\n      '${environment}'`);
   });
 
   test('keeps accessibility in its own opt-in report lane', () => {
@@ -76,15 +70,29 @@ describe('native Playwright CNP contract', () => {
     expect(jenkinsfile).toContain('skipMarkingBuildUnstable: true');
   });
 
-  test.each(['preview', 'aat'])('keeps manual accessibility and smoke reports in one callback for %s', environment => {
-    const callback = `afterAlways('smoketest:${environment}')`;
-    const registrations = jenkinsfile.split(callback).length - 1;
-    const section = smokeCallbackSection(environment);
+  test.each(['preview', 'aat'])(
+    'keeps manual accessibility in the parallel functional callback for %s',
+    environment => {
+      const callback = `afterAlways('smoketest:${environment}')`;
+      const registrations = jenkinsfile.split(callback).length - 1;
+      const section = smokeCallbackSection(environment);
 
-    expect(registrations).toBe(1);
-    expect(section).toContain('publishTestReports()');
-    expect(section).toContain('runPlaywrightAccessibility');
-    expect(jenkinsfile).not.toContain(`afterSuccess('smoketest:${environment}')`);
+      expect(registrations).toBe(1);
+      expect(section).toContain('publishTestReports()');
+      expect(section).not.toContain('runPlaywrightAccessibility');
+      const functionalSection = callbackBody(`functionalTest:${environment}`);
+      expect(functionalSection).toContain('runPlaywrightSuitesInParallel');
+      expect(jenkinsfile).toContain('parallel(suites)');
+      expect(jenkinsfile).not.toContain(`afterSuccess('smoketest:${environment}')`);
+    }
+  );
+
+  test('does not archive native Playwright roots through the generic report callback', () => {
+    expect(jenkinsfile).toContain(
+      'excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"'
+    );
+    expect(jenkinsfile).toContain('withEnv(configurePlaywrightFunctional(targetEnvironment))');
+    expect(jenkinsfile).toContain('withEnv(configurePlaywrightAccessibility(targetEnvironment))');
   });
 
   test('runs the same separate accessibility report on the nightly AAT contract', () => {

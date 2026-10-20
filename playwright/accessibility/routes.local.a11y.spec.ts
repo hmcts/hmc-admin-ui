@@ -24,7 +24,7 @@ function uploadFile(name: string, mimeType: string, contents: string) {
 test.describe('HMC Admin UI local route accessibility', () => {
   test(
     'audits the singular request selection page before a choice is made',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }, testInfo) => {
       await openSingularSelection(page);
       await expect(page.getByRole('radio', { name: 'Final state transition' })).toBeVisible();
@@ -36,7 +36,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
 
   test(
     'audits the singular request selection validation state',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }, testInfo) => {
       await openSingularSelection(page);
       await page.getByRole('button', { name: 'Continue' }).click();
@@ -48,17 +48,21 @@ test.describe('HMC Admin UI local route accessibility', () => {
     }
   );
 
-  test('audits the blank final state transition form', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
-    await openSingularSelection(page);
-    await selectSingularRequestType(page, 'Final state transition');
-    await expect(page.getByRole('heading', { name: 'Final state transition' })).toBeVisible();
+  test(
+    'audits the blank final state transition form',
+    { tag: '@feature:final-state-transition' },
+    async ({ page }, testInfo) => {
+      await openSingularSelection(page);
+      await selectSingularRequestType(page, 'Final state transition');
+      await expect(page.getByRole('heading', { name: 'Final state transition' })).toBeVisible();
 
-    await expectNoAccessibilityViolations(page, testInfo, 'final-state-transition-default');
-  });
+      await expectNoAccessibilityViolations(page, testInfo, 'final-state-transition-default');
+    }
+  );
 
   test(
     'audits final state transition validation with invalid values preserved',
-    { tag: '@feature:singular' },
+    { tag: '@feature:final-state-transition' },
     async ({ page }, testInfo) => {
       await openSingularSelection(page);
       await selectSingularRequestType(page, 'Final state transition');
@@ -77,7 +81,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
 
   test(
     'audits the final state transition service problem page',
-    { tag: '@feature:singular' },
+    { tag: '@feature:service-recovery' },
     async ({ page }, testInfo) => {
       const response = await page.goto('/singular/problem?lng=en');
 
@@ -89,7 +93,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
     }
   );
 
-  test('audits the rollback form before submission', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
+  test('audits the rollback form before submission', { tag: '@feature:rollback' }, async ({ page }, testInfo) => {
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Rollback');
     await expect(page.getByRole('heading', { name: 'Rollback' })).toBeVisible();
@@ -98,7 +102,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
     await expectNoAccessibilityViolations(page, testInfo, 'rollback-default');
   });
 
-  test('audits the rollback response failure state', { tag: '@feature:singular' }, async ({ page }, testInfo) => {
+  test('audits the rollback response failure state', { tag: '@feature:rollback' }, async ({ page }, testInfo) => {
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Rollback');
     await page.getByLabel('Hearing ID').fill(hearingId);
@@ -192,15 +196,19 @@ test.describe('HMC Admin UI local route accessibility', () => {
     await expectNoAccessibilityViolations(page, testInfo, 'bulk-upload-row-validation');
   });
 
-  test('audits the bulk upload service problem page', { tag: '@feature:bulk-upload' }, async ({ page }, testInfo) => {
-    const response = await page.goto('/bulk-upload/problem?lng=en');
+  test(
+    'audits the bulk upload service problem page',
+    { tag: '@feature:service-recovery' },
+    async ({ page }, testInfo) => {
+      const response = await page.goto('/bulk-upload/problem?lng=en');
 
-    await expect(response?.status()).toBe(502);
-    await expect(page.getByRole('heading', { name: 'Sorry, there is a problem with the service' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Try bulk upload again' })).toBeVisible();
+      await expect(response?.status()).toBe(502);
+      await expect(page.getByRole('heading', { name: 'Sorry, there is a problem with the service' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Try bulk upload again' })).toBeVisible();
 
-    await expectNoAccessibilityViolations(page, testInfo, 'bulk-upload-service-problem');
-  });
+      await expectNoAccessibilityViolations(page, testInfo, 'bulk-upload-service-problem');
+    }
+  );
 
   test(
     'audits the bulk response page without a prior upload',
@@ -214,7 +222,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
     }
   );
 
-  test('audits the not found page', { tag: '@feature:error-pages' }, async ({ page }, testInfo) => {
+  test('audits the not found page', { tag: '@feature:service-recovery' }, async ({ page }, testInfo) => {
     const response = await page.goto('/route-that-does-not-exist?lng=en');
 
     await expect(response?.status()).toBe(404);
@@ -225,7 +233,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
 
   test(
     'audits the home page after returning from a completed local request',
-    { tag: '@feature:request-routing' },
+    { tag: '@feature:request-selection' },
     async ({ page }, testInfo) => {
       await openHomePage(page);
       await expect(page.getByRole('heading', { name: 'What type of request would you like to make?' })).toBeVisible();

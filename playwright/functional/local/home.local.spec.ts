@@ -6,7 +6,7 @@ import { openBulkUpload, openSingularSelection } from '../journeys';
 test.describe('HMC Admin UI local home journeys', () => {
   test(
     'exposes the semantic home-page contract and a CSRF-backed form',
-    { tag: '@feature:request-routing' },
+    { tag: '@feature:request-selection' },
     async ({ page }) => {
       await openHomePage(page);
 
@@ -34,7 +34,7 @@ test.describe('HMC Admin UI local home journeys', () => {
 
   test(
     'opens the singular request selection page from home with authentication disabled locally',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }) => {
       await openSingularSelection(page);
 
@@ -47,7 +47,7 @@ test.describe('HMC Admin UI local home journeys', () => {
 
   test(
     'shows the required singular request type error with authentication disabled locally',
-    { tag: '@feature:singular' },
+    { tag: '@feature:request-selection' },
     async ({ page }) => {
       await openSingularSelection(page);
       await page.getByRole('button', { name: 'Continue' }).click();
@@ -60,7 +60,7 @@ test.describe('HMC Admin UI local home journeys', () => {
 
   test(
     'returns to the home page when no request type is selected',
-    { tag: '@feature:request-routing' },
+    { tag: '@feature:request-selection' },
     async ({ page }) => {
       await openHomePage(page);
       await page.getByRole('button', { name: 'Continue' }).click();
@@ -70,7 +70,7 @@ test.describe('HMC Admin UI local home journeys', () => {
     }
   );
 
-  test('returns from singular selection to home with Back', { tag: '@feature:request-routing' }, async ({ page }) => {
+  test('returns from singular selection to home with Back', { tag: '@feature:request-selection' }, async ({ page }) => {
     await openSingularSelection(page);
     await page.getByRole('link', { name: 'Back' }).click();
 
