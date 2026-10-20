@@ -39,8 +39,6 @@ def component = "admin-ui"
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
 def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
-def playwrightFunctionalLocalOutputRoot = 'functional-output/tests/playwright-functional-local'
-def playwrightFunctionalLocalReportFile = 'hmc-playwright-functional-local.html'
 def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
 def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
 def playwrightBrowsersEnv = {
@@ -49,12 +47,14 @@ def playwrightBrowsersEnv = {
 
 def configurePlaywrightFunctional = { String targetEnvironment ->
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  def testUrl = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
   [
     "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
     "PLAYWRIGHT_OUTPUT_DIR=${playwrightFunctionalOutputRoot}/test-results",
     "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml",
     "PLAYWRIGHT_REPORT_FOLDER=${playwrightFunctionalOutputRoot}/odhin-report",
     "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightFunctionalReportFile}",
+    "TEST_URL=${testUrl}",
     "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
     "TEST_TYPE=${targetEnvironment}"
   ]
@@ -84,50 +84,16 @@ def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
   }
 }
 
-def configurePlaywrightFunctionalLocal = {
-  [
-    "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
-    "PLAYWRIGHT_OUTPUT_DIR=${playwrightFunctionalLocalOutputRoot}/test-results",
-    "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightFunctionalLocalOutputRoot}/odhin-report/playwright-junit.xml",
-    "PLAYWRIGHT_REPORT_FOLDER=${playwrightFunctionalLocalOutputRoot}/odhin-report",
-    "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightFunctionalLocalReportFile}"
-  ]
-}
-
-def publishPlaywrightFunctionalLocal = { String reportName ->
-  steps.sh "node bin/verify-playwright-functional-report.js"
-  steps.publishHTML([
-    allowMissing         : false,
-    alwaysLinkToLastBuild: true,
-    keepAll              : true,
-    reportDir            : "${playwrightFunctionalLocalOutputRoot}/odhin-report/",
-    reportFiles          : playwrightFunctionalLocalReportFile,
-    reportName           : reportName
-  ])
-  steps.junit allowEmptyResults: false,
-    testResults: "${playwrightFunctionalLocalOutputRoot}/odhin-report/playwright-junit.xml"
-  steps.archiveArtifacts allowEmptyArchive: false,
-    artifacts: "${playwrightFunctionalLocalOutputRoot}/**"
-}
-
-def runPlaywrightFunctionalLocal = { String reportName ->
-  withEnv(configurePlaywrightFunctionalLocal()) {
-    try {
-      yarnBuilder.yarn('test:playwright:functional:local')
-    } finally {
-      publishPlaywrightFunctionalLocal(reportName)
-    }
-  }
-}
-
 def configurePlaywrightAccessibility = { String targetEnvironment ->
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  def testUrl = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
   [
     "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
     "PLAYWRIGHT_OUTPUT_DIR=${playwrightAccessibilityOutputRoot}/test-results",
     "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml",
     "PLAYWRIGHT_REPORT_FOLDER=${playwrightAccessibilityOutputRoot}/odhin-report",
     "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightAccessibilityReportFile}",
+    "TEST_URL=${testUrl}",
     "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
     "TEST_TYPE=${targetEnvironment}"
   ]
@@ -173,14 +139,6 @@ def runPlaywrightSuitesInParallel = { String targetEnvironment, String functiona
     }
   ]
 
-  if (targetEnvironment == 'preview') {
-    suites.playwrightFunctionalLocal = {
-      stage('PREVIEW HMC Admin UI Playwright Functional Local Contract Test') {
-        runPlaywrightFunctionalLocal('PREVIEW HMC Admin UI Playwright Functional Local Contract Test')
-      }
-    }
-  }
-
   if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
     suites.playwrightAccessibility = {
       stage(accessibilityReportName) {
@@ -215,7 +173,7 @@ withPipeline(type, product, component) {
 
     archiveArtifacts allowEmptyArchive: true,
       artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*',
-      excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightFunctionalLocalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"
+      excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"
   }
 
   afterSuccess('build') {

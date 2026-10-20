@@ -123,6 +123,27 @@ test.describe('HMC Admin UI protected bulk upload journeys', () => {
     }
   );
 
+  test('finds the CSV header after a short preamble', { tag: '@feature:bulk-upload' }, async ({ page }) => {
+    const csv = ['HMC migration upload', 'Generated for test evidence', validCsvHeaders].join('\n');
+    await page.getByLabel('Please upload a file').setInputFiles(createUploadFile('preamble.csv', 'text/csv', csv));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+    await expect(page.getByRole('heading', { name: 'Bulk request response' })).toBeVisible();
+  });
+
+  for (const mimeType of ['application/csv', 'application/vnd.ms-excel']) {
+    test(`accepts the ${mimeType} CSV MIME alias`, { tag: '@feature:bulk-upload' }, async ({ page }) => {
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile(`${mimeType}.csv`, mimeType, validCsvHeaders));
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+      await expect(page.getByRole('heading', { name: 'Bulk request response' })).toBeVisible();
+    });
+  }
+
   test('cancels from bulk upload and returns to Support tools', { tag: '@feature:bulk-upload' }, async ({ page }) => {
     await page.getByRole('link', { name: 'Cancel' }).click();
 

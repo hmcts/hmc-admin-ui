@@ -103,8 +103,7 @@ describe('Odhín report enhancer', () => {
 
   test('derives stable feature names for Admin UI functional specs', () => {
     expect(enhancer.deriveFeatureName('/workspace/playwright/functional/home.spec.ts')).toBe('home');
-    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local-forms.spec.ts')).toBe('local-forms');
-    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local/home.local.spec.ts')).toBe('home');
+    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/oidc/forms.oidc.spec.ts')).toBe('forms');
     expect(enhancer.deriveFeatureName('/workspace/playwright/accessibility/home.oidc.a11y.spec.ts')).toBe('home');
   });
 

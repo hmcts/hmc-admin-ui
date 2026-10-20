@@ -92,4 +92,53 @@ test.describe('HMC Admin UI additional protected accessibility states', () => {
       await expectNoAccessibilityViolations(page, testInfo, 'oidc-bulk-upload-file-selected');
     }
   );
+
+  test(
+    'audits the protected bulk upload invalid-header state',
+    { tag: '@feature:bulk-upload' },
+    async ({ page }, testInfo) => {
+      await page.goto('/bulk-upload?lng=en');
+      const csv = `${validCsvHeaders},unexpected\n${hearingId},${caseReference},rollback,,`;
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile('invalid-header.csv', 'text/csv', csv));
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page.locator('#bulk-upload-file-error')).toHaveText(/correct header layout/);
+      await expectNoAccessibilityViolations(page, testInfo, 'oidc-bulk-upload-invalid-header');
+    }
+  );
+
+  test(
+    'audits the protected rollback boundary validation state',
+    { tag: '@feature:rollback' },
+    async ({ page }, testInfo) => {
+      await page.goto('/singular/rollback?lng=en');
+      const overlongHearingId = '1'.repeat(31);
+      const overlongNotes = 'a'.repeat(5001);
+
+      await page.route('**/singular/rollback*', async route => {
+        if (route.request().method() !== 'POST') {
+          await route.continue();
+          return;
+        }
+
+        const form = new URLSearchParams(route.request().postData() ?? '');
+        form.set('hearingId', overlongHearingId);
+        form.set('caseRef', 'not-a-case-reference');
+        form.set('notes', overlongNotes);
+        await route.continue({ postData: form.toString() });
+      });
+
+      await page.getByLabel('Hearing ID').fill(hearingId);
+      await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+      await page.getByLabel('Incident Number / Notes').fill('Boundary validation');
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page.locator('#hearing-id-error')).toHaveText(/30 characters or fewer/);
+      await expect(page.locator('#case-ref-error')).toHaveText(/16-digit number/);
+      await expect(page.locator('#notes-error')).toHaveText(/5000 characters or fewer/);
+      await expectNoAccessibilityViolations(page, testInfo, 'oidc-rollback-boundary-validation');
+    }
+  );
 });

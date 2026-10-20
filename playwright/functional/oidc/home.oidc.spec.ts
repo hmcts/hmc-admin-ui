@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { expectHomePage, openHomePage } from '../home';
-import { signInThroughOidc } from '../oidc';
+import { expectIdamLoginOrigin, signInThroughOidc } from '../oidc';
 
 test.describe('HMC Admin UI protected home journeys', () => {
   test('signs in through OIDC and shows the home page', { tag: '@feature:authentication' }, async ({ page }) => {
@@ -65,4 +65,14 @@ test.describe('HMC Admin UI protected home journeys', () => {
       await expect(page.getByLabel('Hearing ID')).toHaveValue('not-a-number');
     }
   );
+
+  test('signs out through the protected session boundary', { tag: '@feature:authentication' }, async ({ page }) => {
+    await openHomePage(page);
+    await signInThroughOidc(page);
+    await expectHomePage(page);
+
+    await page.getByRole('link', { name: 'Sign out' }).click();
+
+    await expectIdamLoginOrigin(page);
+  });
 });

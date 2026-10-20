@@ -162,21 +162,7 @@ yarn test:functional:local
 
 This command runs the legacy CodeceptJS journey and report path. It remains separate from the native Playwright lane.
 
-Run the native Playwright functional checks with authentication disabled:
-
-```bash
-yarn test:playwright:functional:local
-```
-
-This command starts the application with `AUTH_ENABLED=false` and runs the local native Playwright journeys. Its JUnit and Odhín evidence is written beneath `functional-output/tests/playwright-functional/`. It proves local UI rendering only; it does not prove OIDC, roles, or Hearing Service calls.
-
-Run the deterministic local accessibility checks with authentication disabled:
-
-```bash
-yarn test:accessibility:local
-```
-
-This command starts the application with `AUTH_ENABLED=false`, runs the local Axe WCAG 2.2 AA checks, and writes JUnit/Odhín output beneath `functional-output/tests/playwright-accessibility/`. Each accessibility audit persists JSON, HTML summary, and screenshot evidence in the accessibility output; CI archives these files with the published report. Legacy Codecept files remain as migration evidence until EXUI-5429 retires them.
+The native Playwright functional and accessibility packs intentionally use the same protected OIDC setup locally and in Jenkins. The retained CodeceptJS command above is the only local authentication-disabled functional path and remains separate migration evidence until EXUI-5429 retires it.
 
 Run the main local CI checks:
 
