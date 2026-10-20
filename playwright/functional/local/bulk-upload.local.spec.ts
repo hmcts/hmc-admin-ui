@@ -122,4 +122,17 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await expect(response).toContain('State is mandatory for final_state_transition requests.');
     await expect(response).toContain('Notes/Incident Number exceeds 5000 character limit.');
   });
+
+  for (const mimeType of ['application/csv', 'application/vnd.ms-excel']) {
+    test(`accepts the ${mimeType} CSV MIME alias`, async ({ page }) => {
+      await openBulkUpload(page);
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile(`${mimeType}.csv`, mimeType, validCsvHeaders));
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page).toHaveURL(/\/bulk-upload\/response$/);
+      await expect(page.getByRole('heading', { name: 'Bulk request response' })).toBeVisible();
+    });
+  }
 });
