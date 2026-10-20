@@ -3,6 +3,7 @@ import * as path from 'node:path';
 
 const jenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_CNP'), 'utf8');
 const nightlyJenkinsfile = fs.readFileSync(path.resolve(__dirname, '../../../../Jenkinsfile_nightly'), 'utf8');
+const codeceptRunner = fs.readFileSync(path.resolve(__dirname, '../../../../bin/run-functional-tests.js'), 'utf8');
 const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../../package.json'), 'utf8'));
 
 function callbackBody(stage: string): string {
@@ -26,6 +27,11 @@ describe('native Playwright CNP contract', () => {
     expect(packageJson.scripts['test:playwright:functional']).toContain('npx playwright test');
     expect(packageJson.scripts['test:playwright:functional:local']).toContain('test:playwright:functional');
     expect(packageJson.scripts['test:functional']).not.toContain('playwright');
+  });
+
+  test('keeps the retained Codecept runner on the Chromium-only browser contract', () => {
+    expect(codeceptRunner).toContain("run('yarn', ['playwright', 'install', 'chromium'])");
+    expect(codeceptRunner).not.toContain("run('yarn', ['playwright', 'install']);");
   });
 
   test('uses the CNP deployment environment, not the callback name, for the IDAM public origin', () => {

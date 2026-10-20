@@ -20,7 +20,7 @@ function run(command, args) {
   return result.status ?? 1;
 }
 
-let testResult = run('yarn', ['playwright', 'install']);
+let testResult = run('yarn', ['playwright', 'install', 'chromium']);
 
 if (testResult === 0) {
   testResult = run('codeceptjs', ['run', '--steps']);
