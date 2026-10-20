@@ -47,7 +47,10 @@ def playwrightBrowsersEnv = {
 
 def configurePlaywrightFunctional = { String targetEnvironment ->
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
-  def testUrl = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
   [
     "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
     "PLAYWRIGHT_OUTPUT_DIR=${playwrightFunctionalOutputRoot}/test-results",
@@ -86,7 +89,10 @@ def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
 
 def configurePlaywrightAccessibility = { String targetEnvironment ->
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
-  def testUrl = env.TEST_URL ?: "https://hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net"
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
   [
     "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
     "PLAYWRIGHT_OUTPUT_DIR=${playwrightAccessibilityOutputRoot}/test-results",

@@ -41,6 +41,11 @@ describe('native Playwright CNP contract', () => {
 
   test('uses the CNP deployment environment, not the callback name, for the IDAM public origin', () => {
     expect(jenkinsfile).toContain("def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'");
+    expect(jenkinsfile).toContain('def testUrl = env.TEST_URL');
+    expect(jenkinsfile).toContain(
+      "throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')"
+    );
+    expect(jenkinsfile).not.toContain('hmc-admin-ui.${deployedEnvironment}.platform.hmcts.net');
     expect(jenkinsfile).toContain('"IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"');
     expect(jenkinsfile).not.toContain(
       'env.IDAM_PUBLIC_URL = "https://hmcts-access.${targetEnvironment}.platform.hmcts.net"'
