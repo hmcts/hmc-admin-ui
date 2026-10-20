@@ -32,7 +32,7 @@ class HmcOdhinAdaptiveReporter {
     const [test, result] = args;
     this.testMetadata.push({
       target: `#${test?.id}-${result?.retry ?? 0}`,
-      feature: deriveFeatureName(test?.location?.file),
+      feature: deriveFeatureName(test?.location?.file, test?.tags),
       tags: test?.tags ?? [],
       durationMs: result?.duration ?? 0,
       retry: result?.retry ?? 0,
@@ -85,7 +85,7 @@ class HmcOdhinAdaptiveReporter {
       return;
     }
 
-    const featureName = deriveFeatureName(test?.location?.file);
+    const featureName = deriveFeatureName(test?.location?.file, test?.tags);
     const current = this.featureStats.get(featureName) ?? createEmptyFeatureStat(featureName);
     current.totalTests += 1;
     current.durationMs += Number(result?.duration ?? 0);
