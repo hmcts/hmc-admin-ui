@@ -2,14 +2,11 @@ import { expect, test } from '@playwright/test';
 
 import { readDownloadedText } from '../downloads';
 import { openBulkUpload } from '../journeys';
+import { createUploadFile } from '../upload';
 
 const hearingId = '12345678901234567890';
 const caseReference = '1234567890123456';
 const validCsvHeaders = 'hearingId,caseRef,action,notes,state';
-
-function uploadFile(name: string, mimeType: string, contents: string) {
-  return { name, mimeType, buffer: Buffer.from(contents) };
-}
 
 test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-upload' }, () => {
   test('renders the CSV upload form contract', async ({ page }) => {
@@ -39,7 +36,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await openBulkUpload(page);
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('bulk-upload.txt', 'text/plain', 'not a csv'));
+      .setInputFiles(createUploadFile('bulk-upload.txt', 'text/plain', 'not a csv'));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -52,7 +49,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await openBulkUpload(page);
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('bulk-upload.csv', 'text/csv', 'This is not a CSV file'));
+      .setInputFiles(createUploadFile('bulk-upload.csv', 'text/csv', 'This is not a CSV file'));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.locator('#bulk-upload-file-error')).toHaveText(/The selected file must be a valid CSV file/);
@@ -62,7 +59,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await openBulkUpload(page);
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('bulk-upload.csv', 'text/csv', `${validCsvHeaders}\n\u0000`));
+      .setInputFiles(createUploadFile('bulk-upload.csv', 'text/csv', `${validCsvHeaders}\n\u0000`));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.locator('#bulk-upload-file-error')).toHaveText(/The selected file must be a valid CSV file/);
@@ -73,7 +70,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await page
       .getByLabel('Please upload a file')
       .setInputFiles(
-        uploadFile(
+        createUploadFile(
           'bulk-upload.csv',
           'text/csv',
           `${validCsvHeaders},unexpected\n${hearingId},${caseReference},rollback,,`
@@ -90,7 +87,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await openBulkUpload(page);
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('headers-only.csv', 'text/csv', validCsvHeaders));
+      .setInputFiles(createUploadFile('headers-only.csv', 'text/csv', validCsvHeaders));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page).toHaveURL(/\/bulk-upload\/response$/);
@@ -109,7 +106,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
       validCsvHeaders,
       `${hearingId},${caseReference},rollback,Migration preamble,`,
     ].join('\n');
-    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('preamble.csv', 'text/csv', csv));
+    await page.getByLabel('Please upload a file').setInputFiles(createUploadFile('preamble.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page).toHaveURL(/\/bulk-upload\/response$/);
@@ -123,7 +120,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
   test('accepts quoted notes containing commas and quotes', async ({ page }) => {
     await openBulkUpload(page);
     const csv = `${validCsvHeaders}\n${hearingId},${caseReference},final_state_transition,"Migration, ""quoted"" note",COMPLETED`;
-    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('quoted-notes.csv', 'text/csv', csv));
+    await page.getByLabel('Please upload a file').setInputFiles(createUploadFile('quoted-notes.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page).toHaveURL(/\/bulk-upload\/response$/);
@@ -144,7 +141,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     ].join('\n');
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('all-supported-actions.csv', 'text/csv', `${validCsvHeaders}\n${rows}`));
+      .setInputFiles(createUploadFile('all-supported-actions.csv', 'text/csv', `${validCsvHeaders}\n${rows}`));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page).toHaveURL(/\/bulk-upload\/response$/);
@@ -178,7 +175,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
     await page
       .getByLabel('Please upload a file')
       .setInputFiles(
-        uploadFile(
+        createUploadFile(
           'final-state-transition.csv',
           'text/csv',
           `${validCsvHeaders}\n${hearingId},${caseReference},final_state_transition,Migration coverage,CANCELLED`
@@ -210,7 +207,7 @@ test.describe('HMC Admin UI local bulk upload journeys', { tag: '@feature:bulk-u
       `${invalidHearingId},${invalidCaseReference},not-an-action,${longNotes},INVALID`,
       `${hearingId},${caseReference},final_state_transition,,`,
     ].join('\n');
-    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('mixed.csv', 'text/csv', csv));
+    await page.getByLabel('Please upload a file').setInputFiles(createUploadFile('mixed.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByRole('link', { name: /There were validation errors/ })).toBeVisible();

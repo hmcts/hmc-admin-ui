@@ -3,13 +3,10 @@ import { expect, test } from '@playwright/test';
 import { auditPageAccessibility } from '../functional/accessibility';
 import { openHomePage } from '../functional/home';
 import { signInThroughOidc } from '../functional/oidc';
+import { createUploadFile } from '../functional/upload';
 
 const hearingId = '12345678901234567890';
 const validCsvHeaders = 'hearingId,caseRef,action,notes,state';
-
-function uploadFile(name: string, mimeType: string, contents: string) {
-  return { name, mimeType, buffer: Buffer.from(contents) };
-}
 
 test.describe('HMC Admin UI protected route accessibility', () => {
   test.beforeEach(async ({ page }) => {
@@ -125,7 +122,9 @@ test.describe('HMC Admin UI protected route accessibility', () => {
     { tag: '@feature:bulk-upload' },
     async ({ page }, testInfo) => {
       await page.goto('/bulk-upload?lng=en');
-      await page.getByLabel('Please upload a file').setInputFiles(uploadFile('requests.txt', 'text/plain', 'not csv'));
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile('requests.txt', 'text/plain', 'not csv'));
       await page.getByRole('button', { name: 'Submit' }).click();
 
       await expect(page.locator('#bulk-upload-file-error')).toHaveText(/CSV file with \.csv extension/);
@@ -142,7 +141,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
       `${hearingId},not-a-case-reference,rollback,,`,
       'not-numeric,not-a-case-reference,not-an-action,notes,INVALID',
     ].join('\n');
-    await page.getByLabel('Please upload a file').setInputFiles(uploadFile('invalid-rows.csv', 'text/csv', csv));
+    await page.getByLabel('Please upload a file').setInputFiles(createUploadFile('invalid-rows.csv', 'text/csv', csv));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByRole('link', { name: /There were validation errors/ })).toBeVisible();
@@ -153,7 +152,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
   });
 
   test(
-    'audits the protected singular service problem page',
+    'audits the protected singular service-problem page contract',
     { tag: '@feature:service-recovery' },
     async ({ page }, testInfo) => {
       const response = await page.goto('/singular/problem?lng=en');
@@ -168,7 +167,7 @@ test.describe('HMC Admin UI protected route accessibility', () => {
   );
 
   test(
-    'audits the protected bulk service problem page',
+    'audits the protected bulk service-problem page contract',
     { tag: '@feature:service-recovery' },
     async ({ page }, testInfo) => {
       const response = await page.goto('/bulk-upload/problem?lng=en');
@@ -182,16 +181,20 @@ test.describe('HMC Admin UI protected route accessibility', () => {
     }
   );
 
-  test('audits the protected bulk response page', { tag: '@feature:bulk-upload' }, async ({ page }, testInfo) => {
-    await page.goto('/bulk-upload/response?lng=en');
-    await expect(page.getByRole('heading', { name: 'Bulk request response' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Download response CSV' })).toBeVisible();
+  test(
+    'audits the protected bulk response page',
+    { tag: '@feature:bulk-upload-response' },
+    async ({ page }, testInfo) => {
+      await page.goto('/bulk-upload/response?lng=en');
+      await expect(page.getByRole('heading', { name: 'Bulk request response' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Download response CSV' })).toBeVisible();
 
-    const results = await auditPageAccessibility(page, testInfo, 'oidc-bulk-response');
-    expect(results.violations).toEqual([]);
-  });
+      const results = await auditPageAccessibility(page, testInfo, 'oidc-bulk-response');
+      expect(results.violations).toEqual([]);
+    }
+  );
 
-  test('audits the protected not-found page', { tag: '@feature:service-recovery' }, async ({ page }, testInfo) => {
+  test('audits the protected not-found page', { tag: '@feature:not-found' }, async ({ page }, testInfo) => {
     const response = await page.goto('/route-that-does-not-exist?lng=en');
 
     await expect(response?.status()).toBe(404);

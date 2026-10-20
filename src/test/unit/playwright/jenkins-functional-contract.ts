@@ -70,6 +70,15 @@ describe('native Playwright CNP contract', () => {
     expect(jenkinsfile).toContain('skipMarkingBuildUnstable: true');
   });
 
+  test('runs the auth-disabled local Playwright contract pack once beside preview coverage', () => {
+    expect(jenkinsfile).toContain("if (targetEnvironment == 'preview')");
+    expect(jenkinsfile).toContain("stage('PREVIEW HMC Admin UI Playwright Functional Local Contract Test')");
+    expect(jenkinsfile).toContain(
+      "runPlaywrightFunctionalLocal('PREVIEW HMC Admin UI Playwright Functional Local Contract Test')"
+    );
+    expect(jenkinsfile).toContain("yarnBuilder.yarn('test:playwright:functional:local')");
+  });
+
   test.each(['preview', 'aat'])(
     'keeps manual accessibility in the parallel functional callback for %s',
     environment => {
@@ -89,9 +98,11 @@ describe('native Playwright CNP contract', () => {
 
   test('does not archive native Playwright roots through the generic report callback', () => {
     expect(jenkinsfile).toContain(
-      'excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"'
+      'excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightFunctionalLocalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"'
     );
     expect(jenkinsfile).toContain('withEnv(configurePlaywrightFunctional(targetEnvironment))');
+    expect(jenkinsfile).toContain("yarnBuilder.yarn('test:playwright:functional:local')");
+    expect(jenkinsfile).toContain('functional-output/tests/playwright-functional-local');
     expect(jenkinsfile).toContain('withEnv(configurePlaywrightAccessibility(targetEnvironment))');
   });
 

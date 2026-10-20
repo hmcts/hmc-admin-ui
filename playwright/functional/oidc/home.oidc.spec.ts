@@ -28,6 +28,21 @@ test.describe('HMC Admin UI protected home journeys', () => {
   );
 
   test(
+    'signs in through OIDC and selects bulk upload from Support tools',
+    { tag: '@feature:bulk-upload' },
+    async ({ page }) => {
+      await openHomePage(page);
+      await signInThroughOidc(page);
+      await expectHomePage(page);
+      await page.getByRole('radio', { name: 'Bulk' }).check();
+      await page.getByRole('button', { name: 'Continue' }).click();
+
+      await expect(page).toHaveURL(/\/bulk-upload$/);
+      await expect(page.getByRole('heading', { name: 'Bulk request' })).toBeVisible();
+    }
+  );
+
+  test(
     'signs in through OIDC and opens the protected bulk upload form',
     { tag: '@feature:bulk-upload' },
     async ({ page }) => {

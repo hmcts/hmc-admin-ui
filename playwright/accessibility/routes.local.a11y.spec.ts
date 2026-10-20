@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { auditPageAccessibility } from '../functional/accessibility';
 import { openHomePage } from '../functional/home';
 import { openBulkUpload, openSingularSelection, selectSingularRequestType } from '../functional/journeys';
+import { createUploadFile } from '../functional/upload';
 
 const hearingId = '12345678901234567890';
 const caseReference = '1234567890123456';
@@ -15,10 +16,6 @@ async function expectNoAccessibilityViolations(
 ): Promise<void> {
   const results = await auditPageAccessibility(page, testInfo, evidenceName);
   expect(results.violations).toEqual([]);
-}
-
-function uploadFile(name: string, mimeType: string, contents: string) {
-  return { name, mimeType, buffer: Buffer.from(contents) };
 }
 
 test.describe('HMC Admin UI local route accessibility', () => {
@@ -153,7 +150,9 @@ test.describe('HMC Admin UI local route accessibility', () => {
     { tag: '@feature:bulk-upload' },
     async ({ page }, testInfo) => {
       await openBulkUpload(page);
-      await page.getByLabel('Please upload a file').setInputFiles(uploadFile('requests.txt', 'text/plain', 'not csv'));
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile('requests.txt', 'text/plain', 'not csv'));
       await page.getByRole('button', { name: 'Submit' }).click();
 
       await expect(page.locator('#bulk-upload-file-error')).toHaveText(/CSV file with \.csv extension/);
@@ -169,7 +168,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
       await openBulkUpload(page);
       await page
         .getByLabel('Please upload a file')
-        .setInputFiles(uploadFile('requests.csv', 'text/csv', `${validCsvHeaders}\n\u0000`));
+        .setInputFiles(createUploadFile('requests.csv', 'text/csv', `${validCsvHeaders}\n\u0000`));
       await page.getByRole('button', { name: 'Submit' }).click();
 
       await expect(page.locator('#bulk-upload-file-error')).toHaveText(/valid CSV file/);
@@ -187,7 +186,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
     ].join('\n');
     await page
       .getByLabel('Please upload a file')
-      .setInputFiles(uploadFile('invalid-rows.csv', 'text/csv', invalidRows));
+      .setInputFiles(createUploadFile('invalid-rows.csv', 'text/csv', invalidRows));
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByRole('link', { name: /There were validation errors/ })).toBeVisible();
@@ -222,7 +221,7 @@ test.describe('HMC Admin UI local route accessibility', () => {
     }
   );
 
-  test('audits the not found page', { tag: '@feature:service-recovery' }, async ({ page }, testInfo) => {
+  test('audits the not found page', { tag: '@feature:not-found' }, async ({ page }, testInfo) => {
     const response = await page.goto('/route-that-does-not-exist?lng=en');
 
     await expect(response?.status()).toBe(404);
