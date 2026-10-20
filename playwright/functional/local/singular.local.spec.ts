@@ -47,6 +47,54 @@ test.describe('HMC Admin UI local singular journeys', () => {
     await expect(page.getByLabel('Incident Number / Notes')).toHaveValue('Incident details');
   });
 
+  test('accepts the final state transition field boundaries', async ({ page }) => {
+    await openSingularSelection(page);
+    await selectSingularRequestType(page, 'Final state transition');
+    await page.getByLabel('Hearing ID').fill('1'.repeat(30));
+    await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+    await page.getByLabel('Status').selectOption('COMPLETED');
+    await page.getByLabel('Incident Number / Notes').fill('a'.repeat(5000));
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/singular\/response$/);
+    await expect(page.getByRole('heading', { name: 'Final state transition request unsuccessful' })).toBeVisible();
+    await expect(page.getByRole('definition').filter({ hasText: '1'.repeat(30) })).toBeVisible();
+  });
+
+  test('preserves final state boundary values and reports each server-side validation error', async ({ page }) => {
+    await openSingularSelection(page);
+    await selectSingularRequestType(page, 'Final state transition');
+
+    const overlongHearingId = '1'.repeat(31);
+    const overlongNotes = 'a'.repeat(5001);
+    await page.route('**/singular/final-state-transition*', async route => {
+      if (route.request().method() !== 'POST') {
+        await route.continue();
+        return;
+      }
+
+      const form = new URLSearchParams(route.request().postData() ?? '');
+      form.set('hearingId', overlongHearingId);
+      form.set('caseRef', caseReference);
+      form.set('status', 'INVALID');
+      form.set('notes', overlongNotes);
+      await route.continue({ postData: form.toString() });
+    });
+
+    await page.getByLabel('Hearing ID').fill(hearingId);
+    await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+    await page.getByLabel('Status').selectOption('CANCELLED');
+    await page.getByLabel('Incident Number / Notes').fill('Boundary validation');
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page.locator('#hearing-id-error')).toHaveText(/Hearing ID must be 30 characters or fewer/);
+    await expect(page.locator('#status-error')).toHaveText(/Status must be Cancelled, Adjourned or Completed/);
+    await expect(page.locator('#notes-error')).toHaveText(/Incident Number \/ Notes must be 5000 characters or fewer/);
+    await expect(page.getByLabel('Hearing ID')).toHaveValue(overlongHearingId);
+    await expect(page.getByLabel('CCD Case Reference Number')).toHaveValue(caseReference);
+    await expect(page.getByLabel('Incident Number / Notes')).toHaveValue(overlongNotes);
+  });
+
   test('shows rollback mandatory errors without rendering a status error', async ({ page }) => {
     await openSingularSelection(page);
     await selectSingularRequestType(page, 'Rollback');
@@ -55,6 +103,54 @@ test.describe('HMC Admin UI local singular journeys', () => {
     await expect(page.locator('#hearing-id-error')).toHaveText(/Enter a hearing ID/);
     await expect(page.locator('#case-ref-error')).toHaveText(/Enter a CCD Case Reference Number/);
     await expect(page.locator('#status-error')).toHaveCount(0);
+  });
+
+  test('accepts the rollback field boundaries without a status field', async ({ page }) => {
+    await openSingularSelection(page);
+    await selectSingularRequestType(page, 'Rollback');
+    await page.getByLabel('Hearing ID').fill('2'.repeat(30));
+    await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+    await page.getByLabel('Incident Number / Notes').fill('b'.repeat(5000));
+    await expect(page.getByLabel('Status')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/singular\/response$/);
+    await expect(page.getByRole('heading', { name: 'Rollback request unsuccessful' })).toBeVisible();
+    await expect(page.getByRole('definition').filter({ hasText: '2'.repeat(30) })).toBeVisible();
+  });
+
+  test('preserves rollback boundary values and reports validation errors without a status error', async ({ page }) => {
+    await openSingularSelection(page);
+    await selectSingularRequestType(page, 'Rollback');
+
+    const overlongHearingId = '1'.repeat(31);
+    const invalidCaseReference = 'not-a-case-reference';
+    const overlongNotes = 'a'.repeat(5001);
+    await page.route('**/singular/rollback*', async route => {
+      if (route.request().method() !== 'POST') {
+        await route.continue();
+        return;
+      }
+
+      const form = new URLSearchParams(route.request().postData() ?? '');
+      form.set('hearingId', overlongHearingId);
+      form.set('caseRef', invalidCaseReference);
+      form.set('notes', overlongNotes);
+      await route.continue({ postData: form.toString() });
+    });
+
+    await page.getByLabel('Hearing ID').fill(hearingId);
+    await page.getByLabel('CCD Case Reference Number').fill(caseReference);
+    await page.getByLabel('Incident Number / Notes').fill('Boundary validation');
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page.locator('#hearing-id-error')).toHaveText(/Hearing ID must be 30 characters or fewer/);
+    await expect(page.locator('#case-ref-error')).toHaveText(/must be a 16-digit number/);
+    await expect(page.locator('#notes-error')).toHaveText(/Incident Number \/ Notes must be 5000 characters or fewer/);
+    await expect(page.locator('#status-error')).toHaveCount(0);
+    await expect(page.getByLabel('Hearing ID')).toHaveValue(overlongHearingId);
+    await expect(page.getByLabel('CCD Case Reference Number')).toHaveValue(invalidCaseReference);
+    await expect(page.getByLabel('Incident Number / Notes')).toHaveValue(overlongNotes);
   });
 
   test('returns from the final state transition form to singular selection with Back', async ({ page }) => {

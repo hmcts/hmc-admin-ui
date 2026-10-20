@@ -4,6 +4,20 @@ import { openHomePage } from '../home';
 import { openBulkUpload, openSingularSelection } from '../journeys';
 
 test.describe('HMC Admin UI local home journeys', () => {
+  test('exposes the semantic home-page contract and a CSRF-backed form', async ({ page }) => {
+    await openHomePage(page);
+
+    await expect(page.getByText('Support tools', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'What type of request would you like to make?' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Bulk' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Singular' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
+    const form = page.locator('form[method="post"][action="/"]');
+    await expect(form).toHaveCount(1);
+    await expect(form.locator('input[type="hidden"][name="_csrf"]')).toHaveAttribute('value', /\S+/);
+    await expect(page.getByText('Sign out', { exact: true })).toHaveCount(0);
+  });
+
   test('renders the home journey with authentication disabled locally', async ({ page }) => {
     await openBulkUpload(page);
     await expect(page).toHaveURL(/\/bulk-upload$/);

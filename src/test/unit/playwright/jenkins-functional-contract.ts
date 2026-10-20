@@ -48,18 +48,13 @@ describe('native Playwright CNP contract', () => {
     );
   });
 
-  test.each(['preview', 'aat'])('configures and publishes the %s full functional stage', environment => {
-    expect(jenkinsfile).toContain(`afterAlways('fullFunctionalTest:${environment}')`);
-    expect(jenkinsfile).toContain(
-      `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
-    );
-  });
-
   test.each(['preview', 'aat'])('configures and publishes the %s normal functional stage', environment => {
     expect(jenkinsfile).toContain(`afterAlways('functionalTest:${environment}')`);
     expect(jenkinsfile).toContain(
       `runPlaywrightFunctional('${environment}', '${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
     );
+    expect(jenkinsfile.split(`runPlaywrightFunctional('${environment}'`).length - 1).toBe(1);
+    expect(jenkinsfile).not.toContain(`afterAlways('fullFunctionalTest:${environment}')`);
   });
 
   test.each(['preview', 'aat'])('publishes the %s functional Odhín report', environment => {

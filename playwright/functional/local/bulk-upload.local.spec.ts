@@ -12,6 +12,20 @@ function uploadFile(name: string, mimeType: string, contents: string) {
 }
 
 test.describe('HMC Admin UI local bulk upload journeys', () => {
+  test('renders the CSV upload form contract', async ({ page }) => {
+    await openBulkUpload(page);
+
+    const form = page.locator('form[data-bulk-upload-form]');
+    await expect(form).toHaveAttribute('action', /\/bulk-upload(?:\?_csrf=\S+)?$/);
+    await expect(form).toHaveAttribute('method', 'post');
+    await expect(form).toHaveAttribute('enctype', 'multipart/form-data');
+    const fileInput = page.getByLabel('Please upload a file');
+    await expect(fileInput).toHaveAttribute('name', 'bulkUploadFile');
+    await expect(fileInput).toHaveAttribute('accept', '.csv,text/csv');
+    await expect(fileInput).toHaveAttribute('aria-describedby', /bulk-upload-file-hint/);
+    await expect(page.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/');
+  });
+
   test('cancels from the bulk upload form and returns to Support tools', async ({ page }) => {
     await openBulkUpload(page);
 
