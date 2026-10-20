@@ -77,13 +77,13 @@ test.describe('HMC Admin UI protected boundary contracts', () => {
       await expect(form.getByLabel('Incident Number / Notes')).toHaveAttribute('name', 'notes');
       await expect(form.getByLabel('Status')).toHaveValue('');
       await expect(form.getByLabel('Status').locator('option')).toHaveText([
-        'Select a status',
+        'Select status',
         'Cancelled',
         'Adjourned',
         'Completed',
       ]);
-      await expect(form.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/singular');
-      await expect(form.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/');
+      await expect(page.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/singular');
+      await expect(page.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/');
     }
   );
 
@@ -100,8 +100,8 @@ test.describe('HMC Admin UI protected boundary contracts', () => {
       await expect(form.getByLabel('CCD Case Reference Number')).toHaveAttribute('name', 'caseRef');
       await expect(form.getByLabel('Incident Number / Notes')).toHaveAttribute('name', 'notes');
       await expect(form.getByLabel('Status')).toHaveCount(0);
-      await expect(form.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/singular');
-      await expect(form.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/');
+      await expect(page.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/singular');
+      await expect(page.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/');
     }
   );
 });
