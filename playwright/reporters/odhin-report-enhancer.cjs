@@ -7,7 +7,12 @@ const { applyPresentation } = require('./presentation/enhance.cjs');
 
 const evidenceLinkAttributes = ' target="_blank" rel="noopener noreferrer"';
 
-function deriveFeatureName(filePath) {
+function deriveFeatureName(filePath, tags = []) {
+  const featureTag = (Array.isArray(tags) ? tags : [tags]).find(tag => /^@feature:[^\s]+$/i.test(String(tag)));
+  if (featureTag) {
+    return String(featureTag).slice('@feature:'.length);
+  }
+
   const normalized = String(filePath ?? '')
     .replace(/\\/g, '/')
     .trim();

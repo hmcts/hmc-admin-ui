@@ -3,7 +3,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 const enhancer = require('../../../../playwright/reporters/odhin-report-enhancer.cjs') as {
-  deriveFeatureName: (filePath: string) => string;
+  deriveFeatureName: (filePath: string, tags?: string[]) => string;
   enhanceDashboardHtml: (
     html: string,
     featureStats: unknown[],
@@ -103,9 +103,14 @@ describe('Odhín report enhancer', () => {
 
   test('derives stable feature names for Admin UI functional specs', () => {
     expect(enhancer.deriveFeatureName('/workspace/playwright/functional/home.spec.ts')).toBe('home');
-    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local-forms.spec.ts')).toBe('local-forms');
-    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/local/home.local.spec.ts')).toBe('home');
+    expect(enhancer.deriveFeatureName('/workspace/playwright/functional/oidc/forms.oidc.spec.ts')).toBe('forms');
     expect(enhancer.deriveFeatureName('/workspace/playwright/accessibility/home.oidc.a11y.spec.ts')).toBe('home');
+  });
+
+  test('uses an explicit feature tag before the spec filename fallback', () => {
+    expect(
+      enhancer.deriveFeatureName('/workspace/playwright/functional/oidc/home.oidc.spec.ts', ['@feature:singular'])
+    ).toBe('singular');
   });
 
   test('counts a flaky retry as an effective pass in the feature overview', () => {

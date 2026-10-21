@@ -46,14 +46,21 @@ def playwrightBrowsersEnv = {
 }
 
 def configurePlaywrightFunctional = { String targetEnvironment ->
-  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
-  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightFunctionalOutputRoot}/test-results"
-  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
-  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightFunctionalOutputRoot}/odhin-report"
-  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightFunctionalReportFile
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
-  env.IDAM_PUBLIC_URL = "https://hmcts-access.${deployedEnvironment}.platform.hmcts.net"
-  env.TEST_TYPE = targetEnvironment
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
+  [
+    "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
+    "PLAYWRIGHT_OUTPUT_DIR=${playwrightFunctionalOutputRoot}/test-results",
+    "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml",
+    "PLAYWRIGHT_REPORT_FOLDER=${playwrightFunctionalOutputRoot}/odhin-report",
+    "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightFunctionalReportFile}",
+    "TEST_URL=${testUrl}",
+    "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
+    "TEST_TYPE=${targetEnvironment}"
+  ]
 }
 
 def publishPlaywrightFunctional = { String reportName ->
@@ -71,22 +78,31 @@ def publishPlaywrightFunctional = { String reportName ->
 }
 
 def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
-  configurePlaywrightFunctional(targetEnvironment)
-  try {
-    yarnBuilder.yarn('test:playwright:functional')
-  } finally {
-    publishPlaywrightFunctional(reportName)
+  withEnv(configurePlaywrightFunctional(targetEnvironment)) {
+    try {
+      yarnBuilder.yarn('test:playwright:functional')
+    } finally {
+      publishPlaywrightFunctional(reportName)
+    }
   }
 }
 
 def configurePlaywrightAccessibility = { String targetEnvironment ->
-  env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
-  env.PLAYWRIGHT_OUTPUT_DIR = "${playwrightAccessibilityOutputRoot}/test-results"
-  env.PLAYWRIGHT_JUNIT_OUTPUT = "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
-  env.PLAYWRIGHT_REPORT_FOLDER = "${playwrightAccessibilityOutputRoot}/odhin-report"
-  env.PLAYWRIGHT_REPORT_INDEX_FILENAME = playwrightAccessibilityReportFile
-  env.IDAM_PUBLIC_URL = "https://hmcts-access.${env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'}.platform.hmcts.net"
-  env.TEST_TYPE = targetEnvironment
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
+  [
+    "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
+    "PLAYWRIGHT_OUTPUT_DIR=${playwrightAccessibilityOutputRoot}/test-results",
+    "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml",
+    "PLAYWRIGHT_REPORT_FOLDER=${playwrightAccessibilityOutputRoot}/odhin-report",
+    "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightAccessibilityReportFile}",
+    "TEST_URL=${testUrl}",
+    "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
+    "TEST_TYPE=${targetEnvironment}"
+  ]
 }
 
 def publishPlaywrightAccessibility = { String reportName ->
@@ -104,18 +120,42 @@ def publishPlaywrightAccessibility = { String reportName ->
 }
 
 def runPlaywrightAccessibility = { String targetEnvironment, String reportName ->
-  configurePlaywrightAccessibility(targetEnvironment)
-  try {
-    yarnBuilder.yarn('test:accessibility:playwright')
-  } catch (Exception e) {
-    if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
-      throw e
+  withEnv(configurePlaywrightAccessibility(targetEnvironment)) {
+    try {
+      yarnBuilder.yarn('test:accessibility:playwright')
+    } catch (Exception e) {
+      if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+        throw e
+      }
+      currentBuild.result = 'UNSTABLE'
+      echo "[playwright-accessibility] Accessibility pack failed but remains report-only: ${e.getClass().getName()}: ${e.getMessage()}"
+    } finally {
+      publishPlaywrightAccessibility(reportName)
     }
-    currentBuild.result = 'UNSTABLE'
-    echo "[playwright-accessibility] Accessibility pack failed but remains report-only: ${e.getClass().getName()}: ${e.getMessage()}"
-  } finally {
-    publishPlaywrightAccessibility(reportName)
   }
+}
+
+def runPlaywrightSuitesInParallel = { String targetEnvironment, String functionalReportName, String accessibilityReportName ->
+  def suites = [
+    failFast: false,
+    playwrightFunctional: {
+      stage(functionalReportName) {
+        runPlaywrightFunctional(targetEnvironment, functionalReportName)
+      }
+    }
+  ]
+
+  if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+    suites.playwrightAccessibility = {
+      stage(accessibilityReportName) {
+        runPlaywrightAccessibility(targetEnvironment, accessibilityReportName)
+      }
+    }
+  } else {
+    echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
+  }
+
+  parallel(suites)
 }
 
 def secrets = [
@@ -137,7 +177,9 @@ withPipeline(type, product, component) {
     junit allowEmptyResults: true, testResults: 'functional-output/functional/reports/*-testsuite.xml'
     junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-smoke/*.xml'
 
-    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*'
+    archiveArtifacts allowEmptyArchive: true,
+      artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*',
+      excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"
   }
 
   afterSuccess('build') {
@@ -166,51 +208,28 @@ withPipeline(type, product, component) {
 
   afterAlways('smoketest:preview') {
     publishTestReports()
-    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
-      stage('PREVIEW HMC Admin UI Playwright Accessibility') {
-        runPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
-      }
-    } else {
-      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
-    }
   }
 
   afterAlways('functionalTest:preview') {
     publishTestReports()
-    stage('PREVIEW HMC Admin UI Playwright Functional Test') {
-      runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
-    }
+    runPlaywrightSuitesInParallel(
+      'preview',
+      'PREVIEW HMC Admin UI Playwright Functional Test',
+      'PREVIEW HMC Admin UI Playwright Accessibility Test'
+    )
   }
 
   afterAlways('functionalTest:aat') {
     publishTestReports()
-    stage('AAT HMC Admin UI Playwright Functional Test') {
-      runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
-    }
+    runPlaywrightSuitesInParallel(
+      'aat',
+      'AAT HMC Admin UI Playwright Functional Test',
+      'AAT HMC Admin UI Playwright Accessibility Test'
+    )
   }
 
   afterAlways('smoketest:aat') {
     publishTestReports()
-    if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
-      stage('AAT HMC Admin UI Playwright Accessibility') {
-        runPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
-      }
-    } else {
-      echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
-    }
   }
 
-  afterAlways('fullFunctionalTest:preview') {
-    publishTestReports()
-    stage('PREVIEW HMC Admin UI Playwright Functional Test') {
-      runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
-    }
-  }
-
-  afterAlways('fullFunctionalTest:aat') {
-    publishTestReports()
-    stage('AAT HMC Admin UI Playwright Functional Test') {
-      runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
-    }
-  }
 }
