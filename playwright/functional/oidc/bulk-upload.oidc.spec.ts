@@ -96,6 +96,29 @@ test.describe('HMC Admin UI protected bulk upload journeys', () => {
     }
   );
 
+  test(
+    'automatically downloads the rejected CSV after authenticated validation fails',
+    { tag: ['@feature:bulk-upload-response', '@ticket:EXUI-5428'] },
+    async ({ page }) => {
+      const csv = [validCsvHeaders, `${hearingId},not-a-case-reference,rollback,,`].join('\n');
+      const rejectedDownload = page.waitForEvent('download');
+
+      await page
+        .getByLabel('Please upload a file')
+        .setInputFiles(createUploadFile('auth-enabled-invalid.csv', 'text/csv', csv));
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page).toHaveURL(/\/bulk-upload(?:\?.*)?$/);
+      await expect(page.getByRole('link', { name: /There were validation errors/ })).toBeVisible();
+      const download = await rejectedDownload;
+      await expect(download.suggestedFilename()).toBe('bulk-upload-response.csv');
+      await expect(await readDownloadedText(download)).toContain(
+        'Case Reference Number must be a 16-digit numeric value.'
+      );
+      await expect(page.getByRole('link', { name: 'Download rejected CSV with issues again' })).toBeVisible();
+    }
+  );
+
   test('rejects an upload larger than 10MB', { tag: '@feature:bulk-upload' }, async ({ page }) => {
     await page.getByLabel('Please upload a file').setInputFiles({
       name: 'oversized.csv',
