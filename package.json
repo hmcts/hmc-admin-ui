@@ -41,7 +41,7 @@
     "@types/config": "3.3.5",
     "@types/cookie-parser": "1.4.10",
     "@types/es6-promisify": "6.0.4",
-    "@types/lodash": "4.17.26",
+    "@types/lodash": "4.17.27",
     "@types/nunjucks": "3.2.6",
     "@types/require-directory": "2.1.7",
     "applicationinsights": "2.9.8",
