@@ -1,9 +1,9 @@
 import * as path from 'path';
 
+import csrf from '@dr.pogodin/csurf';
 import * as bodyParser from 'body-parser';
 import config from 'config';
 import cookieParser from 'cookie-parser';
-import csrf from 'csurf';
 import express, { Express } from 'express';
 import RateLimit from 'express-rate-limit';
 import { glob } from 'glob';
