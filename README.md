@@ -130,17 +130,39 @@ Run smoke tests against a deployed or locally running application:
 TEST_URL=http://localhost:3000 yarn test:smoke
 ```
 
-Run functional tests with CodeceptJS and Playwright:
+Run the retained CodeceptJS functional suite:
 
 ```bash
 yarn test:functional
 ```
 
-Run functional tests against a locally running application with authentication disabled:
+The `test:functional` and `test:fullfunctional` entries remain the legacy CodeceptJS functional pipeline entrypoints, while `test:a11y` remains the legacy Pa11y accessibility entrypoint. Native Playwright runs through the separate commands below, so migration coverage is additive.
+
+Run the native Playwright functional test against an OIDC-enabled deployed environment:
+
+```bash
+TEST_URL=https://your-environment.example TEST_IDAM_USERNAME=... TEST_IDAM_PASSWORD=... yarn test:playwright:functional
+```
+
+This command requires a non-local `TEST_URL` and the IDAM credentials. It fails when either is absent, when zero tests are selected, or when the JUnit/Odhín reports are missing. CNP supplies the credentials from Key Vault. Functional evidence is written beneath `functional-output/tests/playwright-functional/`.
+
+Run the native Playwright accessibility test against an OIDC-enabled deployed environment:
+
+```bash
+TEST_URL=https://your-environment.example TEST_IDAM_USERNAME=... TEST_IDAM_PASSWORD=... yarn test:accessibility:playwright
+```
+
+This command uses the same OIDC prerequisites as the functional lane and writes Axe WCAG 2.2 AA evidence beneath `functional-output/tests/playwright-accessibility/`. CNP runs this report-only pack on its manual/nightly accessibility paths.
+
+Run the retained CodeceptJS functional checks against a locally running application with authentication disabled:
 
 ```bash
 yarn test:functional:local
 ```
+
+This command runs the legacy CodeceptJS journey and report path. It remains separate from the native Playwright lane.
+
+The native Playwright functional and accessibility packs intentionally use the same protected OIDC setup locally and in Jenkins. The retained CodeceptJS command above is the only local authentication-disabled functional path and remains separate migration evidence until EXUI-5429 retires it.
 
 Run the main local CI checks:
 

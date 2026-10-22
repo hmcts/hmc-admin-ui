@@ -8,6 +8,13 @@ projectUrlStr: 'https://github.com/hmcts/hmc-admin-ui/'
 ],
 pipelineTriggers([
 [$class: 'GitHubPushTrigger']
+]),
+parameters([
+  booleanParam(
+    name: 'RUN_PLAYWRIGHT_ACCESSIBILITY',
+    defaultValue: false,
+    description: 'Manual-only: run the non-blocking Playwright accessibility pack and publish its separate Odhín report.'
+  )
 ])
 ])
 
@@ -30,6 +37,126 @@ def product = "hmc"
 def component = "admin-ui"
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
+def playwrightFunctionalOutputRoot = 'functional-output/tests/playwright-functional'
+def playwrightFunctionalReportFile = 'hmc-playwright-functional.html'
+def playwrightAccessibilityOutputRoot = 'functional-output/tests/playwright-accessibility'
+def playwrightAccessibilityReportFile = 'hmc-playwright-accessibility.html'
+def playwrightBrowsersEnv = {
+  ["PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright"]
+}
+
+def configurePlaywrightFunctional = { String targetEnvironment ->
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
+  [
+    "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
+    "PLAYWRIGHT_OUTPUT_DIR=${playwrightFunctionalOutputRoot}/test-results",
+    "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml",
+    "PLAYWRIGHT_REPORT_FOLDER=${playwrightFunctionalOutputRoot}/odhin-report",
+    "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightFunctionalReportFile}",
+    "TEST_URL=${testUrl}",
+    "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
+    "TEST_TYPE=${targetEnvironment}"
+  ]
+}
+
+def publishPlaywrightFunctional = { String reportName ->
+  steps.sh "node bin/verify-playwright-functional-report.js"
+  steps.publishHTML([
+    allowMissing         : false,
+    alwaysLinkToLastBuild: true,
+    keepAll              : true,
+    reportDir            : "${playwrightFunctionalOutputRoot}/odhin-report/",
+    reportFiles          : playwrightFunctionalReportFile,
+    reportName           : reportName
+  ])
+  steps.junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
+  steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
+}
+
+def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
+  withEnv(configurePlaywrightFunctional(targetEnvironment)) {
+    try {
+      yarnBuilder.yarn('test:playwright:functional')
+    } finally {
+      publishPlaywrightFunctional(reportName)
+    }
+  }
+}
+
+def configurePlaywrightAccessibility = { String targetEnvironment ->
+  def deployedEnvironment = env.ENVIRONMENT_NAME ?: targetEnvironment ?: 'aat'
+  def testUrl = env.TEST_URL
+  if (!testUrl) {
+    throw new IllegalStateException('CNP must provide TEST_URL for protected Playwright tests')
+  }
+  [
+    "PLAYWRIGHT_BROWSERS_PATH=${env.WORKSPACE}/.cache/ms-playwright",
+    "PLAYWRIGHT_OUTPUT_DIR=${playwrightAccessibilityOutputRoot}/test-results",
+    "PLAYWRIGHT_JUNIT_OUTPUT=${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml",
+    "PLAYWRIGHT_REPORT_FOLDER=${playwrightAccessibilityOutputRoot}/odhin-report",
+    "PLAYWRIGHT_REPORT_INDEX_FILENAME=${playwrightAccessibilityReportFile}",
+    "TEST_URL=${testUrl}",
+    "IDAM_PUBLIC_URL=https://hmcts-access.${deployedEnvironment}.platform.hmcts.net",
+    "TEST_TYPE=${targetEnvironment}"
+  ]
+}
+
+def publishPlaywrightAccessibility = { String reportName ->
+  steps.publishHTML([
+    allowMissing         : true,
+    alwaysLinkToLastBuild: true,
+    keepAll              : true,
+    reportDir            : "${playwrightAccessibilityOutputRoot}/odhin-report/",
+    reportFiles          : playwrightAccessibilityReportFile,
+    reportName           : reportName
+  ])
+  steps.junit allowEmptyResults: true, skipMarkingBuildUnstable: true,
+    testResults: "${playwrightAccessibilityOutputRoot}/playwright-accessibility-junit.xml"
+  steps.archiveArtifacts allowEmptyArchive: true, artifacts: "${playwrightAccessibilityOutputRoot}/**"
+}
+
+def runPlaywrightAccessibility = { String targetEnvironment, String reportName ->
+  withEnv(configurePlaywrightAccessibility(targetEnvironment)) {
+    try {
+      yarnBuilder.yarn('test:accessibility:playwright')
+    } catch (Exception e) {
+      if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+        throw e
+      }
+      currentBuild.result = 'UNSTABLE'
+      echo "[playwright-accessibility] Accessibility pack failed but remains report-only: ${e.getClass().getName()}: ${e.getMessage()}"
+    } finally {
+      publishPlaywrightAccessibility(reportName)
+    }
+  }
+}
+
+def runPlaywrightSuitesInParallel = { String targetEnvironment, String functionalReportName, String accessibilityReportName ->
+  def suites = [
+    failFast: false,
+    playwrightFunctional: {
+      stage(functionalReportName) {
+        runPlaywrightFunctional(targetEnvironment, functionalReportName)
+      }
+    }
+  ]
+
+  if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+    suites.playwrightAccessibility = {
+      stage(accessibilityReportName) {
+        runPlaywrightAccessibility(targetEnvironment, accessibilityReportName)
+      }
+    }
+  } else {
+    echo '[playwright-accessibility] CNP stage omitted by default. Set RUN_PLAYWRIGHT_ACCESSIBILITY=true on a manual build to run it.'
+  }
+
+  parallel(suites)
+}
 
 def secrets = [
   'hmc-${env}': [
@@ -41,7 +168,7 @@ def secrets = [
 def branchesToSync = ['perftest', 'ithc']
 
 withPipeline(type, product, component) {
-  // enableFullFunctionalTest()
+  enableFullFunctionalTest()
   loadVaultSecrets(secrets)
   syncBranchesWithMaster(branchesToSync)
 
@@ -50,13 +177,25 @@ withPipeline(type, product, component) {
     junit allowEmptyResults: true, testResults: 'functional-output/functional/reports/*-testsuite.xml'
     junit allowEmptyResults: true, testResults: 'functional-output/tests/jest-smoke/*.xml'
 
-    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*'
+    archiveArtifacts allowEmptyArchive: true,
+      artifacts: 'test-results/**/*,playwright-report/**/*,functional-output/**/*,smoke-output/**/*',
+      excludes: "${playwrightFunctionalOutputRoot}/**,${playwrightAccessibilityOutputRoot}/**"
   }
 
   afterSuccess('build') {
-    yarnBuilder.yarn('playwright install')
     yarnBuilder.yarn('rebuild puppeteer')
     yarnBuilder.yarn('build')
+  }
+
+  afterSuccess('checkout') {
+    stage('Playwright Install Chromium') {
+      withEnv(playwrightBrowsersEnv()) {
+        steps.sh 'mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"'
+        yarnBuilder.yarn('playwright --version')
+        yarnBuilder.yarn('test:setup:playwright-install-chromium')
+        yarnBuilder.yarn('test:setup:playwright-verify-chromium')
+      }
+    }
   }
 
   afterSuccess('test') {
@@ -71,7 +210,26 @@ withPipeline(type, product, component) {
     publishTestReports()
   }
 
-  /* afterAlways('functionalTest:preview') {
+  afterAlways('functionalTest:preview') {
     publishTestReports()
-  } */
+    runPlaywrightSuitesInParallel(
+      'preview',
+      'PREVIEW HMC Admin UI Playwright Functional Test',
+      'PREVIEW HMC Admin UI Playwright Accessibility Test'
+    )
+  }
+
+  afterAlways('functionalTest:aat') {
+    publishTestReports()
+    runPlaywrightSuitesInParallel(
+      'aat',
+      'AAT HMC Admin UI Playwright Functional Test',
+      'AAT HMC Admin UI Playwright Accessibility Test'
+    )
+  }
+
+  afterAlways('smoketest:aat') {
+    publishTestReports()
+  }
+
 }
