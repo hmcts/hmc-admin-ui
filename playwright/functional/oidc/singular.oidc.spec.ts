@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test';
-
 import { openHomePage } from '../home';
 import { signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 
 const hearingId = '12345678901234567890';
 const caseReference = '1234567890123456';

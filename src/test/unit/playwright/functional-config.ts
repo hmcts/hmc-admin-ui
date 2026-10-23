@@ -1,3 +1,5 @@
+jest.mock('@playwright/test', () => ({ defineConfig: (config: unknown) => config }));
+
 describe('native functional Playwright configuration', () => {
   const originalTestUrl = process.env.TEST_URL;
   const originalUsername = process.env.TEST_IDAM_USERNAME;
@@ -34,5 +36,12 @@ describe('native functional Playwright configuration', () => {
     expect(config.use.ignoreHTTPSErrors).toBe(true);
     expect(config.testMatch).toEqual(['**/*.oidc.spec.ts']);
     expect(config.webServer).toBeUndefined();
+  });
+  test('prevents protected capture and streams only safe reporter diagnostics', () => {
+    const config = require('../../../../playwright.functional.config.ts').default;
+    expect(config.use).toMatchObject({ trace: 'off', screenshot: 'off', video: 'off' });
+    expect(config.quiet).toBe(true);
+    expect(config.reporter[0][0]).toContain('odhin-adaptive.reporter.cjs');
+    expect(process.env.PLAYWRIGHT_NO_COPY_PROMPT).toBe('1');
   });
 });

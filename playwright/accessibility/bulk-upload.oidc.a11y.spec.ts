@@ -1,8 +1,7 @@
-import { expect, test } from '@playwright/test';
-
 import { auditPageAccessibility } from '../functional/accessibility';
 import { openHomePage } from '../functional/home';
 import { signInThroughOidc } from '../functional/oidc';
+import { expect, test } from '../functional/protected-test';
 import { createUploadFile } from '../functional/upload';
 
 const validCsvHeaders = 'hearingId,caseRef,action,notes,state';

@@ -20,7 +20,6 @@ export type AccessibilityAuditResults = {
 type AccessibilityEvidenceFilenames = {
   html: string;
   json: string;
-  screenshot: string;
 };
 
 export type PublishedAccessibilityEvidenceEntry = {
@@ -31,7 +30,6 @@ export type PublishedAccessibilityEvidenceEntry = {
   attachmentPrefix: string;
   htmlFileName: string;
   jsonFileName: string;
-  screenshotFileName: string;
   violationCount: number;
   rules: string[];
   targets: string[];
@@ -52,7 +50,6 @@ export function accessibilityEvidenceFilenames(evidenceName: string): Accessibil
   return {
     html: `${evidenceName}-axe-summary.html`,
     json: `${evidenceName}-axe-results.json`,
-    screenshot: `${evidenceName}.png`,
   };
 }
 
@@ -85,10 +82,9 @@ export function buildPublishedAccessibilityEvidenceEntry(
     attachmentPrefix: evidenceName,
     htmlFileName: filenames.html,
     jsonFileName: filenames.json,
-    screenshotFileName: filenames.screenshot,
     violationCount: violations.length,
     rules: Array.from(new Set(violations.map(violation => violation.id))),
-    targets: Array.from(new Set(violations.flatMap(violation => violation.nodes.flatMap(node => node.target)))),
+    targets: [],
   };
 }
 
@@ -107,7 +103,6 @@ export async function publishReportLevelAccessibilityEvidence(
   const reportFilenames = {
     html: `${baseName}-${filenames.html}`,
     json: `${baseName}-${filenames.json}`,
-    screenshot: `${baseName}-${filenames.screenshot}`,
   };
   const entry = buildPublishedAccessibilityEvidenceEntry(testInfo, evidenceName, results, reportFilenames);
 
@@ -115,10 +110,6 @@ export async function publishReportLevelAccessibilityEvidence(
   await Promise.all([
     fs.copyFile(path.join(sourceDirectory, filenames.html), path.join(evidenceDirectory, reportFilenames.html)),
     fs.copyFile(path.join(sourceDirectory, filenames.json), path.join(evidenceDirectory, reportFilenames.json)),
-    fs.copyFile(
-      path.join(sourceDirectory, filenames.screenshot),
-      path.join(evidenceDirectory, reportFilenames.screenshot)
-    ),
   ]);
 
   const manifestPath = path.join(evidenceDirectory, 'manifest.json');
@@ -152,8 +143,7 @@ export function buildAccessibilitySummaryHtml(
   <h2>${escapeHtml(violation.id)}${violation.impact ? ` (${escapeHtml(violation.impact)})` : ''}</h2>
   <p>${escapeHtml(violation.help)}</p>
   <p><a href="${escapeHtml(violation.helpUrl)}">Rule guidance</a></p>
-  <ul>${violation.nodes.map(node => `<li><code>${escapeHtml(node.target.join(' '))}</code></li>`).join('')}</ul>
-  ${violation.failureSummary ? `<pre>${escapeHtml(violation.failureSummary)}</pre>` : ''}
+  <p>Affected elements: ${violation.nodes.length}</p>
 </article>`
     )
     .join('\n');
@@ -182,13 +172,27 @@ export async function auditPageAccessibility(
   const filenames = accessibilityEvidenceFilenames(evidenceName);
   const jsonPath = path.join(evidenceDirectory, filenames.json);
   const htmlPath = path.join(evidenceDirectory, filenames.html);
-  const screenshotPath = path.join(evidenceDirectory, filenames.screenshot);
 
   await fs.mkdir(evidenceDirectory, { recursive: true });
   await Promise.all([
-    fs.writeFile(jsonPath, JSON.stringify(results, null, 2), 'utf8'),
+    fs.writeFile(
+      jsonPath,
+      JSON.stringify(
+        {
+          violations: results.violations.map(({ id, impact, help, helpUrl, nodes }) => ({
+            id,
+            impact,
+            help,
+            helpUrl,
+            affectedElements: nodes.length,
+          })),
+        },
+        null,
+        2
+      ),
+      'utf8'
+    ),
     fs.writeFile(htmlPath, buildAccessibilitySummaryHtml(results, filenames.json), 'utf8'),
-    page.screenshot({ path: screenshotPath, fullPage: true }),
   ]);
   await Promise.all([
     testInfo.attach(`accessibility-evidence/${filenames.json}`, {
@@ -196,10 +200,6 @@ export async function auditPageAccessibility(
       contentType: 'application/json',
     }),
     testInfo.attach(`accessibility-evidence/${filenames.html}`, { path: htmlPath, contentType: 'text/html' }),
-    testInfo.attach(`accessibility-evidence/${filenames.screenshot}`, {
-      path: screenshotPath,
-      contentType: 'image/png',
-    }),
   ]);
 
   await publishReportLevelAccessibilityEvidence(testInfo, evidenceName, results, evidenceDirectory, filenames);
