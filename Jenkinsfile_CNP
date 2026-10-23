@@ -18,7 +18,7 @@ parameters([
 ])
 ])
 
-@Library("Infrastructure@2.5.0")
+@Library("Infrastructure@2.13.4")
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 
