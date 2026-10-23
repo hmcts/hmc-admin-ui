@@ -1,3 +1,5 @@
+const { safeError, protectStep, protectResult } = require('./protected-evidence.cjs');
+
 const odhinModule = require('odhin-reports-playwright');
 
 const { normalizeOdhinReportFilename } = require('./odhin-filename.cjs');
@@ -30,6 +32,7 @@ class HmcOdhinAdaptiveReporter {
 
   onTestEnd(...args) {
     const [test, result] = args;
+    protectResult(result, test?.location);
     this.testMetadata.push({
       target: `#${test?.id}-${result?.retry ?? 0}`,
       feature: deriveFeatureName(test?.location?.file, test?.tags),
@@ -41,16 +44,23 @@ class HmcOdhinAdaptiveReporter {
     this.enqueueInnerCallback(() => this.inner.onTestEnd?.(...args));
   }
 
-  onStdOut(...args) {
-    this.enqueueInnerCallback(() => this.inner.onStdOut?.(...args));
+  onStdOut() {}
+
+  onStdErr() {}
+
+  onStepBegin(test, result, step) {
+    protectStep(step);
   }
 
-  onStdErr(...args) {
-    this.enqueueInnerCallback(() => this.inner.onStdErr?.(...args));
+  onStepEnd(test, result, step) {
+    protectStep(step);
   }
 
-  onError(...args) {
-    return this.inner.onError?.(...args);
+  onError(error) {
+    const projected = safeError();
+    for (const key of Object.getOwnPropertyNames(error)) delete error[key];
+    Object.assign(error, projected);
+    return this.inner.onError?.(error);
   }
 
   onEnd(...args) {
@@ -59,8 +69,8 @@ class HmcOdhinAdaptiveReporter {
       .then(() => {
         try {
           enhanceGeneratedReport(this.outputFolder, this.featureStats, this.testMetadata);
-        } catch (error) {
-          process.stderr.write(`[odhin] report enhancement failed: ${formatErrorMessage(error)}\n`);
+        } catch {
+          process.stderr.write('[odhin] report enhancement failed; diagnostic values omitted.\n');
         }
       });
   }
@@ -69,8 +79,8 @@ class HmcOdhinAdaptiveReporter {
     const run = () =>
       Promise.resolve()
         .then(invoke)
-        .catch(error => {
-          process.stderr.write(`[odhin] inner reporter callback failed: ${formatErrorMessage(error)}\n`);
+        .catch(() => {
+          process.stderr.write('[odhin] inner reporter callback failed; diagnostic values omitted.\n');
         });
     this.pendingInnerCallbacks = this.pendingInnerCallbacks.then(run, run);
   }
@@ -124,10 +134,6 @@ function normalizeFinalStatus(status, retry) {
 
 function isFinalResult(status, retry, retries) {
   return terminalStatusesNoRetry.includes(status) || Number(retry ?? 0) === Number(retries ?? 0);
-}
-
-function formatErrorMessage(error) {
-  return error instanceof Error ? error.message : String(error);
 }
 
 module.exports = HmcOdhinAdaptiveReporter;

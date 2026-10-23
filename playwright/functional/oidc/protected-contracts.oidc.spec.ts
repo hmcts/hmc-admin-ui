@@ -1,8 +1,7 @@
-import { expect, test } from '@playwright/test';
-
 import { readDownloadedText } from '../downloads';
 import { expectHomePage, openHomePage } from '../home';
 import { signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 import { createUploadFile } from '../upload';
 
 const validCsvHeaders = 'hearingId,caseRef,action,notes,state';

@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test';
-
 import { openHomePage } from '../home';
 import { signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 
 test.describe('HMC Admin UI protected service recovery journeys', () => {
   test.beforeEach(async ({ page }) => {
