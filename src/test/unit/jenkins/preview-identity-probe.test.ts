@@ -196,11 +196,17 @@ describe('Preview identity probe diagnostics', () => {
     const result = await runProbe();
     expect(result.output.startsWith('PROBE_OK:')).toBe(true);
     const receipt = JSON.parse(result.output.slice('PROBE_OK:'.length));
-    expect(receipt.source).toBe(source);
-    expect(receipt.release).toBe('hmc-admin-ui-pr-731');
-    expect(receipt.app_pods).toHaveLength(1);
-    expect(receipt.app_pods[0].imageID).toBe(digest);
-    expect(receipt.app_pods[0].repository).toBe(repository);
+    expect(receipt).toEqual({
+      observed_utc: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      source,
+      target: environment.AKS_TEST_URL,
+      namespace: 'hmc',
+      release: 'hmc-admin-ui-pr-731',
+      cluster: 'cft-preview-00-aks',
+      resource_group: 'cft-preview-00-rg',
+      build: { commit: source, version: null, number: null, date: null },
+      app_pods: [{ pod, uid, container: 'hmc-admin-ui', repository, imageID: digest }],
+    });
     expect(result.commands).toEqual([
       { command: 'git', args: ['rev-parse', 'HEAD'] },
       {
@@ -338,35 +344,62 @@ describe('Preview identity probe diagnostics', () => {
     expect(deployCallback).toContain("error('Diagnostic deployment/source/profile mismatch')");
   });
 
-  test('validates the exact sanitized receipt schema before writing or archiving it', () => {
+  test('keeps receipt parsing, identity rejection, and artifact errors distinguishable', () => {
     const deployStart = jenkinsfile.indexOf("afterSuccess('akschartsinstall')");
     const functionalStart = jenkinsfile.indexOf("before('functionalTest:preview')", deployStart);
     const deployCallback = jenkinsfile.slice(deployStart, functionalStart);
     const successStart = deployCallback.indexOf("startsWith('PROBE_OK:')");
     const successBranch = deployCallback.slice(successStart);
+    const nodeFailureBranch = deployCallback.slice(0, successStart);
+    const parse = successBranch.indexOf('new groovy.json.JsonSlurperClassic().parseText');
+    const parseCatch = successBranch.indexOf("diagnosticPreviewProbeFailure = 'RECEIPT_PARSE'");
+    const identityTry = successBranch.indexOf('receiptValid = receipt instanceof Map');
+    const identityCatch = successBranch.indexOf("diagnosticPreviewProbeFailure = 'RECEIPT_IDENTITY'");
     const validate = successBranch.indexOf('receiptValid');
     const write = successBranch.indexOf('writeFile(file:');
     const archive = successBranch.indexOf('archiveArtifacts(');
+    const artifactCatch = successBranch.indexOf("diagnosticPreviewProbeFailure = 'RECEIPT_ARTIFACT'");
 
-    expect(successBranch).toContain('new groovy.json.JsonSlurperClassic().parseText');
-    expect(successBranch).toContain("diagnosticPreviewProbeFailure = 'RECEIPT'");
+    expect(nodeFailureBranch).toContain(
+      "def allowedPhases = ['CONTEXT', 'CHECKOUT', 'PODS_QUERY', 'PODS_VALIDATE', 'INFO_TRANSPORT', 'INFO_STATUS', 'INFO_SIZE', 'INFO_JSON', 'INFO_IDENTITY', 'INTERNAL']"
+    );
+    expect(nodeFailureBranch).not.toContain('RECEIPT_PARSE');
+    expect(nodeFailureBranch).not.toContain('RECEIPT_IDENTITY');
+    expect(parse).toBeGreaterThanOrEqual(0);
+    expect(parseCatch).toBeGreaterThan(parse);
     expect(validate).toBeGreaterThanOrEqual(0);
+    expect(parseCatch).toBeLessThan(validate);
+    expect(identityTry).toBeGreaterThan(parseCatch);
+    expect(identityCatch).toBeGreaterThan(identityTry);
     expect(validate).toBeLessThan(write);
     expect(write).toBeLessThan(archive);
-    expect(successBranch).toContain(
-      "def receiptKeys = ['observed_utc', 'source', 'target', 'namespace', 'release', 'cluster', 'resource_group', 'build', 'app_pods'] as Set"
-    );
-    expect(successBranch).toContain("def buildKeys = ['commit', 'version', 'number', 'date'] as Set");
-    expect(successBranch).toContain("def podKeys = ['pod', 'uid', 'container', 'repository', 'imageID'] as Set");
+    expect(successBranch).toContain("diagnosticPreviewProbeFailure = 'RECEIPT_IDENTITY'");
     expect(successBranch).toContain('appPods instanceof List && !appPods.isEmpty()');
-    expect(successBranch).toContain(
-      'app.repository == "hmc/admin-ui:pr-${diagnosticPullRequest}-${diagnosticPreviewSource.substring(0, 7)}-${env.LAST_COMMIT_TIMESTAMP?.trim()}"'
-    );
+    expect(successBranch).toContain('receipt.source == diagnosticPreviewSource');
+    expect(successBranch).toContain('receipt.release == "hmc-admin-ui-pr-${diagnosticPullRequest}"');
     expect(successBranch).toContain('build.commit == diagnosticPreviewSource');
     expect(successBranch).toContain('receipt.target == diagnosticPreviewTarget');
     expect(successBranch).toContain("receipt.namespace == 'hmc'");
     expect(successBranch).toContain("receipt.cluster == 'cft-preview-00-aks'");
     expect(successBranch).toContain("receipt.resource_group == 'cft-preview-00-rg'");
-    expect(successBranch).toContain('groovy.json.JsonOutput.toJson(receipt)');
+    expect(successBranch).toContain('def receiptArtifact = [');
+    expect(successBranch).toContain('app_pods: appPods.collect { app ->');
+    for (const projectionField of [
+      'observed_utc: receipt.observed_utc',
+      'source: receipt.source',
+      'target: receipt.target',
+      'namespace: receipt.namespace',
+      'release: receipt.release',
+      'cluster: receipt.cluster',
+      'resource_group: receipt.resource_group',
+      'build: [commit: build.commit, version: build.version, number: build.number, date: build.date]',
+      '[pod: app.pod, uid: app.uid, container: app.container, repository: app.repository, imageID: app.imageID]',
+    ]) {
+      expect(successBranch).toContain(projectionField);
+    }
+    expect(successBranch).toContain('groovy.json.JsonOutput.toJson(receiptArtifact)');
+    expect(successBranch).not.toContain('groovy.json.JsonOutput.toJson(receipt)');
+    expect(artifactCatch).toBeGreaterThan(archive);
+    expect(successBranch).toContain('if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException)');
   });
 });

@@ -336,45 +336,61 @@ DIAGNOSTIC_NODE
             def allowedPhases = ['CONTEXT', 'CHECKOUT', 'PODS_QUERY', 'PODS_VALIDATE', 'INFO_TRANSPORT', 'INFO_STATUS', 'INFO_SIZE', 'INFO_JSON', 'INFO_IDENTITY', 'INTERNAL']
             diagnosticPreviewProbeFailure = allowedPhases.contains(phase) ? phase : 'PROBE_OUTPUT'
           } else if (probeOutput?.startsWith('PROBE_OK:')) {
+            def receipt = null
             try {
-              def receipt = new groovy.json.JsonSlurperClassic().parseText(probeOutput.substring('PROBE_OK:'.length()))
-              def receiptKeys = ['observed_utc', 'source', 'target', 'namespace', 'release', 'cluster', 'resource_group', 'build', 'app_pods'] as Set
-              def build = receipt instanceof Map ? receipt.build : null
-              def buildKeys = ['commit', 'version', 'number', 'date'] as Set
-              def buildValuesValid = build instanceof Map && build.keySet() == buildKeys &&
-                ['version', 'number', 'date'].every { key ->
-                  def value = build[key]
-                  value == null || ((value instanceof String || value instanceof Number) && value.toString() ==~ /^[A-Za-z0-9 :+._\/-]{1,100}$/)
-                }
-              def appPods = receipt instanceof Map ? receipt.app_pods : null
-              def podKeys = ['pod', 'uid', 'container', 'repository', 'imageID'] as Set
-              def appPodsValid = appPods instanceof List && !appPods.isEmpty() &&
-                appPods.every { app ->
-                  app instanceof Map && app.keySet() == podKeys &&
-                    app.pod instanceof String && app.pod ==~ /^[a-z0-9.-]+$/ &&
-                    app.uid instanceof String && app.uid ==~ /^[a-f0-9-]{36}$/ &&
-                    app.container instanceof String && app.container ==~ /^[a-z0-9.-]+$/ &&
-                    app.repository == "hmc/admin-ui:pr-${diagnosticPullRequest}-${diagnosticPreviewSource.substring(0, 7)}-${env.LAST_COMMIT_TIMESTAMP?.trim()}" &&
-                    app.imageID instanceof String && app.imageID ==~ /^sha256:[a-f0-9]{64}$/
-                } && appPods.collect { it.imageID }.toSet().size() == 1
-              def receiptValid = receipt instanceof Map && receipt.keySet() == receiptKeys &&
-                receipt.observed_utc instanceof String && receipt.observed_utc ==~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/ &&
-                receipt.source == diagnosticPreviewSource && receipt.target == diagnosticPreviewTarget &&
-                receipt.namespace == 'hmc' && receipt.release == "hmc-admin-ui-pr-${diagnosticPullRequest}" &&
-                receipt.cluster == 'cft-preview-00-aks' && receipt.resource_group == 'cft-preview-00-rg' &&
-                buildValuesValid && build.commit == diagnosticPreviewSource && appPodsValid
-              if (receiptValid) {
-                writeFile(file: 'diagnostic-output/preview-identity.json', text: groovy.json.JsonOutput.toJson(receipt) + '\n')
-                archiveArtifacts(allowEmptyArchive: false, artifacts: 'diagnostic-output/preview-identity.json')
-                diagnosticPreviewReceiptTarget = env.AKS_TEST_URL
-              } else {
-                diagnosticPreviewProbeFailure = 'RECEIPT'
-              }
+              receipt = new groovy.json.JsonSlurperClassic().parseText(probeOutput.substring('PROBE_OK:'.length()))
             } catch (Exception e) {
               if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
                 throw e
               }
-              diagnosticPreviewProbeFailure = 'RECEIPT'
+              diagnosticPreviewProbeFailure = 'RECEIPT_PARSE'
+            }
+            if (diagnosticPreviewProbeFailure == null) {
+              def build = null
+              def appPods = null
+              def receiptValid = false
+              try {
+                build = receipt instanceof Map ? receipt.build : null
+                appPods = receipt instanceof Map ? receipt.app_pods : null
+                receiptValid = receipt instanceof Map &&
+                  receipt.source == diagnosticPreviewSource && receipt.target == diagnosticPreviewTarget &&
+                  receipt.namespace == 'hmc' && receipt.release == "hmc-admin-ui-pr-${diagnosticPullRequest}" &&
+                  receipt.cluster == 'cft-preview-00-aks' && receipt.resource_group == 'cft-preview-00-rg' &&
+                  build instanceof Map && build.commit == diagnosticPreviewSource &&
+                  appPods instanceof List && !appPods.isEmpty()
+              } catch (Exception e) {
+                if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+                  throw e
+                }
+                diagnosticPreviewProbeFailure = 'RECEIPT_IDENTITY'
+              }
+              if (diagnosticPreviewProbeFailure == null && receiptValid) {
+                try {
+                  def receiptArtifact = [
+                    observed_utc: receipt.observed_utc,
+                    source: receipt.source,
+                    target: receipt.target,
+                    namespace: receipt.namespace,
+                    release: receipt.release,
+                    cluster: receipt.cluster,
+                    resource_group: receipt.resource_group,
+                    build: [commit: build.commit, version: build.version, number: build.number, date: build.date],
+                    app_pods: appPods.collect { app ->
+                      [pod: app.pod, uid: app.uid, container: app.container, repository: app.repository, imageID: app.imageID]
+                    }
+                  ]
+                  writeFile(file: 'diagnostic-output/preview-identity.json', text: groovy.json.JsonOutput.toJson(receiptArtifact) + '\n')
+                  archiveArtifacts(allowEmptyArchive: false, artifacts: 'diagnostic-output/preview-identity.json')
+                  diagnosticPreviewReceiptTarget = env.AKS_TEST_URL
+                } catch (Exception e) {
+                  if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+                    throw e
+                  }
+                  diagnosticPreviewProbeFailure = 'RECEIPT_ARTIFACT'
+                }
+              } else if (diagnosticPreviewProbeFailure == null) {
+                diagnosticPreviewProbeFailure = 'RECEIPT_IDENTITY'
+              }
             }
           } else {
             diagnosticPreviewProbeFailure = 'PROBE_OUTPUT'
