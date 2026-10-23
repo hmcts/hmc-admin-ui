@@ -123,6 +123,18 @@ def runPlaywrightAccessibility = { String targetEnvironment, String reportName -
   }
 }
 
+def diagnosticPullRequest = env.CHANGE_ID
+if (env.CHANGE_BRANCH != 'test/EXUI-5429-preview-diagnostic-20261023' ||
+    env.CHANGE_TARGET != 'test/EXUI-5429-retire-codecept' ||
+    !(diagnosticPullRequest ==~ /[1-9][0-9]*/) ||
+    env.BRANCH_NAME != "PR-${diagnosticPullRequest}" ||
+    params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+  error('Diagnostic PR context/profile mismatch')
+}
+def diagnosticPreviewTarget = "https://hmc-admin-ui-pr-${diagnosticPullRequest}.preview.platform.hmcts.net"
+def diagnosticPreviewSource = null
+def diagnosticPreviewReceiptTarget = null
+
 def secrets = [
   'hmc-${env}': [
     secret('hmc-admin-ui-test-user', 'TEST_IDAM_USERNAME'),
@@ -151,6 +163,11 @@ withPipeline(type, product, component) {
   }
 
   afterSuccess('checkout') {
+    if (!(env.GIT_COMMIT ==~ /[a-f0-9]{40}/) ||
+        steps.sh(returnStdout: true, script: 'git rev-parse HEAD').trim() != env.GIT_COMMIT) {
+      error('Diagnostic checkout source mismatch')
+    }
+    diagnosticPreviewSource = env.GIT_COMMIT
     stage('Playwright Install Chromium') {
       withEnv(playwrightBrowsersEnv()) {
         steps.sh 'mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"'
@@ -173,8 +190,114 @@ withPipeline(type, product, component) {
     publishTestReports()
   }
 
+  afterSuccess('akschartsinstall') {
+    if (env.GIT_COMMIT != diagnosticPreviewSource ||
+        !(diagnosticPreviewSource ==~ /[a-f0-9]{40}/) ||
+        env.CHANGE_ID != diagnosticPullRequest ||
+        env.CHANGE_BRANCH != 'test/EXUI-5429-preview-diagnostic-20261023' ||
+        env.CHANGE_TARGET != 'test/EXUI-5429-retire-codecept' ||
+        env.BRANCH_NAME != "PR-${diagnosticPullRequest}" ||
+        new uk.gov.hmcts.contino.Subscription(env).previewName != 'nonprod' ||
+        env.TEAM_NAMESPACE != 'hmc' ||
+        env.AKS_TEST_URL != diagnosticPreviewTarget ||
+        env.AKS_CLUSTER_NAME != 'cft-preview-00-aks' ||
+        env.AKS_RESOURCE_GROUP != 'cft-preview-00-rg' ||
+        params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+      error('Diagnostic deployment/source/profile mismatch')
+    }
+    timeout(time: 1, unit: 'MINUTES') {
+      def receipt = steps.sh(label: 'Read scoped Preview identity', returnStdout: true, script: '''set +x
+node <<'DIAGNOSTIC_NODE'
+const { execFileSync } = require('node:child_process');
+const https = require('node:https');
+const source = process.env.GIT_COMMIT;
+const pullRequest = process.env.CHANGE_ID;
+const release = 'hmc-admin-ui-pr-' + pullRequest;
+const target = 'https://' + release + '.preview.platform.hmcts.net';
+function requireIdentity(ok) { if (!ok) throw new Error('Identity probe rejected'); }
+function parsePods(text) {
+  const rows = text.split('\\n').filter(Boolean).map(line => line.split('\\t'));
+  const pods = new Map();
+  for (const row of rows) {
+    requireIdentity(row.length === 2 || row.length === 6);
+    const [pod, uid] = row;
+    requireIdentity(/^[a-z0-9.-]+$/.test(pod) && /^[a-f0-9-]{36}$/.test(uid));
+    if (row.length === 2) {
+      requireIdentity(!pods.has(pod));
+      pods.set(pod, { uid, statuses: [] });
+    } else {
+      const selected = pods.get(pod);
+      requireIdentity(selected && selected.uid === uid);
+      requireIdentity(/^[a-z0-9.-]+$/.test(row[2]) && !selected.statuses.some(status => status[2] === row[2]));
+      selected.statuses.push(row);
+    }
+  }
+  requireIdentity(pods.size > 0);
+  const apps = [];
+  const digest = /sha256:[a-f0-9]{64}$/;
+  const sourceImage = new RegExp('^[a-z0-9.-]+(?::[0-9]+)?/hmc/admin-ui:pr-' + pullRequest + '$');
+  for (const selected of pods.values()) {
+    const matches = selected.statuses.filter(row => /\\/hmc\\/admin-ui(?=[:@])/.test(row[3]));
+    requireIdentity(matches.length === 1);
+    const [pod, uid, container, image, imageID, ready] = matches[0];
+    requireIdentity(sourceImage.test(image) && digest.test(imageID) && ready === 'true');
+    apps.push({ pod, uid, container, repository: 'hmc/admin-ui:pr-' + pullRequest, imageID: imageID.match(digest)[0] });
+  }
+  requireIdentity(new Set(apps.map(app => app.imageID)).size === 1);
+  return apps;
+}
+function parseBuild(body) {
+  const build = JSON.parse(body).build;
+  requireIdentity(build && build.commit === source);
+  const result = { commit: build.commit };
+  for (const key of ['version', 'number', 'date']) {
+    const value = build[key];
+    requireIdentity(value == null || ((typeof value === 'string' || typeof value === 'number') && /^[A-Za-z0-9 :+._/\\-]{1,100}$/.test(String(value))));
+    result[key] = value == null ? null : value;
+  }
+  return result;
+}
+async function info() {
+  return new Promise((resolve, reject) => {
+    const request = https.get(target + '/info', { signal: AbortSignal.timeout(15_000) }, response => {
+      if (response.statusCode !== 200) { response.resume(); reject(new Error('HTTP')); return; }
+      let size = 0;
+      const chunks = [];
+      response.on('data', chunk => { size += chunk.length; if (size > 64 * 1024) { response.destroy(); reject(new Error('Size')); } else chunks.push(chunk); });
+      response.on('end', () => { try { resolve(parseBuild(Buffer.concat(chunks).toString('utf8'))); } catch { reject(new Error('Build')); } });
+      response.on('error', reject);
+    });
+    request.on('error', reject);
+  });
+}
+async function main() {
+  requireIdentity(/^[a-f0-9]{40}$/.test(source) && /^[1-9][0-9]*$/.test(pullRequest));
+  requireIdentity(process.env.CHANGE_BRANCH === 'test/EXUI-5429-preview-diagnostic-20261023' && process.env.CHANGE_TARGET === 'test/EXUI-5429-retire-codecept' && process.env.BRANCH_NAME === 'PR-' + pullRequest);
+  requireIdentity(process.env.AKS_TEST_URL === target && process.env.TEAM_NAMESPACE === 'hmc' && process.env.AKS_CLUSTER_NAME === 'cft-preview-00-aks' && process.env.AKS_RESOURCE_GROUP === 'cft-preview-00-rg');
+  requireIdentity(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10_000 }).trim() === source);
+  const projection = '{{range .items}}{{.metadata.name}}{{"\\\\t"}}{{.metadata.uid}}{{"\\\\n"}}{{$pod := .}}{{range .status.containerStatuses}}{{$pod.metadata.name}}{{"\\\\t"}}{{$pod.metadata.uid}}{{"\\\\t"}}{{.name}}{{"\\\\t"}}{{.image}}{{"\\\\t"}}{{.imageID}}{{"\\\\t"}}{{.ready}}{{"\\\\n"}}{{end}}{{end}}';
+  const pods = parsePods(execFileSync('kubectl', ['get', 'pods', '--namespace', 'hmc', '--selector', 'app.kubernetes.io/instance=' + release + ',!job-name', '--request-timeout=20s', '-o', 'go-template=' + projection], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 25_000, maxBuffer: 64 * 1024 }));
+  const build = await info();
+  process.stdout.write(JSON.stringify({ observed_utc: new Date().toISOString(), source, target, namespace: 'hmc', release, cluster: process.env.AKS_CLUSTER_NAME, resource_group: process.env.AKS_RESOURCE_GROUP, build, app_pods: pods }) + '\\n');
+}
+main().catch(() => { process.stderr.write('Preview identity probe failed\\n'); process.exitCode = 1; });
+DIAGNOSTIC_NODE
+''').trim()
+      writeFile(file: 'diagnostic-output/preview-identity.json', text: receipt + '\n')
+      archiveArtifacts(allowEmptyArchive: false, artifacts: 'diagnostic-output/preview-identity.json')
+      diagnosticPreviewReceiptTarget = env.AKS_TEST_URL
+    }
+  }
+
   before('functionalTest:preview') {
     configurePlaywrightFunctional('preview')
+    if (env.GIT_COMMIT != diagnosticPreviewSource ||
+        !(diagnosticPreviewSource ==~ /[a-f0-9]{40}/) ||
+        diagnosticPreviewReceiptTarget != diagnosticPreviewTarget ||
+        env.TEST_URL != diagnosticPreviewReceiptTarget || params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
+      error('Diagnostic receipt/test target mismatch')
+    }
+    env.IDAM_PUBLIC_URL = 'https://controlled-failure.invalid'
   }
 
   afterAlways('functionalTest:preview') {
