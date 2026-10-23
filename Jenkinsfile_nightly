@@ -55,6 +55,7 @@ def configurePlaywrightFunctional = {
 }
 
 def publishPlaywrightFunctional = {
+  steps.sh 'node bin/verify-playwright-functional-report.js'
   steps.publishHTML([
     allowMissing         : false,
     alwaysLinkToLastBuild: true,
@@ -65,15 +66,6 @@ def publishPlaywrightFunctional = {
   ])
   steps.junit allowEmptyResults: false, testResults: "${playwrightFunctionalOutputRoot}/odhin-report/playwright-junit.xml"
   steps.archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
-}
-
-def runPlaywrightFunctional = {
-  configurePlaywrightFunctional()
-  try {
-    yarnBuilder.yarn('test:playwright:functional')
-  } finally {
-    publishPlaywrightFunctional()
-  }
 }
 
 def runPlaywrightAccessibility = {
@@ -120,11 +112,12 @@ withNightlyPipeline(type, product, component) {
       }
     }
   }
+  before('fullFunctionalTest') {
+    configurePlaywrightFunctional()
+  }
   afterAlways('fullFunctionalTest') {
     try {
-      stage('Nightly HMC Admin UI Playwright Functional Test') {
-        runPlaywrightFunctional()
-      }
+      publishPlaywrightFunctional()
     } finally {
       if (params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
         stage('Nightly HMC Admin UI Playwright Accessibility') {
