@@ -112,7 +112,7 @@ describe('inherited functional aliases', () => {
     project = fs.mkdtempSync(path.join(os.tmpdir(), 'hmc-functional-alias-'));
     fs.writeFileSync(
       path.join(project, 'package.json'),
-      JSON.stringify({ name: 'alias-proof', scripts: packageJson.scripts })
+      JSON.stringify({ name: 'alias-proof', packageManager: packageJson.packageManager, scripts: packageJson.scripts })
     );
     fs.writeFileSync(path.join(project, 'yarn.lock'), '');
     const install = spawnSync(
