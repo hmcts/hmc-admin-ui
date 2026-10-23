@@ -223,6 +223,7 @@ const { execFileSync } = require('node:child_process');
 const https = require('node:https');
 const source = process.env.GIT_COMMIT;
 const pullRequest = process.env.CHANGE_ID;
+const lastCommitTimestamp = (process.env.LAST_COMMIT_TIMESTAMP || '').trim();
 const release = 'hmc-admin-ui-pr-' + pullRequest;
 const target = 'https://' + release + '.preview.platform.hmcts.net';
 const phaseCodes = ['CONTEXT', 'CHECKOUT', 'PODS_QUERY', 'PODS_VALIDATE', 'INFO_TRANSPORT', 'INFO_STATUS', 'INFO_SIZE', 'INFO_JSON', 'INFO_IDENTITY', 'INTERNAL'];
@@ -232,29 +233,33 @@ function parsePods(text) {
   const rows = text.split('\\n').filter(Boolean).map(line => line.split('\\t'));
   const pods = new Map();
   for (const row of rows) {
-    requireIdentity(row.length === 2 || row.length === 6, 'PODS_VALIDATE');
+    requireIdentity(row.length === 2 || row.length === 4 || row.length === 6, 'PODS_VALIDATE');
     const [pod, uid] = row;
     requireIdentity(/^[a-z0-9.-]+$/.test(pod) && /^[a-f0-9-]{36}$/.test(uid), 'PODS_VALIDATE');
     if (row.length === 2) {
       requireIdentity(!pods.has(pod), 'PODS_VALIDATE');
-      pods.set(pod, { uid, statuses: [] });
+      pods.set(pod, { uid, containers: [], statuses: [] });
     } else {
       const selected = pods.get(pod);
       requireIdentity(selected && selected.uid === uid, 'PODS_VALIDATE');
-      requireIdentity(/^[a-z0-9.-]+$/.test(row[2]) && !selected.statuses.some(status => status[2] === row[2]), 'PODS_VALIDATE');
-      selected.statuses.push(row);
+      const records = row.length === 4 ? selected.containers : selected.statuses;
+      requireIdentity(/^[a-z0-9.-]+$/.test(row[2]) && !records.some(record => record[2] === row[2]), 'PODS_VALIDATE');
+      records.push(row);
     }
   }
   requireIdentity(pods.size > 0, 'PODS_VALIDATE');
   const apps = [];
   const digest = /sha256:[a-f0-9]{64}$/;
-  const sourceImage = new RegExp('^[a-z0-9.-]+(?::[0-9]+)?/hmc/admin-ui:pr-' + pullRequest + '$');
+  const repository = 'hmc/admin-ui:pr-' + pullRequest + '-' + source.slice(0, 7) + '-' + lastCommitTimestamp;
+  const sourceImage = new RegExp('^[a-z0-9.-]+(?::[0-9]+)?/' + repository + '$');
   for (const selected of pods.values()) {
-    const matches = selected.statuses.filter(row => /\\/hmc\\/admin-ui(?=[:@])/.test(row[3]));
+    const matches = selected.containers.filter(row => /\\/hmc\\/admin-ui(?=[:@])/.test(row[3]));
     requireIdentity(matches.length === 1, 'PODS_VALIDATE');
-    const [pod, uid, container, image, imageID, ready] = matches[0];
-    requireIdentity(sourceImage.test(image) && digest.test(imageID) && ready === 'true', 'PODS_VALIDATE');
-    apps.push({ pod, uid, container, repository: 'hmc/admin-ui:pr-' + pullRequest, imageID: imageID.match(digest)[0] });
+    const [pod, uid, container, image] = matches[0];
+    const status = selected.statuses.find(row => row[2] === container);
+    requireIdentity(status && status[3] === image && sourceImage.test(image) && digest.test(status[4]) && status[5] === 'true', 'PODS_VALIDATE');
+    const imageID = status[4];
+    apps.push({ pod, uid, container, repository, imageID: imageID.match(digest)[0] });
   }
   requireIdentity(new Set(apps.map(app => app.imageID)).size === 1, 'PODS_VALIDATE');
   return apps;
@@ -292,7 +297,7 @@ async function info() {
   });
 }
 async function main() {
-  requireIdentity(/^[a-f0-9]{40}$/.test(source) && /^[1-9][0-9]*$/.test(pullRequest), 'CONTEXT');
+  requireIdentity(/^[a-f0-9]{40}$/.test(source) && /^[1-9][0-9]*$/.test(pullRequest) && /^[0-9]{14}$/.test(lastCommitTimestamp), 'CONTEXT');
   requireIdentity(process.env.CHANGE_BRANCH === 'test/EXUI-5429-preview-diagnostic-20261023' && process.env.CHANGE_TARGET === 'test/EXUI-5429-retire-codecept' && process.env.BRANCH_NAME === 'PR-' + pullRequest, 'CONTEXT');
   requireIdentity(process.env.AKS_TEST_URL === target && process.env.TEAM_NAMESPACE === 'hmc' && process.env.AKS_CLUSTER_NAME === 'cft-preview-00-aks' && process.env.AKS_RESOURCE_GROUP === 'cft-preview-00-rg', 'CONTEXT');
   let checkout;
@@ -302,7 +307,7 @@ async function main() {
     reject('CHECKOUT');
   }
   requireIdentity(checkout === source, 'CHECKOUT');
-  const projection = '{{range .items}}{{.metadata.name}}{{"\\\\t"}}{{.metadata.uid}}{{"\\\\n"}}{{$pod := .}}{{range .status.containerStatuses}}{{$pod.metadata.name}}{{"\\\\t"}}{{$pod.metadata.uid}}{{"\\\\t"}}{{.name}}{{"\\\\t"}}{{.image}}{{"\\\\t"}}{{.imageID}}{{"\\\\t"}}{{.ready}}{{"\\\\n"}}{{end}}{{end}}';
+  const projection = '{{range .items}}{{.metadata.name}}{{"\\\\t"}}{{.metadata.uid}}{{"\\\\n"}}{{$pod := .}}{{range .spec.containers}}{{$pod.metadata.name}}{{"\\\\t"}}{{$pod.metadata.uid}}{{"\\\\t"}}{{.name}}{{"\\\\t"}}{{.image}}{{"\\\\n"}}{{end}}{{range .status.containerStatuses}}{{$pod.metadata.name}}{{"\\\\t"}}{{$pod.metadata.uid}}{{"\\\\t"}}{{.name}}{{"\\\\t"}}{{.image}}{{"\\\\t"}}{{.imageID}}{{"\\\\t"}}{{.ready}}{{"\\\\n"}}{{end}}{{end}}';
   let podOutput;
   try {
     podOutput = execFileSync('kubectl', ['get', 'pods', '--namespace', 'hmc', '--selector', 'app.kubernetes.io/instance=' + release + ',!job-name', '--request-timeout=20s', '-o', 'go-template=' + projection], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 25_000, maxBuffer: 64 * 1024 });
@@ -349,7 +354,7 @@ DIAGNOSTIC_NODE
                     app.pod instanceof String && app.pod ==~ /^[a-z0-9.-]+$/ &&
                     app.uid instanceof String && app.uid ==~ /^[a-f0-9-]{36}$/ &&
                     app.container instanceof String && app.container ==~ /^[a-z0-9.-]+$/ &&
-                    app.repository == "hmc/admin-ui:pr-${diagnosticPullRequest}" &&
+                    app.repository == "hmc/admin-ui:pr-${diagnosticPullRequest}-${diagnosticPreviewSource.substring(0, 7)}-${env.LAST_COMMIT_TIMESTAMP?.trim()}" &&
                     app.imageID instanceof String && app.imageID ==~ /^sha256:[a-f0-9]{64}$/
                 } && appPods.collect { it.imageID }.toSet().size() == 1
               def receiptValid = receipt instanceof Map && receipt.keySet() == receiptKeys &&
@@ -381,6 +386,7 @@ DIAGNOSTIC_NODE
 
   before('functionalTest:preview') {
     if (diagnosticPreviewProbeFailure != null) {
+      echo("Preview identity probe phase: ${diagnosticPreviewProbeFailure}")
       error("Preview identity probe failed: ${diagnosticPreviewProbeFailure}")
     }
     configurePlaywrightFunctional('preview')
