@@ -64,9 +64,12 @@ describe('native Playwright CNP contract', () => {
 
   test.each(['preview', 'aat'])('configures normal and full %s before the inherited runner', environment => {
     for (const stage of ['functionalTest', 'fullFunctionalTest']) {
-      expect(jenkinsfile).toContain(
-        `before('${stage}:${environment}') {\n    configurePlaywrightFunctional('${environment}')`
-      );
+      const beforeCallback = `before('${stage}:${environment}') {`;
+      const beforeStart = jenkinsfile.indexOf(beforeCallback);
+      expect(beforeStart).toBeGreaterThanOrEqual(0);
+      const beforeEnd = jenkinsfile.indexOf('\n  }', beforeStart);
+      const beforeSection = jenkinsfile.slice(beforeStart, beforeEnd);
+      expect(beforeSection).toContain(`configurePlaywrightFunctional('${environment}')`);
       const body = callbackBody(`${stage}:${environment}`);
       expect(body).toContain(
         `publishPlaywrightFunctional('${environment.toUpperCase()} HMC Admin UI Playwright Functional Test')`
@@ -78,6 +81,18 @@ describe('native Playwright CNP contract', () => {
     }
     expect(jenkinsfile).not.toContain('enableFullFunctionalTest(');
     expect(jenkinsfile).not.toContain('parallel(suites)');
+  });
+
+  test('gates the diagnostic Preview identity before native configuration', () => {
+    const beforeStart = jenkinsfile.indexOf("before('functionalTest:preview') {");
+    const beforeEnd = jenkinsfile.indexOf('\n  }', beforeStart);
+    const beforeSection = jenkinsfile.slice(beforeStart, beforeEnd);
+    const identityGate = beforeSection.indexOf('diagnosticPreviewProbeFailure');
+    const nativeConfiguration = beforeSection.indexOf("configurePlaywrightFunctional('preview')");
+
+    expect(identityGate).toBeGreaterThanOrEqual(0);
+    expect(nativeConfiguration).toBeGreaterThanOrEqual(0);
+    expect(identityGate).toBeLessThan(nativeConfiguration);
   });
 
   test('keeps accessibility in its own opt-in report lane', () => {

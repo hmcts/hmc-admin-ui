@@ -134,6 +134,7 @@ if (env.CHANGE_BRANCH != 'test/EXUI-5429-preview-diagnostic-20261023' ||
 def diagnosticPreviewTarget = "https://hmc-admin-ui-pr-${diagnosticPullRequest}.preview.platform.hmcts.net"
 def diagnosticPreviewSource = null
 def diagnosticPreviewReceiptTarget = null
+def diagnosticPreviewProbeFailure = null
 
 def secrets = [
   'hmc-${env}': [
@@ -191,22 +192,32 @@ withPipeline(type, product, component) {
   }
 
   afterSuccess('akschartsinstall') {
-    if (env.GIT_COMMIT != diagnosticPreviewSource ||
-        !(diagnosticPreviewSource ==~ /[a-f0-9]{40}/) ||
-        env.CHANGE_ID != diagnosticPullRequest ||
-        env.CHANGE_BRANCH != 'test/EXUI-5429-preview-diagnostic-20261023' ||
-        env.CHANGE_TARGET != 'test/EXUI-5429-retire-codecept' ||
-        env.BRANCH_NAME != "PR-${diagnosticPullRequest}" ||
-        new uk.gov.hmcts.contino.Subscription(env).previewName != 'nonprod' ||
-        env.TEAM_NAMESPACE != 'hmc' ||
-        env.AKS_TEST_URL != diagnosticPreviewTarget ||
-        env.AKS_CLUSTER_NAME != 'cft-preview-00-aks' ||
-        env.AKS_RESOURCE_GROUP != 'cft-preview-00-rg' ||
-        params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
-      error('Diagnostic deployment/source/profile mismatch')
+    diagnosticPreviewProbeFailure = null
+    diagnosticPreviewReceiptTarget = null
+    def diagnosticContextMatches = false
+    try {
+      diagnosticContextMatches = env.GIT_COMMIT == diagnosticPreviewSource &&
+        diagnosticPreviewSource ==~ /[a-f0-9]{40}/ &&
+        env.CHANGE_ID == diagnosticPullRequest &&
+        env.CHANGE_BRANCH == 'test/EXUI-5429-preview-diagnostic-20261023' &&
+        env.CHANGE_TARGET == 'test/EXUI-5429-retire-codecept' &&
+        env.BRANCH_NAME == "PR-${diagnosticPullRequest}" &&
+        new uk.gov.hmcts.contino.Subscription(env).previewName == 'nonprod' &&
+        env.TEAM_NAMESPACE == 'hmc' &&
+        env.AKS_TEST_URL == diagnosticPreviewTarget &&
+        env.AKS_CLUSTER_NAME == 'cft-preview-00-aks' &&
+        env.AKS_RESOURCE_GROUP == 'cft-preview-00-rg' &&
+        !params.RUN_PLAYWRIGHT_ACCESSIBILITY
+    } catch (Exception ignored) {
+      diagnosticContextMatches = false
     }
-    timeout(time: 1, unit: 'MINUTES') {
-      def receipt = steps.sh(label: 'Read scoped Preview identity', returnStdout: true, script: '''set +x
+    if (!diagnosticContextMatches) {
+      error('Diagnostic deployment/source/profile mismatch')
+    } else {
+      timeout(time: 1, unit: 'MINUTES') {
+        def probeOutput = null
+        try {
+          probeOutput = steps.sh(label: 'Read scoped Preview identity', returnStdout: true, script: '''set +x
 node <<'DIAGNOSTIC_NODE'
 const { execFileSync } = require('node:child_process');
 const https = require('node:https');
@@ -214,82 +225,164 @@ const source = process.env.GIT_COMMIT;
 const pullRequest = process.env.CHANGE_ID;
 const release = 'hmc-admin-ui-pr-' + pullRequest;
 const target = 'https://' + release + '.preview.platform.hmcts.net';
-function requireIdentity(ok) { if (!ok) throw new Error('Identity probe rejected'); }
+const phaseCodes = ['CONTEXT', 'CHECKOUT', 'PODS_QUERY', 'PODS_VALIDATE', 'INFO_TRANSPORT', 'INFO_STATUS', 'INFO_SIZE', 'INFO_JSON', 'INFO_IDENTITY', 'INTERNAL'];
+function reject(phase) { const error = new Error(); error.phase = phase; throw error; }
+function requireIdentity(ok, phase) { if (!ok) reject(phase); }
 function parsePods(text) {
   const rows = text.split('\\n').filter(Boolean).map(line => line.split('\\t'));
   const pods = new Map();
   for (const row of rows) {
-    requireIdentity(row.length === 2 || row.length === 6);
+    requireIdentity(row.length === 2 || row.length === 6, 'PODS_VALIDATE');
     const [pod, uid] = row;
-    requireIdentity(/^[a-z0-9.-]+$/.test(pod) && /^[a-f0-9-]{36}$/.test(uid));
+    requireIdentity(/^[a-z0-9.-]+$/.test(pod) && /^[a-f0-9-]{36}$/.test(uid), 'PODS_VALIDATE');
     if (row.length === 2) {
-      requireIdentity(!pods.has(pod));
+      requireIdentity(!pods.has(pod), 'PODS_VALIDATE');
       pods.set(pod, { uid, statuses: [] });
     } else {
       const selected = pods.get(pod);
-      requireIdentity(selected && selected.uid === uid);
-      requireIdentity(/^[a-z0-9.-]+$/.test(row[2]) && !selected.statuses.some(status => status[2] === row[2]));
+      requireIdentity(selected && selected.uid === uid, 'PODS_VALIDATE');
+      requireIdentity(/^[a-z0-9.-]+$/.test(row[2]) && !selected.statuses.some(status => status[2] === row[2]), 'PODS_VALIDATE');
       selected.statuses.push(row);
     }
   }
-  requireIdentity(pods.size > 0);
+  requireIdentity(pods.size > 0, 'PODS_VALIDATE');
   const apps = [];
   const digest = /sha256:[a-f0-9]{64}$/;
   const sourceImage = new RegExp('^[a-z0-9.-]+(?::[0-9]+)?/hmc/admin-ui:pr-' + pullRequest + '$');
   for (const selected of pods.values()) {
     const matches = selected.statuses.filter(row => /\\/hmc\\/admin-ui(?=[:@])/.test(row[3]));
-    requireIdentity(matches.length === 1);
+    requireIdentity(matches.length === 1, 'PODS_VALIDATE');
     const [pod, uid, container, image, imageID, ready] = matches[0];
-    requireIdentity(sourceImage.test(image) && digest.test(imageID) && ready === 'true');
+    requireIdentity(sourceImage.test(image) && digest.test(imageID) && ready === 'true', 'PODS_VALIDATE');
     apps.push({ pod, uid, container, repository: 'hmc/admin-ui:pr-' + pullRequest, imageID: imageID.match(digest)[0] });
   }
-  requireIdentity(new Set(apps.map(app => app.imageID)).size === 1);
+  requireIdentity(new Set(apps.map(app => app.imageID)).size === 1, 'PODS_VALIDATE');
   return apps;
 }
 function parseBuild(body) {
-  const build = JSON.parse(body).build;
-  requireIdentity(build && build.commit === source);
+  let parsed;
+  try { parsed = JSON.parse(body); } catch { reject('INFO_JSON'); }
+  requireIdentity(parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.build && typeof parsed.build === 'object' && !Array.isArray(parsed.build), 'INFO_IDENTITY');
+  const build = parsed.build;
+  requireIdentity(build && build.commit === source, 'INFO_IDENTITY');
   const result = { commit: build.commit };
   for (const key of ['version', 'number', 'date']) {
     const value = build[key];
-    requireIdentity(value == null || ((typeof value === 'string' || typeof value === 'number') && /^[A-Za-z0-9 :+._/\\-]{1,100}$/.test(String(value))));
+    requireIdentity(value == null || ((typeof value === 'string' || typeof value === 'number') && /^[A-Za-z0-9 :+._/\\-]{1,100}$/.test(String(value))), 'INFO_IDENTITY');
     result[key] = value == null ? null : value;
   }
   return result;
 }
 async function info() {
   return new Promise((resolve, reject) => {
-    const request = https.get(target + '/info', { signal: AbortSignal.timeout(15_000) }, response => {
-      if (response.statusCode !== 200) { response.resume(); reject(new Error('HTTP')); return; }
-      let size = 0;
-      const chunks = [];
-      response.on('data', chunk => { size += chunk.length; if (size > 64 * 1024) { response.destroy(); reject(new Error('Size')); } else chunks.push(chunk); });
-      response.on('end', () => { try { resolve(parseBuild(Buffer.concat(chunks).toString('utf8'))); } catch { reject(new Error('Build')); } });
-      response.on('error', reject);
-    });
-    request.on('error', reject);
+    let request;
+    try {
+      request = https.get(target + '/info', { signal: AbortSignal.timeout(15_000) }, response => {
+        response.on('error', () => reject(Object.assign(new Error(), { phase: 'INFO_TRANSPORT' })));
+        if (response.statusCode !== 200) { response.resume(); reject(Object.assign(new Error(), { phase: 'INFO_STATUS' })); return; }
+        let size = 0;
+        const chunks = [];
+        response.on('data', chunk => { size += chunk.length; if (size > 64 * 1024) { response.destroy(); reject(Object.assign(new Error(), { phase: 'INFO_SIZE' })); } else chunks.push(chunk); });
+        response.on('end', () => { try { resolve(parseBuild(Buffer.concat(chunks).toString('utf8'))); } catch (error) { reject(error); } });
+      });
+      request.on('error', () => reject(Object.assign(new Error(), { phase: 'INFO_TRANSPORT' })));
+    } catch {
+      reject(Object.assign(new Error(), { phase: 'INFO_TRANSPORT' }));
+    }
   });
 }
 async function main() {
-  requireIdentity(/^[a-f0-9]{40}$/.test(source) && /^[1-9][0-9]*$/.test(pullRequest));
-  requireIdentity(process.env.CHANGE_BRANCH === 'test/EXUI-5429-preview-diagnostic-20261023' && process.env.CHANGE_TARGET === 'test/EXUI-5429-retire-codecept' && process.env.BRANCH_NAME === 'PR-' + pullRequest);
-  requireIdentity(process.env.AKS_TEST_URL === target && process.env.TEAM_NAMESPACE === 'hmc' && process.env.AKS_CLUSTER_NAME === 'cft-preview-00-aks' && process.env.AKS_RESOURCE_GROUP === 'cft-preview-00-rg');
-  requireIdentity(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10_000 }).trim() === source);
+  requireIdentity(/^[a-f0-9]{40}$/.test(source) && /^[1-9][0-9]*$/.test(pullRequest), 'CONTEXT');
+  requireIdentity(process.env.CHANGE_BRANCH === 'test/EXUI-5429-preview-diagnostic-20261023' && process.env.CHANGE_TARGET === 'test/EXUI-5429-retire-codecept' && process.env.BRANCH_NAME === 'PR-' + pullRequest, 'CONTEXT');
+  requireIdentity(process.env.AKS_TEST_URL === target && process.env.TEAM_NAMESPACE === 'hmc' && process.env.AKS_CLUSTER_NAME === 'cft-preview-00-aks' && process.env.AKS_RESOURCE_GROUP === 'cft-preview-00-rg', 'CONTEXT');
+  let checkout;
+  try {
+    checkout = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10_000 }).trim();
+  } catch {
+    reject('CHECKOUT');
+  }
+  requireIdentity(checkout === source, 'CHECKOUT');
   const projection = '{{range .items}}{{.metadata.name}}{{"\\\\t"}}{{.metadata.uid}}{{"\\\\n"}}{{$pod := .}}{{range .status.containerStatuses}}{{$pod.metadata.name}}{{"\\\\t"}}{{$pod.metadata.uid}}{{"\\\\t"}}{{.name}}{{"\\\\t"}}{{.image}}{{"\\\\t"}}{{.imageID}}{{"\\\\t"}}{{.ready}}{{"\\\\n"}}{{end}}{{end}}';
-  const pods = parsePods(execFileSync('kubectl', ['get', 'pods', '--namespace', 'hmc', '--selector', 'app.kubernetes.io/instance=' + release + ',!job-name', '--request-timeout=20s', '-o', 'go-template=' + projection], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 25_000, maxBuffer: 64 * 1024 }));
+  let podOutput;
+  try {
+    podOutput = execFileSync('kubectl', ['get', 'pods', '--namespace', 'hmc', '--selector', 'app.kubernetes.io/instance=' + release + ',!job-name', '--request-timeout=20s', '-o', 'go-template=' + projection], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 25_000, maxBuffer: 64 * 1024 });
+  } catch {
+    reject('PODS_QUERY');
+  }
+  const pods = parsePods(podOutput);
   const build = await info();
-  process.stdout.write(JSON.stringify({ observed_utc: new Date().toISOString(), source, target, namespace: 'hmc', release, cluster: process.env.AKS_CLUSTER_NAME, resource_group: process.env.AKS_RESOURCE_GROUP, build, app_pods: pods }) + '\\n');
+  return { observed_utc: new Date().toISOString(), source, target, namespace: 'hmc', release, cluster: process.env.AKS_CLUSTER_NAME, resource_group: process.env.AKS_RESOURCE_GROUP, build, app_pods: pods };
 }
-main().catch(() => { process.stderr.write('Preview identity probe failed\\n'); process.exitCode = 1; });
+main().then(receipt => process.stdout.write('PROBE_OK:' + JSON.stringify(receipt) + '\\n')).catch(error => {
+  const phase = phaseCodes.includes(error && error.phase) ? error.phase : 'INTERNAL';
+  process.stdout.write('PROBE_FAILURE:' + phase + '\\n');
+});
 DIAGNOSTIC_NODE
 ''').trim()
-      writeFile(file: 'diagnostic-output/preview-identity.json', text: receipt + '\n')
-      archiveArtifacts(allowEmptyArchive: false, artifacts: 'diagnostic-output/preview-identity.json')
-      diagnosticPreviewReceiptTarget = env.AKS_TEST_URL
+        } catch (Exception e) {
+          if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+            throw e
+          }
+          diagnosticPreviewProbeFailure = 'PROBE_EXECUTION'
+        }
+        if (diagnosticPreviewProbeFailure == null) {
+          if (probeOutput?.startsWith('PROBE_FAILURE:')) {
+            def phase = probeOutput.substring('PROBE_FAILURE:'.length())
+            def allowedPhases = ['CONTEXT', 'CHECKOUT', 'PODS_QUERY', 'PODS_VALIDATE', 'INFO_TRANSPORT', 'INFO_STATUS', 'INFO_SIZE', 'INFO_JSON', 'INFO_IDENTITY', 'INTERNAL']
+            diagnosticPreviewProbeFailure = allowedPhases.contains(phase) ? phase : 'PROBE_OUTPUT'
+          } else if (probeOutput?.startsWith('PROBE_OK:')) {
+            try {
+              def receipt = new groovy.json.JsonSlurperClassic().parseText(probeOutput.substring('PROBE_OK:'.length()))
+              def receiptKeys = ['observed_utc', 'source', 'target', 'namespace', 'release', 'cluster', 'resource_group', 'build', 'app_pods'] as Set
+              def build = receipt instanceof Map ? receipt.build : null
+              def buildKeys = ['commit', 'version', 'number', 'date'] as Set
+              def buildValuesValid = build instanceof Map && build.keySet() == buildKeys &&
+                ['version', 'number', 'date'].every { key ->
+                  def value = build[key]
+                  value == null || ((value instanceof String || value instanceof Number) && value.toString() ==~ /^[A-Za-z0-9 :+._\/-]{1,100}$/)
+                }
+              def appPods = receipt instanceof Map ? receipt.app_pods : null
+              def podKeys = ['pod', 'uid', 'container', 'repository', 'imageID'] as Set
+              def appPodsValid = appPods instanceof List && !appPods.isEmpty() &&
+                appPods.every { app ->
+                  app instanceof Map && app.keySet() == podKeys &&
+                    app.pod instanceof String && app.pod ==~ /^[a-z0-9.-]+$/ &&
+                    app.uid instanceof String && app.uid ==~ /^[a-f0-9-]{36}$/ &&
+                    app.container instanceof String && app.container ==~ /^[a-z0-9.-]+$/ &&
+                    app.repository == "hmc/admin-ui:pr-${diagnosticPullRequest}" &&
+                    app.imageID instanceof String && app.imageID ==~ /^sha256:[a-f0-9]{64}$/
+                } && appPods.collect { it.imageID }.toSet().size() == 1
+              def receiptValid = receipt instanceof Map && receipt.keySet() == receiptKeys &&
+                receipt.observed_utc instanceof String && receipt.observed_utc ==~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/ &&
+                receipt.source == diagnosticPreviewSource && receipt.target == diagnosticPreviewTarget &&
+                receipt.namespace == 'hmc' && receipt.release == "hmc-admin-ui-pr-${diagnosticPullRequest}" &&
+                receipt.cluster == 'cft-preview-00-aks' && receipt.resource_group == 'cft-preview-00-rg' &&
+                buildValuesValid && build.commit == diagnosticPreviewSource && appPodsValid
+              if (receiptValid) {
+                writeFile(file: 'diagnostic-output/preview-identity.json', text: groovy.json.JsonOutput.toJson(receipt) + '\n')
+                archiveArtifacts(allowEmptyArchive: false, artifacts: 'diagnostic-output/preview-identity.json')
+                diagnosticPreviewReceiptTarget = env.AKS_TEST_URL
+              } else {
+                diagnosticPreviewProbeFailure = 'RECEIPT'
+              }
+            } catch (Exception e) {
+              if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+                throw e
+              }
+              diagnosticPreviewProbeFailure = 'RECEIPT'
+            }
+          } else {
+            diagnosticPreviewProbeFailure = 'PROBE_OUTPUT'
+          }
+        }
+      }
     }
   }
 
   before('functionalTest:preview') {
+    if (diagnosticPreviewProbeFailure != null) {
+      error("Preview identity probe failed: ${diagnosticPreviewProbeFailure}")
+    }
     configurePlaywrightFunctional('preview')
     if (env.GIT_COMMIT != diagnosticPreviewSource ||
         !(diagnosticPreviewSource ==~ /[a-f0-9]{40}/) ||
