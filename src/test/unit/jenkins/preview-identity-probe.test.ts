@@ -351,7 +351,9 @@ describe('Preview identity probe diagnostics', () => {
     const successStart = deployCallback.indexOf("startsWith('PROBE_OK:')");
     const successBranch = deployCallback.slice(successStart);
     const nodeFailureBranch = deployCallback.slice(0, successStart);
-    const parse = successBranch.indexOf('new groovy.json.JsonSlurperClassic().parseText');
+    const parse = successBranch.indexOf(
+      "steps.readJSON(text: probeOutput.substring('PROBE_OK:'.length()), returnPojo: true)"
+    );
     const parseCatch = successBranch.indexOf("diagnosticPreviewProbeFailure = 'RECEIPT_PARSE'");
     const identityTry = successBranch.indexOf('receiptValid = receipt instanceof Map');
     const identityCatch = successBranch.indexOf("diagnosticPreviewProbeFailure = 'RECEIPT_IDENTITY'");
@@ -365,6 +367,7 @@ describe('Preview identity probe diagnostics', () => {
     );
     expect(nodeFailureBranch).not.toContain('RECEIPT_PARSE');
     expect(nodeFailureBranch).not.toContain('RECEIPT_IDENTITY');
+    expect(successBranch).not.toContain('JsonSlurperClassic');
     expect(parse).toBeGreaterThanOrEqual(0);
     expect(parseCatch).toBeGreaterThan(parse);
     expect(validate).toBeGreaterThanOrEqual(0);

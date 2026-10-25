@@ -338,7 +338,7 @@ DIAGNOSTIC_NODE
           } else if (probeOutput?.startsWith('PROBE_OK:')) {
             def receipt = null
             try {
-              receipt = new groovy.json.JsonSlurperClassic().parseText(probeOutput.substring('PROBE_OK:'.length()))
+              receipt = steps.readJSON(text: probeOutput.substring('PROBE_OK:'.length()), returnPojo: true)
             } catch (Exception e) {
               if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
                 throw e
