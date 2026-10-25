@@ -412,7 +412,6 @@ DIAGNOSTIC_NODE
         env.TEST_URL != diagnosticPreviewReceiptTarget || params.RUN_PLAYWRIGHT_ACCESSIBILITY) {
       error('Diagnostic receipt/test target mismatch')
     }
-    env.IDAM_PUBLIC_URL = 'https://controlled-failure.invalid'
   }
 
   afterAlways('functionalTest:preview') {

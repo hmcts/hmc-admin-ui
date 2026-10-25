@@ -307,7 +307,7 @@ describe('Preview identity probe diagnostics', () => {
     expect(receipt.app_pods[0].imageID).toBe(digest);
   });
 
-  test('defers identity rejection to the pre-native hook and gates the fault override', () => {
+  test('defers identity rejection to the pre-native hook and preserves the configured Preview origin', () => {
     const deployStart = jenkinsfile.indexOf("afterSuccess('akschartsinstall')");
     const functionalStart = jenkinsfile.indexOf("before('functionalTest:preview')", deployStart);
     const nativeGate = jenkinsfile.slice(
@@ -319,9 +319,9 @@ describe('Preview identity probe diagnostics', () => {
     expect(deployCallback).toContain('diagnosticPreviewProbeFailure');
     expect(deployCallback).not.toContain("error('Preview identity probe failed");
     expect(nativeGate.indexOf('diagnosticPreviewProbeFailure')).toBeGreaterThanOrEqual(0);
-    expect(nativeGate.indexOf('diagnosticPreviewProbeFailure')).toBeLessThan(
-      nativeGate.indexOf("env.IDAM_PUBLIC_URL = 'https://controlled-failure.invalid'")
-    );
+    const configureFunctional = nativeGate.indexOf("configurePlaywrightFunctional('preview')");
+    expect(configureFunctional).toBeGreaterThanOrEqual(0);
+    expect(nativeGate.slice(configureFunctional)).not.toContain('env.IDAM_PUBLIC_URL');
     expect(nativeGate).toContain('diagnosticPreviewReceiptTarget');
     expect(nativeGate).toContain('echo("Preview identity probe phase: ${diagnosticPreviewProbeFailure}")');
     expect(nativeGate.indexOf('echo(')).toBeLessThan(nativeGate.indexOf('error('));
