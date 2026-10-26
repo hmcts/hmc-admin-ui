@@ -82,15 +82,6 @@ def publishPlaywrightFunctional = { String reportName ->
   archiveArtifacts allowEmptyArchive: false, artifacts: "${playwrightFunctionalOutputRoot}/**"
 }
 
-def runPlaywrightFunctional = { String targetEnvironment, String reportName ->
-  configurePlaywrightFunctional(targetEnvironment)
-  try {
-    yarnBuilder.yarn('test:playwright:functional')
-  } finally {
-    publishPlaywrightFunctional(reportName)
-  }
-}
-
 def configurePlaywrightAccessibility = { String targetEnvironment ->
   def deployedEnvironment = env.ENVIRONMENT_NAME ?: params.ENVIRONMENT ?: 'sandbox'
   env.PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/ms-playwright"
@@ -106,18 +97,6 @@ def configurePlaywrightAccessibility = { String targetEnvironment ->
 def isInfrastructureAbort = { Exception exception ->
   exception instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException ||
     (exception instanceof hudson.AbortException && ((exception.getMessage() ?: '') =~ /(exit code|status)\s+(129|137|143)/).find())
-}
-
-def publishLegacyFunctionalReport = { String environmentName ->
-  publishHTML([
-    allowMissing: true,
-    alwaysLinkToLastBuild: true,
-    keepAll: true,
-    reportDir: 'functional-output/functional/html-report',
-    reportFiles: 'test-report.html',
-    reportName: "${environmentName} Legacy Functional Test"
-  ])
-  junit allowEmptyResults: true, testResults: 'functional-output/functional/reports/*-testsuite.xml'
 }
 
 def publishSmokeTestReport = { String environmentName ->
@@ -195,12 +174,25 @@ withParameterizedPipeline(type, product, component, params.ENVIRONMENT, 'sandbox
     publishSmokeTestReport('PREVIEW')
   }
 
-  after('functionalTest:preview') {
-    publishLegacyFunctionalReport('PREVIEW')
+  before('functionalTest:preview') {
+    configurePlaywrightFunctional('preview')
+  }
+
+  afterAlways('functionalTest:preview') {
     try {
-      stage('PREVIEW HMC Admin UI Playwright Functional Test') {
-        runPlaywrightFunctional('preview', 'PREVIEW HMC Admin UI Playwright Functional Test')
-      }
+      publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
+    } finally {
+      runManualPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
+    }
+  }
+
+  before('fullFunctionalTest:preview') {
+    configurePlaywrightFunctional('preview')
+  }
+
+  afterAlways('fullFunctionalTest:preview') {
+    try {
+      publishPlaywrightFunctional('PREVIEW HMC Admin UI Playwright Functional Test')
     } finally {
       runManualPlaywrightAccessibility('preview', 'PREVIEW HMC Admin UI Playwright Accessibility Test')
     }
@@ -210,12 +202,25 @@ withParameterizedPipeline(type, product, component, params.ENVIRONMENT, 'sandbox
     publishSmokeTestReport('AAT')
   }
 
-  after('functionalTest:aat') {
-    publishLegacyFunctionalReport('AAT')
+  before('functionalTest:aat') {
+    configurePlaywrightFunctional('aat')
+  }
+
+  afterAlways('functionalTest:aat') {
     try {
-      stage('AAT HMC Admin UI Playwright Functional Test') {
-        runPlaywrightFunctional('aat', 'AAT HMC Admin UI Playwright Functional Test')
-      }
+      publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
+    } finally {
+      runManualPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
+    }
+  }
+
+  before('fullFunctionalTest:aat') {
+    configurePlaywrightFunctional('aat')
+  }
+
+  afterAlways('fullFunctionalTest:aat') {
+    try {
+      publishPlaywrightFunctional('AAT HMC Admin UI Playwright Functional Test')
     } finally {
       runManualPlaywrightAccessibility('aat', 'AAT HMC Admin UI Playwright Accessibility Test')
     }
