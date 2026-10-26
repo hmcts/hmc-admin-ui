@@ -13,6 +13,7 @@ const reportFile = normalizeOdhinReportFilename(
   process.env.PLAYWRIGHT_REPORT_INDEX_FILENAME ?? 'hmc-playwright-functional.html'
 );
 const baseURL = resolveBaseUrl();
+process.env.PLAYWRIGHT_NO_COPY_PROMPT = '1';
 
 function resolveBaseUrl(): string {
   const targetUrl = process.env.TEST_URL;
@@ -41,8 +42,8 @@ export default defineConfig({
     process.env.PLAYWRIGHT_OUTPUT_DIR ??
     process.env.PLAYWRIGHT_TEST_OUTPUT_DIR ??
     'functional-output/tests/playwright-functional/test-results',
+  quiet: true,
   reporter: [
-    [process.env.CI ? 'dot' : 'list'],
     [
       path.resolve(__dirname, 'playwright/reporters/odhin-adaptive.reporter.cjs'),
       {
@@ -58,6 +59,7 @@ export default defineConfig({
         title: 'HMC Admin UI Playwright Functional',
       },
     ],
+    [process.env.CI ? 'dot' : 'list'],
     ['junit', { outputFile: junitPath }],
   ],
   retries: 0,
@@ -65,8 +67,9 @@ export default defineConfig({
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
+    screenshot: 'off',
+    trace: 'off',
+    video: 'off',
   },
   workers: 1,
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],

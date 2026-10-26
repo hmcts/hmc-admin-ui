@@ -1,8 +1,7 @@
-import { expect, test } from '@playwright/test';
-
 import { auditPageAccessibility } from '../functional/accessibility';
 import { expectHomePage, openHomePage } from '../functional/home';
 import { signInThroughOidc } from '../functional/oidc';
+import { expect, test } from '../functional/protected-test';
 
 test(
   'checks the protected home page against WCAG 2.2 AA',

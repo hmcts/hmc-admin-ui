@@ -1,8 +1,7 @@
-import { expect, test } from '@playwright/test';
-
 import { readDownloadedText } from '../downloads';
 import { openHomePage } from '../home';
 import { signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 import { createUploadFile } from '../upload';
 
 const hearingId = '12345678901234567890';

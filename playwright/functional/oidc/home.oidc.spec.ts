@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test';
-
 import { expectHomePage, openHomePage } from '../home';
 import { expectIdamLoginOrigin, signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 
 test.describe('HMC Admin UI protected home journeys', () => {
   test('signs in through OIDC and shows the home page', { tag: '@feature:authentication' }, async ({ page }) => {

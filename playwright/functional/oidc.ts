@@ -1,5 +1,7 @@
 import { type Page, expect } from '@playwright/test';
 
+import { requireProtectedEvidence } from './protected-test';
+
 const DEFAULT_IDAM_PUBLIC_URL = 'https://hmcts-access.aat.platform.hmcts.net';
 const IDAM_ORIGIN_TIMEOUT_MS = 10_000;
 
@@ -14,6 +16,7 @@ export async function expectIdamLoginOrigin(page: PageWithUrl): Promise<void> {
 }
 
 export async function signInThroughOidc(page: Page): Promise<void> {
+  requireProtectedEvidence();
   const username = process.env.TEST_IDAM_USERNAME;
   const password = process.env.TEST_IDAM_PASSWORD;
   if (!username || !password) {

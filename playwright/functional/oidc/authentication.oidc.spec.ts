@@ -1,6 +1,5 @@
-import { expect, test } from '@playwright/test';
-
 import { expectIdamLoginOrigin } from '../oidc';
+import { expect, test } from '../protected-test';
 
 test.describe('HMC Admin UI protected authentication boundary', () => {
   test(

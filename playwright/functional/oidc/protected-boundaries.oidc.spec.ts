@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test';
-
 import { expectHomePage, openHomePage } from '../home';
 import { signInThroughOidc } from '../oidc';
+import { expect, test } from '../protected-test';
 
 const invalidRequestType = 'unsupported-request-type';
 
