@@ -17,8 +17,6 @@ module.exports = [
       'src/main/types/**',
       'src/main/views/govuk/**',
       'jest.*config.js',
-      'src/test/*/codecept.conf.js',
-      'src/test/config.ts',
       '**/*.{js,cjs,mjs}',
       '.pnp.*',
     ],
