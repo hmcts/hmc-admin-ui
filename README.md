@@ -1,8 +1,6 @@
-HMC ADMIN UI
-============
+# HMC ADMIN UI
 
-Overview
---------
+## Overview
 
 hmc-admin-ui is an HMCTS administrative web application. It is a Node.js and
 TypeScript service that renders the user interface with Nunjucks and serves
@@ -21,9 +19,7 @@ The application includes:
 
 The local application listens on port 3000 by default.
 
-
-Prerequisites
--------------
+## Prerequisites
 
 - Node.js 24.18.0, as specified by .nvmrc and package.json.
 - Yarn 4.15.0, managed through Corepack.
@@ -38,9 +34,7 @@ Enable Corepack and install the dependencies:
     corepack enable
     yarn install
 
-
-Configuration
--------------
+## Configuration
 
 Configuration is loaded by the Node config package. The repository contains
 default, development, production and test configuration files in config/.
@@ -61,9 +55,7 @@ contains valid values for:
 - Redis settings when Redis-backed sessions are enabled.
 - HMC service endpoints.
 
-
-Build the application
----------------------
+## Build the application
 
 Create a development build:
 
@@ -79,9 +71,7 @@ Create a production build:
 The production build sets NODE_ENV=production, enables Webpack production mode
 and emits hashed asset filenames.
 
-
-Run locally
------------
+## Run locally
 
 Development mode
 
@@ -109,9 +99,7 @@ configuration:
 The demo-style configuration must contain valid values for any external
 services used by the selected user journey.
 
-
-Run with Docker
----------------
+## Run with Docker
 
 Build the container image:
 
@@ -129,9 +117,7 @@ is available at:
 Stop the containers with Ctrl+C, or use the normal Docker Compose command for
 the running project.
 
-
-Code quality
-------------
+## Code quality
 
 The repository uses ESLint, Stylelint and Prettier.
 
@@ -146,9 +132,7 @@ Apply the available automatic fixes:
 The automatic-fix command runs Prettier and ESLint fixes. It does not apply
 Stylelint fixes automatically; review any Stylelint findings separately.
 
-
-Tests
------
+## Tests
 
 Unit tests
 
@@ -196,9 +180,7 @@ Run the main local CI checks:
 This installs immutable dependencies, builds the application, rebuilds
 Puppeteer, runs lint, unit tests, route tests and accessibility tests.
 
-
-Health checks
-------------
+## Health checks
 
 The application exposes a health endpoint at:
 
@@ -220,9 +202,7 @@ After starting or deploying the service:
 4. Test the main administrative journey affected by the change.
 5. Check downstream service health and telemetry when a journey fails.
 
-
-Security controls
------------------
+## Security controls
 
 CSRF protection
 
@@ -253,9 +233,7 @@ OIDC, session cookies, application secrets, S2S credentials and Redis-backed
 session storage are environment-sensitive. Never use production credentials
 for local testing and never place live secrets in source control.
 
-
-Troubleshooting
----------------
+## Troubleshooting
 
 Application does not start
 
@@ -296,9 +274,7 @@ Tests fail before execution
   suite.
 - Check that test credentials are loaded through the approved local process.
 
-
-Development workflow
---------------------
+## Development workflow
 
 1. Create a focused branch for the change.
 2. Install dependencies with yarn install.
@@ -309,9 +285,7 @@ Development workflow
 7. Confirm that no credentials, generated assets or sensitive test output are
    included in the change.
 
-
-UK English and user-facing text
---------------------------------
+## UK English and user-facing text
 
 Use UK English in user-facing copy, support responses, tests and operational
 documentation. Preferred examples include:
@@ -328,9 +302,7 @@ Keep technical identifiers, package names, API fields, HTTP headers, route
 names and external service names unchanged. For example, Authorization may be
 an API header even when surrounding explanatory text uses authorisation.
 
-
-Licence
--------
+## Licence
 
 This project is licensed under the MIT Licence. See LICENSE for the full
 licence text.
