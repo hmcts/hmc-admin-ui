@@ -3178,10 +3178,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/config@npm:3.3.5":
-  version: 3.3.5
-  resolution: "@types/config@npm:3.3.5"
-  checksum: 10/6e8595d00e4df85e3e982f812a3fdfd9a952df11776800b0ddf7893963fc179c684a2d82c84f2160d09e90345bce7cb68a49c95dc864f0c9052019ea2c0e31bb
+"@types/config@npm:4.4.0":
+  version: 4.4.0
+  resolution: "@types/config@npm:4.4.0"
+  dependencies:
+    config: "npm:*"
+  checksum: 10/2b5aaf0684516f63d0c96b6fe709a1164cd39994d015c9139c25d1241e4607adcabe00288ca4ec1951d91554d35b27015cd4ca7792bd55caf99c1bc5269a4102
   languageName: node
   linkType: hard
 
@@ -5558,6 +5560,15 @@ __metadata:
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
   checksum: 10/9680699c8e2b3af0ae22592cb764acaf973f292a7b71b8a06720233011853a58e256c89216a10cbe889727532fd77f8bcd49a760cedfde271b8e006c20e079f2
+  languageName: node
+  linkType: hard
+
+"config@npm:*":
+  version: 5.0.1
+  resolution: "config@npm:5.0.1"
+  dependencies:
+    json5: "npm:^2.2.3"
+  checksum: 10/20920c671a4b49e4da2a64c53806f37d787e806abf7c5e205b2a22abef74a82cdd7336c66d78c92b585b1bd2320300df40e55a70c644ebae73a391865bcc377b
   languageName: node
   linkType: hard
 
@@ -8093,7 +8104,7 @@ __metadata:
     "@types/body-parser": "npm:1.19.6"
     "@types/chai": "npm:^5.2.1"
     "@types/chai-as-promised": "npm:7.1.8"
-    "@types/config": "npm:3.3.5"
+    "@types/config": "npm:4.4.0"
     "@types/cookie-parser": "npm:1.4.10"
     "@types/es6-promisify": "npm:6.0.4"
     "@types/express": "npm:^5.0.0"
