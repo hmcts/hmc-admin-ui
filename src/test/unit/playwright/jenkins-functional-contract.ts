@@ -156,7 +156,7 @@ describe('manual parameterized pipeline contract', () => {
     expect(parameterizedJenkinsfile).toContain("choices: 'saat\\nsandbox\\nsprod'");
     expect(parameterizedJenkinsfile).toContain("name: 'RUN_PLAYWRIGHT_ACCESSIBILITY'");
     expect(parameterizedJenkinsfile).toContain('defaultValue: false');
-    expect(parameterizedJenkinsfile).toContain('@Library("Infrastructure@2.5.0")');
+    expect(parameterizedJenkinsfile).toContain('@Library("Infrastructure@2.13.6")');
     expect(parameterizedJenkinsfile).toContain("def product = 'hmc'");
     expect(parameterizedJenkinsfile).toContain("def component = 'admin-ui'");
     expect(parameterizedJenkinsfile).toContain(
