@@ -1,6 +1,7 @@
 {
   "useCSRFProtection": true,
   "appInsights": {
+    "connectionString": "",
     "instrumentationKey": false
   },
   "auth": {

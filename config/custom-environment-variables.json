@@ -1,4 +1,7 @@
 {
+  "appInsights": {
+    "connectionString": "APPLICATIONINSIGHTS_CONNECTION_STRING"
+  },
   "auth": {
     "enabled": {
       "__name": "AUTH_ENABLED",
