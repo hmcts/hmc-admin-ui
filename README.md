@@ -21,7 +21,7 @@ The local application listens on port 3000 by default.
 
 ## Prerequisites
 
-- Node.js 24.18.0, as specified by .nvmrc and package.json.
+- Node.js 24.22.2, as specified by .nvmrc and package.json.
 - Yarn 4.15.0, managed through Corepack.
 - Docker, if you want to use the container workflow.
 - Access to the HMCTS VPN and approved environment credentials when calling
