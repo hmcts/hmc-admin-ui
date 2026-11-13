@@ -36,6 +36,12 @@ Enable Corepack and install the dependencies:
 
 ## Configuration
 
+Production startup uses `ts-node --transpile-only` to avoid retaining the
+TypeScript typechecker in the application process. Run TypeScript checks during
+development and CI, rather than on pod startup. Preview allocates a 1 GiB
+container limit with a 512 MiB V8 old-space limit, leaving room for native memory,
+buffers and other process overhead.
+
 Configuration is loaded by the Node config package. The repository contains
 default, development, production and test configuration files in config/.
 Secret values can be supplied through the configured properties-volume
