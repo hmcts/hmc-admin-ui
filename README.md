@@ -36,10 +36,21 @@ Enable Corepack and install the dependencies:
 
 ## Configuration
 
+Production startup uses `ts-node --transpile-only` to avoid retaining the
+TypeScript typechecker in the application process. Run TypeScript checks during
+development and CI, rather than on pod startup. Preview allocates a 1 GiB
+container limit with a 512 MiB V8 old-space limit, leaving room for native memory,
+buffers and other process overhead.
+
 Configuration is loaded by the Node config package. The repository contains
 default, development, production and test configuration files in config/.
 Secret values can be supplied through the configured properties-volume
 mechanism and environment-specific deployment configuration.
+
+Application Insights accepts `APPLICATIONINSIGHTS_CONNECTION_STRING`, which
+takes precedence over the existing `AppInsightsInstrumentationKey` secret.
+Legacy instrumentation keys are converted to connection strings before starting
+the version 3 SDK. Telemetry remains disabled when neither value is configured.
 
 Do not commit passwords, client secrets, session secrets, S2S secrets,
 instrumentation keys or other live credentials. Use the approved local secret

@@ -1,16 +1,26 @@
 import config from 'config';
 
-const appInsights = require('applicationinsights');
-
 export class AppInsights {
   enable(): void {
-    if (config.get('appInsights.instrumentationKey')) {
-      appInsights.setup(config.get('appInsights.instrumentationKey')).setSendLiveMetrics(true).start();
+    let connectionString = config.get<string>('appInsights.connectionString');
+    if (!connectionString) {
+      const instrumentationKey = config.get<string | false>('appInsights.instrumentationKey');
+      if (!instrumentationKey) {
+        return;
+      }
 
-      appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = 'hmc-admin-ui';
-      appInsights.defaultClient.trackTrace({
-        message: 'App insights activated',
-      });
+      connectionString = instrumentationKey.includes('=')
+        ? instrumentationKey
+        : `InstrumentationKey=${instrumentationKey}`;
     }
+
+    const appInsights = require('applicationinsights');
+    const setup = appInsights.setup(connectionString).setSendLiveMetrics(true);
+
+    appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = 'hmc-admin-ui';
+    setup.start();
+    appInsights.defaultClient.trackTrace({
+      message: 'App insights activated',
+    });
   }
 }
