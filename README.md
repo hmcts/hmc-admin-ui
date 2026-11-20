@@ -3,7 +3,7 @@
 ## Overview
 
 hmc-admin-ui is an HMCTS administrative web application. It is a Node.js and
-TypeScript service that renders the user interface with Nunjucks and serves
+TypeScript  service that renders the user interface with Nunjucks and serves
 frontend assets built by Webpack.
 
 The application includes:
