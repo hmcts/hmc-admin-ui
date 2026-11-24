@@ -3,6 +3,21 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+const root = path.resolve(__dirname, '../../../..');
+
+function resolveYarnPath(projectRoot: string): string {
+  const yarnConfig = fs.readFileSync(path.join(projectRoot, '.yarnrc.yml'), 'utf8');
+  const configuredPath = yarnConfig.match(/^yarnPath:\s*(.+)$/m)?.[1]?.trim();
+
+  if (!configuredPath) {
+    throw new Error('Unable to resolve yarnPath from .yarnrc.yml');
+  }
+
+  return path.resolve(projectRoot, configuredPath.replace(/^['"]|['"]$/g, ''));
+}
+
+const yarnPath = resolveYarnPath(root);
+
 const { verifyFunctionalReport } = require('../../../../bin/verify-playwright-functional-report');
 
 describe('verifyFunctionalReport', () => {
@@ -90,7 +105,6 @@ describe('verifyFunctionalReport', () => {
 });
 
 describe('inherited functional aliases', () => {
-  const root = path.resolve(__dirname, '../../../..');
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   let project: string;
 
@@ -115,19 +129,15 @@ describe('inherited functional aliases', () => {
       JSON.stringify({ name: 'alias-proof', packageManager: packageJson.packageManager, scripts: packageJson.scripts })
     );
     fs.writeFileSync(path.join(project, 'yarn.lock'), '');
-    const install = spawnSync(
-      process.execPath,
-      [path.join(root, '.yarn/releases/yarn-4.15.0.cjs'), 'install', '--mode=skip-build'],
-      {
-        cwd: project,
-        env: {
-          ...process.env,
-          YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
-          YARN_GLOBAL_FOLDER: path.join(project, '.yarn-global'),
-        },
-        encoding: 'utf8',
-      }
-    );
+    const install = spawnSync(process.execPath, [yarnPath, 'install', '--mode=skip-build'], {
+      cwd: project,
+      env: {
+        ...process.env,
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+        YARN_GLOBAL_FOLDER: path.join(project, '.yarn-global'),
+      },
+      encoding: 'utf8',
+    });
     if (install.status !== 0) {
       throw new Error(install.stdout + install.stderr);
     }
@@ -165,15 +175,11 @@ process.exit(Number(process.env.FAKE_EXIT || 0));
       for (const exit of [0, 7]) {
         const receipt = path.join(project, 'invocations.jsonl');
         fs.rmSync(receipt, { force: true });
-        const result = spawnSync(
-          process.execPath,
-          [path.join(root, '.yarn/releases/yarn-4.15.0.cjs'), 'run', alias, '--', '--grep', '@ticket:EXUI-5428'],
-          {
-            cwd: project,
-            env: { ...aliasEnvironment(), FAKE_EXIT: String(exit) },
-            encoding: 'utf8',
-          }
-        );
+        const result = spawnSync(process.execPath, [yarnPath, 'run', alias, '--', '--grep', '@ticket:EXUI-5428'], {
+          cwd: project,
+          env: { ...aliasEnvironment(), FAKE_EXIT: String(exit) },
+          encoding: 'utf8',
+        });
         expect({ status: result.status, error: result.stderr }).toEqual({ status: exit, error: '' });
         expect(
           fs
@@ -188,15 +194,11 @@ process.exit(Number(process.env.FAKE_EXIT || 0));
   );
 
   test.each(['missing', 'skipped'])('rejects %s reports through the inherited functional alias', report => {
-    const result = spawnSync(
-      process.execPath,
-      [path.join(root, '.yarn/releases/yarn-4.15.0.cjs'), 'run', 'test:functional'],
-      {
-        cwd: project,
-        env: { ...aliasEnvironment(), FAKE_REPORT: report },
-        encoding: 'utf8',
-      }
-    );
+    const result = spawnSync(process.execPath, [yarnPath, 'run', 'test:functional'], {
+      cwd: project,
+      env: { ...aliasEnvironment(), FAKE_REPORT: report },
+      encoding: 'utf8',
+    });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('verify-playwright-functional-report:');
   });
@@ -215,15 +217,11 @@ process.exit(Number(process.env.FAKE_EXIT || 0));
       FAKE_REPORT: 'missing',
     });
     try {
-      const result = spawnSync(
-        process.execPath,
-        [path.join(root, '.yarn/releases/yarn-4.15.0.cjs'), 'run', 'test:functional'],
-        {
-          cwd: project,
-          env: aliasEnvironment(),
-          encoding: 'utf8',
-        }
-      );
+      const result = spawnSync(process.execPath, [yarnPath, 'run', 'test:functional'], {
+        cwd: project,
+        env: aliasEnvironment(),
+        encoding: 'utf8',
+      });
       expect(fs.readFileSync(sentinel, 'utf8')).toBe('Existing evidence');
       expect(result.status).toBe(0);
     } finally {
