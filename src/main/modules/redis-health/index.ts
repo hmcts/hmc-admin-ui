@@ -22,17 +22,20 @@ export class RedisHealth {
       return false;
     }
 
-    for (let attempt = 1; attempt <= REDIS_HEALTH_MAX_ATTEMPTS; attempt++) {
-      if (await this.pingRedis(attempt)) {
-        return true;
-      }
+    return this.checkWithRetries();
+  }
 
-      if (attempt < REDIS_HEALTH_MAX_ATTEMPTS) {
-        await this.delay(REDIS_HEALTH_RETRY_DELAY_MS);
-      }
+  private async checkWithRetries(attempt: number = 1): Promise<boolean> {
+    if (await this.pingRedis(attempt)) {
+      return true;
     }
 
-    return false;
+    if (attempt >= REDIS_HEALTH_MAX_ATTEMPTS) {
+      return false;
+    }
+
+    await this.delay(REDIS_HEALTH_RETRY_DELAY_MS);
+    return this.checkWithRetries(attempt + 1);
   }
 
   private async pingRedis(attempt: number): Promise<boolean> {

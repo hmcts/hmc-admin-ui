@@ -3,12 +3,20 @@ import { FormError, SingularRequestForm, SingularRequestType } from '../types/si
 
 export const finalStateTransitionStatuses = ['CANCELLED', 'ADJOURNED', 'COMPLETED'];
 
+function formValue(value: unknown): string {
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value).trim();
+  }
+
+  return '';
+}
+
 export function buildSingularRequestForm(body: Record<string, unknown>): SingularRequestForm {
   return {
-    hearingId: String(body.hearingId || '').trim(),
-    caseRef: String(body.caseRef || '').trim(),
-    status: String(body.status || '').trim(),
-    notes: String(body.notes || '').trim(),
+    hearingId: formValue(body.hearingId),
+    caseRef: formValue(body.caseRef),
+    status: formValue(body.status),
+    notes: formValue(body.notes),
   };
 }
 

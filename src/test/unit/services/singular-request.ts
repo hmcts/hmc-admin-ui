@@ -1,5 +1,23 @@
-import { buildSingularRequestPayload } from '../../../main/services/singular-request';
+import { buildSingularRequestForm, buildSingularRequestPayload } from '../../../main/services/singular-request';
 import { SingularRequestType } from '../../../main/types/singular-request';
+
+describe('buildSingularRequestForm', () => {
+  test('does not stringify object-valued form fields', () => {
+    expect(
+      buildSingularRequestForm({
+        hearingId: {},
+        caseRef: [],
+        status: { value: 'CANCELLED' },
+        notes: null,
+      })
+    ).toEqual({
+      hearingId: '',
+      caseRef: '',
+      status: '',
+      notes: '',
+    });
+  });
+});
 
 describe('buildSingularRequestPayload', () => {
   test('builds a manageExceptions payload for final state transition', () => {

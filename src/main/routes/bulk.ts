@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 import config from 'config';
 import { Application, NextFunction, Request, Response } from 'express';
@@ -16,8 +16,8 @@ const defaultBulkUploadResponseCsv = [
 
 const MAX_UPLOAD_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const INVALID_UPLOAD_FILE_TYPE_ERROR = 'INVALID_UPLOAD_FILE_TYPE';
-const allowedCsvFileExtensions = ['.csv'];
-const allowedCsvMimeTypes = ['text/csv', 'application/csv', 'application/vnd.ms-excel'];
+const allowedCsvFileExtensions = new Set(['.csv']);
+const allowedCsvMimeTypes = new Set(['text/csv', 'application/csv', 'application/vnd.ms-excel']);
 const expectedCsvHeaders = ['hearingId', 'caseRef', 'action', 'notes', 'state'];
 const storage = multer.memoryStorage();
 
@@ -32,7 +32,7 @@ export const uploadLimits = {
 
 export function isAllowedCsvFile(file: Pick<Express.Multer.File, 'originalname' | 'mimetype'>): boolean {
   const extension = path.extname(file.originalname).toLowerCase();
-  return allowedCsvFileExtensions.includes(extension) && allowedCsvMimeTypes.includes(file.mimetype);
+  return allowedCsvFileExtensions.has(extension) && allowedCsvMimeTypes.has(file.mimetype);
 }
 
 export function hasCsvContent(file: Pick<Express.Multer.File, 'buffer'>): boolean {
@@ -112,7 +112,7 @@ function uploadSingleBulkUploadFile(req: Request, res: Response, next: NextFunct
 
 const authEnabled: boolean = config.get('auth.enabled');
 
-export default function (app: Application): void {
+export default function registerBulkRoutes(app: Application): void {
   app.get('/bulk-upload', (req, res) => {
     res.render('bulk-upload');
   });

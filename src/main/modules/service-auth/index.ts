@@ -6,8 +6,6 @@ const { generateSync } = require('otplib');
 
 const S2S_OTP_GUARDRAILS = createGuardrails({ MIN_SECRET_BYTES: 10 });
 
-type LeaseResponse = string;
-
 export class ServiceAuthTokenProvider {
   private readonly client: AxiosInstance;
   private readonly microservice: string = config.get('microservice');
@@ -22,7 +20,7 @@ export class ServiceAuthTokenProvider {
   }
 
   public async getToken(): Promise<string> {
-    const response = await this.client.post<LeaseResponse>(
+    const response = await this.client.post<string>(
       '/lease',
       {
         microservice: this.microservice,
