@@ -7,8 +7,8 @@ import type {
 import { ManageExceptionsResponse } from '../types/manage-exceptions';
 
 const expectedHeaders = ['hearingId', 'caseRef', 'action', 'notes', 'state'];
-const validActions = ['final_state_transition', 'rollback'];
-const validStates = ['CANCELLED', 'COMPLETED', 'ADJOURNED'];
+const validActions = new Set(['final_state_transition', 'rollback']);
+const validStates = new Set(['CANCELLED', 'COMPLETED', 'ADJOURNED']);
 const defaultCsvData = 'unavailable,unavailable,unavailable,unavailable,error,"No valid CSV hearing rows were found"';
 
 // parse the uploaded csv into JSON
@@ -84,9 +84,12 @@ export function buildBulkUploadResponseCsv(
         request.caseRef,
         request.action,
         request.state,
-        // If validation issue, else if validation issues are present, else if response is present
-        setStatusForCsv(!request.validationIssue, options.includeValidationIssues, response?.status),
-        setMessageForCsv(!request.validationIssue, options.includeValidationIssues, response?.message),
+        request.validationIssue ? 'INVALID' : options.includeValidationIssues ? 'VALID' : response?.status || 'UNKNOWN',
+        request.validationIssue
+          ? 'Validation failed'
+          : options.includeValidationIssues
+            ? ''
+            : response?.message || 'No response message returned',
       ];
 
       if (options.includeValidationIssues) {
@@ -103,15 +106,12 @@ export function buildBulkUploadResponseCsv(
 }
 
 // cleanly escape a value for CSV output, adding quotes if necessary
-function csvEscape(value: string | undefined): string {
-  // Set empty string for undefined values
-  const cellValue = value ?? '';
-
-  if (/[",\n\r]/.test(cellValue)) {
-    return `"${cellValue.replace(/"/g, '""')}"`;
+function csvEscape(value = ''): string {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
   }
 
-  return cellValue;
+  return value;
 }
 
 // Transforms a single CSV line into an array of cell values
@@ -210,13 +210,13 @@ function validateRow(row: CsvRow, rowNumber: number): BulkUploadValidationError[
     errors.push({ row: rowNumber, message: 'Case Reference Number must be a 16-digit numeric value.' });
   }
 
-  if (!validActions.includes(action)) {
+  if (!validActions.has(action)) {
     errors.push({ row: rowNumber, message: "Action must be either 'final_state_transition' or 'rollback'." });
   }
 
   if (action === 'final_state_transition' && !state) {
     errors.push({ row: rowNumber, message: 'State is mandatory for final_state_transition requests.' });
-  } else if (state && !validStates.includes(state)) {
+  } else if (state && !validStates.has(state)) {
     errors.push({ row: rowNumber, message: 'State must be one of CANCELLED, COMPLETED, or ADJOURNED.' });
   }
 
@@ -234,32 +234,4 @@ function findHeaderRowIndex(lines: string[]): number {
     }
   }
   return 0; // fall back to first line if headers never found, validation will correctly fail
-}
-
-function setStatusForCsv(
-  isValid: boolean,
-  fileIsInvalid: boolean | undefined,
-  responseStatus: string | undefined
-): string {
-  if (!isValid) {
-    return 'INVALID';
-  } else if (fileIsInvalid) {
-    return 'VALID';
-  } else {
-    return responseStatus || 'UNKNOWN';
-  }
-}
-
-function setMessageForCsv(
-  isValid: boolean,
-  fileIsInvalid: boolean | undefined,
-  responseStatus: string | undefined
-): string {
-  if (!isValid) {
-    return 'Validation failed';
-  } else if (fileIsInvalid) {
-    return '';
-  } else {
-    return responseStatus || 'No response message returned';
-  }
 }
