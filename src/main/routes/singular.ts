@@ -133,7 +133,7 @@ async function handleSingularRequest(req: Request, res: Response, page: Singular
   res.redirect(303, '/singular/response');
 }
 
-export default function (app: Application): void {
+export default function registerSingularRoutes(app: Application): void {
   app.get('/singular', (req, res) => {
     renderRequestTypeSelection(res);
   });
